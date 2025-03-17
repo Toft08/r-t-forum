@@ -131,7 +131,7 @@ button:hover {
 
 /*------ Navigation bar ------*/
 
-nav {
+/* nav {
     display: flex;
     justify-content: space-between;
     background-color: #e5f0e5;
@@ -165,7 +165,7 @@ nav a {
 }
 nav a:hover {
     color: #738b7c;
-}
+} */
 
 /*------ Icons ------*/
 

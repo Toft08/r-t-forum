@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="static/styles.css">
     <!-- <link rel="icon" type="image/png" href="/assets/favicon.png"> -->
     <title>Real-Time Forum</title>
 </head>
@@ -15,12 +15,8 @@
 
     <!-- Container for dynamic content -->
     <div id="app">
-        <!-- Authentication View -->
-        <div id="auth-view" class="view">
-            <div class="container">
-                <h1>Real-Time Forum</h1>
-                
-                <div id="login-form" class="auth-form">
+                <!-- Login Form -->
+                <div id="login-form" class="auth-form container">
                     <h2>Login</h2>
                     <form id="login-form-element">
                         <div class="form-group">
@@ -32,13 +28,92 @@
                             <input type="password" id="login-password" required>
                         </div>
                         <div class="form-actions">
-                            <button type="submit">Login</button>
-                            <a href="#" id="show-register">Need an account? Register</a>
+                            <button type="button" onclick="showPage('mainPage')">FAKE-Login</button>
+                            <!-- <a href="#" id="show-register">Need an account? Register</a> -->
+                            <button onclick="showPage('registerPage')">FAKE-Create Account</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Main Page -->
+                <div id="mainPage" class="page container">
+                    <h2>Latest Posts</h2>
+                    <div class="form-actions">
+                        <button onclick="showPage('createPostPage')">Create Post</button>
+                        <button onclick="showPage('login-form')">Log Out</button>
+                    </div>
+                    <div id="posts">
+                        <!-- Post examples -->
+                        <div class="post">
+                            <div class="post-info-home">
+                                <span class="username">JohnDoe</span>
+                            </div>
+                            <h3>My First Post Title</h3>
+                            <p class="post-content">
+                                This is an example post content. It will be truncated if it gets too long
+                                to keep the feed clean and easy to scan through.
+                            </p>
+                            <div class="icons-container">
+                                <div class="comment-icon">
+                                    <span class="material-symbols-outlined">chat_bubble</span>
+                                    <span>3</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="post">
+                            <div class="post-info-home">
+                                <span class="username">JaneSmith</span>
+                            </div>
+                            <h3>Another Example Post</h3>
+                            <p class="post-content">
+                                Here's another post to show how multiple posts would appear in the feed.
+                                You can add categories and other features as needed.
+                            </p>
+                            <div class="icons-container">
+                                <div class="comment-icon">
+                                    <span class="material-symbols-outlined">chat_bubble</span>
+                                    <span>5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create Post Page -->
+                <div id="createPostPage" class="page container">
+                    <h2>Create a Post</h2>
+                    <form id="create-post-form">
+                        <div class="form-group">
+                            <label for="post-title">Title</label>
+                            <input type="text" id="post-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="post-content">Content</label>
+                            <textarea id="post-content" rows="5" class="content-textarea" required></textarea>
+                        </div>
+                        <div class="category-container">
+                            <label class="category-label">
+                                <input type="checkbox" name="category" value="tech">
+                                Tech
+                            </label>
+                            <label class="category-label">
+                                <input type="checkbox" name="category" value="sports">
+                                Sports
+                            </label>
+                            <label class="category-label">
+                                <input type="checkbox" name="category" value="news">
+                                News
+                            </label>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" onclick="showPage('mainPage')">Cancel</button>
+                            <button type="button" onclick="createPost()">Submit Post</button>
                         </div>
                     </form>
                 </div>
                 
-                <div id="register-form" class="auth-form hidden">
+                <!-- Register Page -->
+                <div id="registerPage" class="page container">
                     <h2>Register</h2>
                     <form id="register-form-element">
                         <div class="form-group">
@@ -75,24 +150,45 @@
                             <input type="text" id="register-lastname" required>
                         </div>
                         <div class="form-actions">
-                            <button type="submit">Register</button>
-                            <a href="#" id="show-login">Already have an account? Login</a>
+                            <button type="button" onclick="showPage('login-form')">Back to Login</button>
+                            <button type="button" onclick="registerUser()">Register</button>
                         </div>
                     </form>
                 </div>
             </div>
-        </div>
-        <!-- Main app view (only visible when logged in) -->
-        <div id="main-view" class="view hidden">
-            <nav>
-                <button onclick="navigate('home')">Home</button>
-                <button onclick="navigate('create-post')">Create Post</button>
-                <button onclick="navigate('login')">Login</button>
-            </nav>
-            <!-- Forum content, messages, etc. -->
-        </div>
     </div>
     </div>
-    <script src="/static/js/app.js" type="module"></script>
+    <script>
+         // Function to show only one page at a time
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page, .auth-form').forEach(page => {
+                page.style.display = 'none';
+            });
+            
+            // Show the selected page
+            document.getElementById(pageId).style.display = 'block';
+        }
+        
+        // placeholder functions for now
+        function createPost() {
+            // Here we would normally handle the post submission
+            // For now, we'll just go back to the main page
+            alert('Post created successfully!');
+            showPage('mainPage');
+        }
+        
+        function registerUser() {
+            // Here we would normally handle the registration
+            // For now, we'll just go back to the login page
+            alert('Registration successful! You can now log in.');
+            showPage('login-form');
+        }
+        
+        // Show login form by default when page loads
+        window.onload = function() {
+            showPage('login-form');
+        }
+    </script>
 </body>
 </html>
