@@ -92,3 +92,24 @@ This project is an improved version of a previous forum, incorporating real-time
 * WebSockets in Go and JavaScript
 
 * SQL Database Management
+
+# Project structure
+```
+project/
+├── main.go                  # Entry point
+├── static/                  # Static assets
+│   ├── index.html           # Single HTML file
+│   ├── css/                 # CSS files
+│   └── js/                  # JavaScript files
+│       ├── app.js           # Main application logic
+│       ├── router.js        # Page navigation
+│       ├── auth.js          # Authentication handling
+│       ├── posts.js         # Post/comment handling
+│       └── chat.js          # WebSocket and messaging
+├── handlers/                # Go HTTP handlers
+│   ├── auth.go              # Authentication handlers
+│   ├── posts.go             # Post/comment handlers
+│   └── websocket.go         # WebSocket handlers
+├── models/                  # Database models
+└── database/                # Database setup
+```

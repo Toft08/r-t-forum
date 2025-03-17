@@ -95,6 +95,23 @@ func MakeTables(db *sql.DB) {
 		fmt.Println("Error creating Session table:", err)
 		return
 	}
+	// New for r-t-forum
+	createMessageTableQuery := `
+    CREATE TABLE IF NOT EXISTS Message (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER NOT NULL,
+        receiver_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        sent_at TEXT NOT NULL,
+        is_read INTEGER DEFAULT 0,
+        FOREIGN KEY (sender_id) REFERENCES User (id) ON DELETE CASCADE,
+        FOREIGN KEY (receiver_id) REFERENCES User (id) ON DELETE CASCADE
+    );`
+	if _, err := db.Exec(createMessageTableQuery); err != nil {
+		fmt.Println("Error creating Message table:", err)
+		return
+	}
+
 	insertCategoryQuery := `
     INSERT INTO category (name)
     SELECT 'General' WHERE NOT EXISTS (SELECT 1 FROM category WHERE name = 'General')

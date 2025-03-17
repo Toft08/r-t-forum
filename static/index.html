@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles.css">
+    <!-- <link rel="icon" type="image/png" href="/assets/favicon.png"> -->
+    <title>Real-Time Forum</title>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <h1>grit:forum</h1>
+        </header>
+        <!-- <nav>
+            <button onclick="navigate('home')">Home</button>
+            <button onclick="navigate('create-post')">Create Post</button>
+            <button onclick="navigate('login')">Login</button>
+        </nav> -->
+    <!-- Container for dynamic content -->
+    <div id="app">
+        <!-- Authentication View -->
+        <div id="auth-view" class="view">
+            <div class="container">
+                <h1>Real-Time Forum</h1>
+                
+                <div id="login-form" class="auth-form">
+                    <h2>Login</h2>
+                    <form id="login-form-element">
+                        <div class="form-group">
+                            <label for="login-username">Username or Email</label>
+                            <input type="text" id="login-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">Login</button>
+                            <a href="#" id="show-register">Need an account? Register</a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="register-form" class="auth-form hidden">
+                    <h2>Register</h2>
+                    <form id="register-form-element">
+                        <div class="form-group">
+                            <label for="register-username">Username</label>
+                            <input type="text" id="register-username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email</label>
+                            <input type="email" id="register-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password</label>
+                            <input type="password" id="register-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-age">Age</label>
+                            <input type="number" id="register-age" required min="13">
+                        </div>
+                        <div class="form-group">
+                            <label for="register-gender">Gender</label>
+                            <select id="register-gender" required>
+                                <option value="">Select gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Attack Helicopter</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-firstname">First Name</label>
+                            <input type="text" id="register-firstname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-lastname">Last Name</label>
+                            <input type="text" id="register-lastname" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit">Register</button>
+                            <a href="#" id="show-login">Already have an account? Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Main app view (only visible when logged in) -->
+        <div id="main-view" class="view hidden">
+            <!-- Forum content, messages, etc. -->
+        </div>
+    </div>
+    </div>
+    <script src="/static/js/app.js" type="module"></script>
+</body>
+</html>

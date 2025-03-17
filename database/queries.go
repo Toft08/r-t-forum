@@ -100,3 +100,76 @@ func Votes() string {
 	`
 	return query
 }
+
+/* New for r-t-forum */
+
+// GetConversations returns the query to fetch a user's conversations
+func GetConversations() string {
+	query := `
+        SELECT 
+            CASE 
+                WHEN M.sender_id = ? THEN M.receiver_id 
+                ELSE M.sender_id 
+            END AS other_user_id,
+            User.username AS other_username,
+            M.content AS last_message,
+            M.sent_at AS message_time,
+            SUM(CASE WHEN M.is_read = 0 AND M.receiver_id = ? THEN 1 ELSE 0 END) AS unread_count
+        FROM (
+            SELECT 
+                sender_id, 
+                receiver_id, 
+                content, 
+                sent_at, 
+                is_read,
+                ROW_NUMBER() OVER (
+                    PARTITION BY 
+                        CASE 
+                            WHEN sender_id = ? THEN receiver_id 
+                            ELSE sender_id 
+                        END
+                    ORDER BY sent_at DESC
+                ) AS rn
+            FROM Message
+            WHERE sender_id = ? OR receiver_id = ?
+        ) AS M
+        JOIN User ON (
+            CASE 
+                WHEN M.sender_id = ? THEN M.receiver_id 
+                ELSE M.sender_id 
+            END = User.id
+        )
+        WHERE M.rn = 1
+        GROUP BY other_user_id, other_username, last_message, message_time
+        ORDER BY message_time DESC;
+    `
+	return query
+}
+
+// GetMessageHistory returns the query to fetch message history between two users
+func GetMessageHistory() string {
+	query := `
+        SELECT 
+            id,
+            sender_id,
+            receiver_id,
+            content,
+            sent_at,
+            is_read
+        FROM Message
+        WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)
+        ORDER BY sent_at DESC
+        LIMIT ? OFFSET ?
+    `
+	return query
+}
+
+// MarkMessagesAsRead returns the query to mark messages as read
+func MarkMessagesAsRead() string {
+	query := `
+        UPDATE Message
+        SET is_read = 1
+        WHERE sender_id = ? AND receiver_id = ? AND is_read = 0
+    `
+	return query
+}

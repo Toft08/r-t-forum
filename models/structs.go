@@ -1,4 +1,4 @@
-package web
+package models
 
 type CommentDetails struct {
 	CommentID   int
