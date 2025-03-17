@@ -12,11 +12,7 @@
         <header>
             <h1>grit:forum</h1>
         </header>
-        <!-- <nav>
-            <button onclick="navigate('home')">Home</button>
-            <button onclick="navigate('create-post')">Create Post</button>
-            <button onclick="navigate('login')">Login</button>
-        </nav> -->
+
     <!-- Container for dynamic content -->
     <div id="app">
         <!-- Authentication View -->
@@ -88,6 +84,11 @@
         </div>
         <!-- Main app view (only visible when logged in) -->
         <div id="main-view" class="view hidden">
+            <nav>
+                <button onclick="navigate('home')">Home</button>
+                <button onclick="navigate('create-post')">Create Post</button>
+                <button onclick="navigate('login')">Login</button>
+            </nav>
             <!-- Forum content, messages, etc. -->
         </div>
     </div>

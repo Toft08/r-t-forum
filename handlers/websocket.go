@@ -78,16 +78,16 @@ func (manager *ClientManager) Start() {
 				broadcastUserStatus(conn.UserID, false)
 			}
 
-		case message := <-manager.broadcast:
-			// Broadcast a message to all clients
-			for _, conn := range manager.clients {
-				select {
-				case conn.Conn.WriteMessage(websocket.TextMessage, message):
-				default:
-					close(conn.Conn)
-					manager.unregister <- conn
-				}
-			}
+			// case message := <-manager.broadcast:
+			// 	// Broadcast a message to all clients
+			// 	for _, conn := range manager.clients {
+			// 		select {
+			// 		case conn.Conn.WriteMessage(websocket.TextMessage, message):
+			// 		default:
+			// 			close(conn.Conn)
+			// 			manager.unregister <- conn
+			// 		}
+			// 	}
 		}
 	}
 }

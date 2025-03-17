@@ -33,6 +33,9 @@ main {
     border-radius: 5px;
     min-height: 100%; /* Allow it to expand */
 }
+.hidden {
+    display: none;
+}
 
 a {
     color: #1b2218be;
