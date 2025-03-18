@@ -10,8 +10,33 @@
 <body>
     <div class="wrapper">
         <header>
+            <nav class="nav">
+                <div class="nav-left">
+                    <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
+                </div>
+                <div class="nav-right">
+                        <p class="welcome-text">Logged in as: <strong>Username placeholder</strong></p>
+                        <form action="/logout" method="POST">
+                        <button type="submit" class="logout-button">Log Out</button>
+                        </form>
+                        <button class="signup-button" onclick="window.location.href='/signup';">Sign Up</button>
+                        <button class="login-button" onclick="window.location.href='/login';">Log In</button>
+                </div>
+            </nav>
             <h1>grit:forum</h1>
         </header>
+
+        <div class="content-container" >
+            <!-- Sidebar -->
+        <aside id="sidebar">
+            <h3>Online Users</h3>
+            <ul id="online-users">
+                <li>Alice</li>
+                <li>Bob</li>
+                <li>Charlie</li>
+            </ul>
+        </aside>
+        </div>
 
     <!-- Container for dynamic content -->
     <div id="app">
@@ -168,6 +193,18 @@
             
             // Show the selected page
             document.getElementById(pageId).style.display = 'block';
+
+            // Show sidebar only on main and createPost pages
+            if (pageId === 'mainPage' || pageId === 'createPostPage') {
+                document.getElementById('sidebar').style.display = 'block';
+            } else {
+                document.getElementById('sidebar').style.display = 'none';
+            }
+        }
+
+        // Show login form by default when page loads
+        window.onload = function () {
+            showPage('login-form');
         }
         
         // placeholder functions for now

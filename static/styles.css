@@ -131,7 +131,7 @@ button:hover {
 
 /*------ Navigation bar ------*/
 
-/* nav {
+nav {
     display: flex;
     justify-content: space-between;
     background-color: #e5f0e5;
@@ -165,7 +165,7 @@ nav a {
 }
 nav a:hover {
     color: #738b7c;
-} */
+}
 
 /*------ Icons ------*/
 
@@ -522,16 +522,27 @@ input[type="text"], input[type="password"] {
     display: none;
 }
 
-/*------ Footer ------*/
+/*------ Sidebar styling ------*/
 
-footer {
-    background-color: #e5f0e5;
-    color: white;
-    text-align: center;
-    padding: 1rem 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+.content-container {
+    display: flex;
+}
+
+#sidebar {
+    width: 200px;
+    background: #f3f3f3;
+    padding: 15px;
+    display: none; /* Hidden by default */
+}
+
+#online-users {
+    list-style: none;
+    padding: 0;
+}
+
+#online-users li {
+    padding: 5px;
+    border-bottom: 1px solid #ddd;
 }
 
 /* When window is resized then filter label and or should get their own rows */
