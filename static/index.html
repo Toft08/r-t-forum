@@ -8,21 +8,20 @@
     <title>Real-Time Forum</title>
 </head>
 <body>
+    <!-- nav bar -->
+    <nav class="nav">
+        <div class="nav-left">
+            <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
+        </div>
+        <div class="nav-right">
+                <p class="welcome-text">Logged in as: <strong>Username placeholder</strong></p>
+                <form action="/logout" method="POST">
+                <button type="submit" class="logout-button">Log Out</button>
+                </form>
+        </div>
+    </nav>
     <div class="wrapper">
         <header>
-            <nav class="nav">
-                <div class="nav-left">
-                    <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
-                </div>
-                <div class="nav-right">
-                        <p class="welcome-text">Logged in as: <strong>Username placeholder</strong></p>
-                        <form action="/logout" method="POST">
-                        <button type="submit" class="logout-button">Log Out</button>
-                        </form>
-                        <button class="signup-button" onclick="window.location.href='/signup';">Sign Up</button>
-                        <button class="login-button" onclick="window.location.href='/login';">Log In</button>
-                </div>
-            </nav>
             <h1>grit:forum</h1>
         </header>
 
@@ -34,6 +33,11 @@
                 <li>Alice</li>
                 <li>Bob</li>
                 <li>Charlie</li>
+            </ul>
+            <ul id="offline-users">
+                <li>David</li>
+                <li>Eve</li>
+                <li>Frank</li>
             </ul>
         </aside>
         </div>

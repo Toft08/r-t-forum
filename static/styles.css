@@ -538,12 +538,12 @@ input[type="text"], input[type="password"] {
     right: 0%;
 }
 
-#online-users {
+#online-users, #offline-users {
     list-style: none;
     padding: 0;
 }
 
-#online-users li {
+#online-users li, #offline-users li {
     padding: 5px;
     border-bottom: 1px solid #ddd;
 }
