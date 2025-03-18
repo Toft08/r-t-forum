@@ -530,9 +530,12 @@ input[type="text"], input[type="password"] {
 
 #sidebar {
     width: 200px;
-    background: #f3f3f3;
+    background: #e5f0e5;
     padding: 15px;
     display: none; /* Hidden by default */
+    position: fixed;
+    height: 100%;
+    right: 0%;
 }
 
 #online-users {
