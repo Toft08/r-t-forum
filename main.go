@@ -17,7 +17,7 @@ func main() {
 	database.MakeTables(db)
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		web.PageHandler(w, r, db)
+		web.PageHandler(w, r)
 	})
 
 	log.Println("Server is running on http://localhost:8080")

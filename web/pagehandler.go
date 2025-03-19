@@ -5,47 +5,50 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
 )
 
 var db *sql.DB
 
-var tmpl = template.Must(template.ParseGlob("templates/*.html"))
+var tmpl = template.Must(template.ParseGlob("index.html"))
+
+func PageHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "index.html")
+}
 
 // PageDetails contains the data to be passed to the HTML templates
-func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
+// func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 
-	data := PageDetails{}
+// 	data := PageDetails{}
 
-	db = database
+// 	db = database
 
-	// Retrieve categories from the database
-	var err error
-	data.Categories, err = GetCategories()
-	if err != nil {
-		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
+// 	// Retrieve categories from the database
+// 	var err error
+// 	data.Categories, err = GetCategories()
+// 	if err != nil {
+// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
+// 		return
+// 	}
 
-	switch r.URL.Path {
-	case "/":
-		HomePage(w, r, &data)
-	case "/login":
-		Login(w, r, &data)
-	case "/signup":
-		SignUp(w, r, &data)
-	case "/create-post":
-		CreatePost(w, r, &data)
-	default:
-		if strings.HasPrefix(r.URL.Path, "/post") {
-			PostHandler(w, r, &data)
-		} else if strings.HasPrefix(r.URL.Path, "/logout") {
-			Logout(w, r, &data)
-		} else {
-			ErrorHandler(w, "Page Not Found", http.StatusNotFound)
-		}
-	}
-}
+// 	switch r.URL.Path {
+// 	case "/":
+// 		HomePage(w, r, &data)
+// 	case "/login":
+// 		Login(w, r, &data)
+// 	case "/signup":
+// 		SignUp(w, r, &data)
+// 	case "/create-post":
+// 		CreatePost(w, r, &data)
+// 	default:
+// 		if strings.HasPrefix(r.URL.Path, "/post") {
+// 			PostHandler(w, r, &data)
+// 		} else if strings.HasPrefix(r.URL.Path, "/logout") {
+// 			Logout(w, r, &data)
+// 		} else {
+// 			ErrorHandler(w, "Page Not Found", http.StatusNotFound)
+// 		}
+// 	}
+// }
 
 // RenderTemplate handles the rendering of HTML templates with provided data
 func RenderTemplate(w http.ResponseWriter, t string, data interface{}) {
