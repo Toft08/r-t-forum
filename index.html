@@ -8,10 +8,98 @@
     <title>Forum</title>
 </head>
 <body>
+        <!-- nav bar -->
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
+            </div>
+            <div class="nav-right">
+                    <p class="welcome-text">Logged in as: <strong>Username placeholder</strong></p>
+                    <form action="/logout" method="POST">
+                    <button type="submit" class="logout-button">Log Out</button>
+                    </form>
+            </div>
+        </nav>
     <div class="wrapper">
         <header>
             <h1>grit:forum</h1>
         </header>
+
+        <div class="content-container" >
+            <!-- Sidebar -->
+        <aside id="sidebar">
+            <h3>Users Online</h3>
+            <ul id="online-users">
+                <li>Alice</li>
+                <li>Bob</li>
+                <li>Charlie</li>
+            </ul>
+            <ul id="offline-users">
+                <li>David</li>
+                <li>Eve</li>
+                <li>Frank</li>
+            </ul>
+        </aside>
+        </div>
+
+        <div id="app">
+            <!-- Login page -->
+            <div class="container">
+                <h1>Login</h1>
+                <form action="/login" method="POST">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    
+                    <button type="submit">Login</button>
+                </form>
+                <br>
+                {{if .ValidationError}}
+                    <div class="error">
+                        {{.ValidationError}}
+                    </div>
+                {{end}}
+                <div class="signup-link">
+                    Don't have an account? <a href="/signup">Sign up here</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- signup page -->
+        <div class="container">
+            <h1>Sign Up</h1>
+            <form action="/signup" method="POST">
+                <label for="username">Username
+                    <div class="hover-icon">
+                        <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
+                        <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
+                    </div>
+                </label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" placeholder="Enter your email" required>
+    
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    
+                <button type="submit">Sign Up</button>
+            </form>
+            <br>
+            {{if .ValidationError}}
+                <div class="error">
+                    {{.ValidationError}}
+                </div>
+            {{end}}
+            <div class="signup-link">Already have an account? 
+                <a href="/login">Login here</a>
+            </div>
+          </div>
+        </div>
+
+            <!-- Main page -->
         <main>
             <!-- Button to toggle filter visibility -->
             <button onclick="toggleFilter()" class="show-filter-button">Show Filters</button>
@@ -82,22 +170,207 @@
             <p>No posts...</p>
             {{end}}
         </main>
+
+        <!-- create post page -->
+        <div class="wrapper">
+            {{if .LoggedIn}}
+            <div class="container">
+                <form action="/create-post" method="POST">
+                    <label for="title">Title:</label>
+                    <input type="text" id="title" name="title" required maxlength="50">
+                    <br>
+    
+                    <label for="content">Content:</label>
+                    <textarea class="content-textarea" id="content" name="content" required></textarea>
+                    <br>
+    
+                    <label>Select Topics:</label>
+                    <div class="category-container">
+                        {{ range $index, $category := .Categories }}
+                        <label class="category-label {{ if eq $index 0 }}hidden-category{{ end }}">
+                            <input type="checkbox" name="category" value="{{ $category.CategoryID }}">
+                            {{ $category.CategoryName }}
+                        </label>
+                        {{ end }}
+                    </div>
+                    <br>
+    
+                    <button type="submit">Submit Post</button>
+                </form>
+            {{else}}
+                <p>You must be logged in to create a post.</p>
+            {{end}}
+            </div>
+        </div>
+
+        <!-- Post page -->
+        <main>
+            {{range .Posts}}
+            <div class="post-header-like-dislike">
+                <h2 class="post-title">{{.PostTitle}}</h2>
+                <form action="/post/{{.PostID}}" method="POST" class="like-dislike-form">
+                    <div class="reaction-buttons">
+                    {{if .LikedNow}}
+                        <button type="submit" name="vote" value="like" title="like" class="like-button" style="color: #54956d;">
+                        <span class="material-symbols-outlined">thumb_up</span></button>
+                        <span class="reaction-count">{{.Likes}}</span>
+                    {{else}}
+                        <button type="submit" name="vote" value="like" title="like" class="like-button">
+                        <span class="material-symbols-outlined">thumb_up</span></button>
+                        <span class="reaction-count">{{.Likes}}</span>
+                    {{end}}
+    
+                    {{if .DislikedNow}}
+                        <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button" style="color: rgb(197, 54, 64);">
+                        <span class="material-symbols-outlined">thumb_down</span></button>
+                        <span class="reaction-count">{{.Dislikes}}</span>
+                    {{else}}
+                        <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button">
+                        <span class="material-symbols-outlined">thumb_down</span></button>
+                        <span class="reaction-count">{{.Dislikes}}</span>
+                    {{end}}
+                    </div>
+                </form>
+            </div>
+            <div class="category-container">
+            {{range $index, $category := .Categories}}
+                <p class="category-tags">
+                    {{if $index}}{{end}} 
+                    {{$category}}{{end}}
+                </p>
+            </div>
+            <div class="post-info">
+                <span class="material-symbols-outlined" style="font-size: 24px;">filter_vintage</span>
+                <span class="username">{{.Username}}</span>
+            </div>
+                <p>{{.CreatedAt}}</p>
+            <div class="post-card">
+                <pre>{{.PostContent}}</pre>
+            </div>
+            {{ if eq (len .Comments) 0 }}
+                <p>No comments yet. Be the first to create one!</p>
+            {{ else }}
+                <h3 class="comment-header">Comments:</h3>
+                {{ range $index, $comment := .Comments }} 
+                <div class="comment">
+                    <div class="container-post">
+                        <p><strong>{{ $comment.Username }}</strong>: {{ $comment.CreatedAt }}</p> 
+                        <form action="/post/{{.PostID}}" method="POST" class="like-dislike-form">
+                            <div class="reaction-buttons">
+                                <input type="hidden" name="comment-id" value="{{.CommentID}}">
+                                {{if .LikedNow}}
+                                    <button type="submit" name="vote" value="like" title="like" class="like-button" style="color: #54956d;">
+                                    <span class="material-symbols-outlined">thumb_up</span></button>
+                                    <span class="reaction-count">{{ $comment.Likes }}</span>
+                                {{else}}
+                                    <button type="submit" name="vote" value="like" title="like" class="like-button">
+                                    <span class="material-symbols-outlined">thumb_up</span></button>
+                                    <span class="reaction-count">{{ $comment.Likes }}</span>
+                                {{end}}
+    
+                                {{if .DislikedNow}}
+                                    <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button" style="color: rgb(197, 54, 64);">
+                                    <span class="material-symbols-outlined">thumb_down</span></button>
+                                    <span class="reaction-count">{{ $comment.Dislikes }}</span>
+                                {{else}}
+                                    <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button">
+                                    <span class="material-symbols-outlined">thumb_down</span></button>
+                                    <span class="reaction-count">{{ $comment.Dislikes }}</span>
+                                {{end}}
+                            </div>
+                        </form>
+                    </div>
+                    <div class="post-card">
+                        <pre>{{ $comment.Content }}</pre>
+                    </div>
+                </div>
+                {{ end }}
+            {{ end }}
+            {{ end }}
+            
+            {{if .LoggedIn }}
+                {{range .Posts}}
+                <form action="/post/{{.PostID}}" method="POST">
+                    <label for="comment"></label>
+                    <textarea class="comment-textarea" id="comment" name="comment" placeholder="Enter comment here" required></textarea>
+                    <br>
+                    <button type="submit">Submit Comment</button>
+                </form>
+            {{else}}
+                <p>You must be logged in to leave a comment.</p>
+            {{end}}
+            {{end}}
+        </main>
+       </div>
+
+       <!-- error page -->
+            <main>
+            <h2>Error received</h2>
+                <div id="error">
+                    <h1>Error</h1>
+                    {{.ErrorMessage}}
+                    <a href="/">Go back to Home</a>
+                </div>
+            </main>
+        </div>
+
+    </div>
     </div>
 
-<!-- <nav class="nav">
-    <div class="nav-left">
-        <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
-    </div>
-    <div class="nav-right">
-        {{if .LoggedIn}}
-            <p class="welcome-text">Logged in as: <strong>{{.Username}}</strong></p>
-            <form action="/logout" method="POST">
-            <button type="submit" class="logout-button">Log Out</button>
-            </form>
-        {{else}}
-            <button class="signup-button" onclick="window.location.href='/signup';">Sign Up</button>
-            <button class="login-button" onclick="window.location.href='/login';">Log In</button>
-        {{end}}
-    </div>
-</nav> -->
 </body>
+<script>
+
+    // Function to show only one page at a time
+    function showPage(pageId) {
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.style.display = 'none';
+        });
+        //show the page with the given id
+        document.getElementById(pageId).style.display = 'block';
+
+        // Hide sidebar on login and signup pages
+        if (pageId !== 'login-form' || pageId !== 'signup-form') {
+            document.getElementById('sidebar').style.display = 'block';
+        } else {
+            document.getElementById('sidebar').style.display = 'none';
+        }
+    }
+
+    // Show login form by default
+    window.onload = function() {
+        showPage('login-form');
+    }
+
+    // script for grabbing the comment textarea and resizing it
+    const textarea = document.getElementById("comment");
+
+    textarea.addEventListener("input", function () {
+        this.style.height = "auto"; // Reset height to auto
+        let newHeight = this.scrollHeight; // Get the height of the content
+
+        if (newHeight > 200) { // Limit the height to 200px
+            newHeight = 200;
+            this.style.overflowY = "auto"; // Enable scrolling when max height is reached
+        } else {
+            this.style.overflowY = "hidden"; // Hide scrollbar when below max height
+        }
+
+        this.style.height = newHeight + "px"; // Apply height
+    });
+
+textarea.addEventListener("input", function () {
+    this.style.height = "auto"; // Reset height to auto
+    let newHeight = this.scrollHeight; // Get the required height
+
+    if (newHeight > 300) { // Limit to 300px max
+        newHeight = 300;
+        this.style.overflowY = "auto"; // Enable scrolling when max height is reached
+    } else {
+        this.style.overflowY = "hidden"; // Hide scrollbar when below max height
+    }
+
+    this.style.height = newHeight + "px"; // Apply height to textarea
+});
+</script>
+</html>§§
