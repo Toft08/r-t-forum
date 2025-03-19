@@ -44,7 +44,7 @@
 
         <div id="app">
             <!-- Login page -->
-            <div class="container">
+            <div id="login-form" class="container">
                 <h1>Login</h1>
                 <form action="/login" method="POST">
                     <label for="username">Username</label>
@@ -68,7 +68,7 @@
         </div>
 
         <!-- signup page -->
-        <div class="container">
+        <div id="signup-form" class="container">
             <h1>Sign Up</h1>
             <form action="/signup" method="POST">
                 <label for="username">Username
@@ -100,7 +100,7 @@
         </div>
 
             <!-- Main page -->
-        <main>
+        <div id="mainPage" class="page container">
             <!-- Button to toggle filter visibility -->
             <button onclick="toggleFilter()" class="show-filter-button">Show Filters</button>
 
@@ -169,12 +169,11 @@
             {{else}}
             <p>No posts...</p>
             {{end}}
-        </main>
+        </div>
 
         <!-- create post page -->
-        <div class="wrapper">
-            {{if .LoggedIn}}
-            <div class="container">
+            <!-- {{if .LoggedIn}} -->
+            <div id="createPage" class="page container">
                 <form action="/create-post" method="POST">
                     <label for="title">Title:</label>
                     <input type="text" id="title" name="title" required maxlength="50">
@@ -204,7 +203,7 @@
         </div>
 
         <!-- Post page -->
-        <main>
+        <div id="postPage" class="page container">
             {{range .Posts}}
             <div class="post-header-like-dislike">
                 <h2 class="post-title">{{.PostTitle}}</h2>
@@ -300,18 +299,18 @@
                 <p>You must be logged in to leave a comment.</p>
             {{end}}
             {{end}}
-        </main>
+        </div>
        </div>
 
        <!-- error page -->
-            <main>
+            <div id="errorPage" class="page container">
             <h2>Error received</h2>
                 <div id="error">
                     <h1>Error</h1>
                     {{.ErrorMessage}}
                     <a href="/">Go back to Home</a>
                 </div>
-            </main>
+            </div>
         </div>
 
     </div>
