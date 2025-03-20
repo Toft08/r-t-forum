@@ -25,26 +25,9 @@
             <h1>grit:forum</h1>
         </header>
 
-        <div class="content-container" >
-            <!-- Sidebar -->
-        <aside id="sidebar">
-            <h3>Users Online</h3>
-            <ul id="online-users">
-                <li>Alice</li>
-                <li>Bob</li>
-                <li>Charlie</li>
-            </ul>
-            <ul id="offline-users">
-                <li>David</li>
-                <li>Eve</li>
-                <li>Frank</li>
-            </ul>
-        </aside>
-        </div>
-
         <div id="app">
             <!-- Login page -->
-            <div id="login-form" class="container">
+            <div id="login-form" class="page container">
                 <h1>Login</h1>
                 <form action="/login" method="POST">
                     <label for="username">Username</label>
@@ -62,13 +45,13 @@
                     </div>
                 {{end}}
                 <div class="signup-link">
-                    Don't have an account? <a href="/signup">Sign up here</a>
+                    Don't have an account? <button onclick="showPage('signup-form')">Register here</button>
                 </div>
             </div>
         </div>
 
         <!-- signup page -->
-        <div id="signup-form" class="container">
+        <div id="signup-form" class="page container">
             <h1>Sign Up</h1>
             <form action="/signup" method="POST">
                 <label for="username">Username
@@ -84,6 +67,27 @@
     
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <div class="form-group">
+                    <label for="register-age">Age</label>
+                    <input type="number" id="register-age" required min="13">
+                </div>
+                <div class="form-group">
+                    <label for="register-gender">Gender</label>
+                    <select id="register-gender" required>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Attack Helicopter</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="register-firstname">First Name</label>
+                    <input type="text" id="register-firstname" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-lastname">Last Name</label>
+                    <input type="text" id="register-lastname" required>
+                </div>
     
                 <button type="submit">Sign Up</button>
             </form>
@@ -94,225 +98,10 @@
                 </div>
             {{end}}
             <div class="signup-link">Already have an account? 
-                <a href="/login">Login here</a>
+                <button type="button" onclick="showPage('login-form')">Back to Login</button>
             </div>
           </div>
         </div>
-
-            <!-- Main page -->
-        <div id="mainPage" class="page container">
-            <!-- Button to toggle filter visibility -->
-            <button onclick="toggleFilter()" class="show-filter-button">Show Filters</button>
-
-            <!-- Filter Form (hidden by default) -->
-            <form class="filter" method="POST" action="/">
-                <div class="filter-group">
-                    <!-- Topic Filter -->
-                    <label for="topicFilter" class="filter-label">Filter by Category:</label>
-                    <select id="topicFilter" name="topic" class="filter-select">
-                        <option value="">-</option>
-                        {{ range $index, $category := .Categories }}
-                        <option value="{{ $category.CategoryID }}">{{ $category.CategoryName }}</option>
-                        {{ end }}
-                    </select>
-                    
-                    <!-- Only show "Created by Me" if the user is logged in -->
-                    {{if .LoggedIn}}
-                        <span class="or">or</span>
-                        <label for="postFilter" class="filter-label">Filter by Action:</label>
-                        <select id="postFilter" name="filter" class="filter-select">
-                            <option value="">-</option>
-                            <option value="createdByMe">Created by Me</option>
-                            <option value="likedByMe">Liked by Me</option>
-                            <option value="dislikedByMe">Disliked by Me</option>
-                        </select>
-                    {{end}}
-                </div>
-                <button type="submit" class="filter-button">Apply Filters</button>
-            </form>
-
-            <!-- Latest Posts Header with Create Post link -->
-            <div class="latest-posts-header">
-                <h2>Latest Posts</h2>
-                {{if .LoggedIn}}
-                <a class="create-post" href="/create-post">Create Post</a>
-                {{else}}
-                <p>Log in to create post.</p>
-                {{end}}
-            </div>
-
-            {{range .Posts}}
-            <div class="post">
-                <h3><a href="/post/{{.PostID}}">{{.PostTitle}}</a></h3>
-                <div class="category-container">
-            
-                    {{range $index, $category := .Categories}}
-                    <p class="category-tags">
-                    {{if $index}} {{end}}{{$category}} {{end}}
-                    </p>
-                </div>
-                <div class="post-info-home">
-                    <span class="material-symbols-outlined" style="font-size: 24px;">filter_vintage</span>
-                    <span class="username">{{.Username}}</span>
-                </div>
-                <p class="post-content">{{.PostContent}}</p>
-                <div class="icons-container">
-                    <span class="comment-icon"><span class="material-symbols-outlined">chat</span>{{len .Comments}}</span>
-                    <div class="reaction-buttons">
-                        <span class="material-symbols-outlined">thumb_up</span>
-                        <span class="reaction-count">{{.Likes}}</span>
-                        <span class="material-symbols-outlined">thumb_down</span>
-                        <span class="reaction-count">{{.Dislikes}}</span>
-                    </div>
-                </div>
-            </div>
-            {{else}}
-            <p>No posts...</p>
-            {{end}}
-        </div>
-
-        <!-- create post page -->
-            <!-- {{if .LoggedIn}} -->
-            <div id="createPage" class="page container">
-                <form action="/create-post" method="POST">
-                    <label for="title">Title:</label>
-                    <input type="text" id="title" name="title" required maxlength="50">
-                    <br>
-    
-                    <label for="content">Content:</label>
-                    <textarea class="content-textarea" id="content" name="content" required></textarea>
-                    <br>
-    
-                    <label>Select Topics:</label>
-                    <div class="category-container">
-                        {{ range $index, $category := .Categories }}
-                        <label class="category-label {{ if eq $index 0 }}hidden-category{{ end }}">
-                            <input type="checkbox" name="category" value="{{ $category.CategoryID }}">
-                            {{ $category.CategoryName }}
-                        </label>
-                        {{ end }}
-                    </div>
-                    <br>
-    
-                    <button type="submit">Submit Post</button>
-                </form>
-            {{else}}
-                <p>You must be logged in to create a post.</p>
-            {{end}}
-            </div>
-        </div>
-
-        <!-- Post page -->
-        <div id="postPage" class="page container">
-            {{range .Posts}}
-            <div class="post-header-like-dislike">
-                <h2 class="post-title">{{.PostTitle}}</h2>
-                <form action="/post/{{.PostID}}" method="POST" class="like-dislike-form">
-                    <div class="reaction-buttons">
-                    {{if .LikedNow}}
-                        <button type="submit" name="vote" value="like" title="like" class="like-button" style="color: #54956d;">
-                        <span class="material-symbols-outlined">thumb_up</span></button>
-                        <span class="reaction-count">{{.Likes}}</span>
-                    {{else}}
-                        <button type="submit" name="vote" value="like" title="like" class="like-button">
-                        <span class="material-symbols-outlined">thumb_up</span></button>
-                        <span class="reaction-count">{{.Likes}}</span>
-                    {{end}}
-    
-                    {{if .DislikedNow}}
-                        <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button" style="color: rgb(197, 54, 64);">
-                        <span class="material-symbols-outlined">thumb_down</span></button>
-                        <span class="reaction-count">{{.Dislikes}}</span>
-                    {{else}}
-                        <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button">
-                        <span class="material-symbols-outlined">thumb_down</span></button>
-                        <span class="reaction-count">{{.Dislikes}}</span>
-                    {{end}}
-                    </div>
-                </form>
-            </div>
-            <div class="category-container">
-            {{range $index, $category := .Categories}}
-                <p class="category-tags">
-                    {{if $index}}{{end}} 
-                    {{$category}}{{end}}
-                </p>
-            </div>
-            <div class="post-info">
-                <span class="material-symbols-outlined" style="font-size: 24px;">filter_vintage</span>
-                <span class="username">{{.Username}}</span>
-            </div>
-                <p>{{.CreatedAt}}</p>
-            <div class="post-card">
-                <pre>{{.PostContent}}</pre>
-            </div>
-            {{ if eq (len .Comments) 0 }}
-                <p>No comments yet. Be the first to create one!</p>
-            {{ else }}
-                <h3 class="comment-header">Comments:</h3>
-                {{ range $index, $comment := .Comments }} 
-                <div class="comment">
-                    <div class="container-post">
-                        <p><strong>{{ $comment.Username }}</strong>: {{ $comment.CreatedAt }}</p> 
-                        <form action="/post/{{.PostID}}" method="POST" class="like-dislike-form">
-                            <div class="reaction-buttons">
-                                <input type="hidden" name="comment-id" value="{{.CommentID}}">
-                                {{if .LikedNow}}
-                                    <button type="submit" name="vote" value="like" title="like" class="like-button" style="color: #54956d;">
-                                    <span class="material-symbols-outlined">thumb_up</span></button>
-                                    <span class="reaction-count">{{ $comment.Likes }}</span>
-                                {{else}}
-                                    <button type="submit" name="vote" value="like" title="like" class="like-button">
-                                    <span class="material-symbols-outlined">thumb_up</span></button>
-                                    <span class="reaction-count">{{ $comment.Likes }}</span>
-                                {{end}}
-    
-                                {{if .DislikedNow}}
-                                    <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button" style="color: rgb(197, 54, 64);">
-                                    <span class="material-symbols-outlined">thumb_down</span></button>
-                                    <span class="reaction-count">{{ $comment.Dislikes }}</span>
-                                {{else}}
-                                    <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button">
-                                    <span class="material-symbols-outlined">thumb_down</span></button>
-                                    <span class="reaction-count">{{ $comment.Dislikes }}</span>
-                                {{end}}
-                            </div>
-                        </form>
-                    </div>
-                    <div class="post-card">
-                        <pre>{{ $comment.Content }}</pre>
-                    </div>
-                </div>
-                {{ end }}
-            {{ end }}
-            {{ end }}
-            
-            {{if .LoggedIn }}
-                {{range .Posts}}
-                <form action="/post/{{.PostID}}" method="POST">
-                    <label for="comment"></label>
-                    <textarea class="comment-textarea" id="comment" name="comment" placeholder="Enter comment here" required></textarea>
-                    <br>
-                    <button type="submit">Submit Comment</button>
-                </form>
-            {{else}}
-                <p>You must be logged in to leave a comment.</p>
-            {{end}}
-            {{end}}
-        </div>
-       </div>
-
-       <!-- error page -->
-            <div id="errorPage" class="page container">
-            <h2>Error received</h2>
-                <div id="error">
-                    <h1>Error</h1>
-                    {{.ErrorMessage}}
-                    <a href="/">Go back to Home</a>
-                </div>
-            </div>
-        </div>
-
     </div>
     </div>
 
@@ -328,12 +117,6 @@
         //show the page with the given id
         document.getElementById(pageId).style.display = 'block';
 
-        // Hide sidebar on login and signup pages
-        if (pageId !== 'login-form' || pageId !== 'signup-form') {
-            document.getElementById('sidebar').style.display = 'block';
-        } else {
-            document.getElementById('sidebar').style.display = 'none';
-        }
     }
 
     // Show login form by default
@@ -341,35 +124,5 @@
         showPage('login-form');
     }
 
-    // script for grabbing the comment textarea and resizing it
-    const textarea = document.getElementById("comment");
-
-    textarea.addEventListener("input", function () {
-        this.style.height = "auto"; // Reset height to auto
-        let newHeight = this.scrollHeight; // Get the height of the content
-
-        if (newHeight > 200) { // Limit the height to 200px
-            newHeight = 200;
-            this.style.overflowY = "auto"; // Enable scrolling when max height is reached
-        } else {
-            this.style.overflowY = "hidden"; // Hide scrollbar when below max height
-        }
-
-        this.style.height = newHeight + "px"; // Apply height
-    });
-
-textarea.addEventListener("input", function () {
-    this.style.height = "auto"; // Reset height to auto
-    let newHeight = this.scrollHeight; // Get the required height
-
-    if (newHeight > 300) { // Limit to 300px max
-        newHeight = 300;
-        this.style.overflowY = "auto"; // Enable scrolling when max height is reached
-    } else {
-        this.style.overflowY = "hidden"; // Hide scrollbar when below max height
-    }
-
-    this.style.height = newHeight + "px"; // Apply height to textarea
-});
 </script>
 </html>§§
