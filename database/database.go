@@ -13,7 +13,8 @@ func InitDB() *sql.DB {
 	if err != nil {
 		log.Println("Failed to initialize the database")
 		log.Fatal(err)
-
+	} else {
+		log.Println("Database initialized successfully")
 	}
 	return db
 }

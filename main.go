@@ -8,8 +8,9 @@ import (
 )
 
 func main() {
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 
-	http.Handle("/assets/", http.FileServer(http.Dir(".")))
+	// http.Handle("/assets/", http.FileServer(http.Dir(".")))
 
 	db := database.InitDB()
 	defer db.Close()
