@@ -11,8 +11,22 @@ var db *sql.DB
 
 var tmpl = template.Must(template.ParseGlob("index.html"))
 
-func PageHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
+func PageHandler(w http.ResponseWriter, r *http.Request, data *PageDetails) {
+	switch r.Method {
+	case "GET":
+		http.ServeFile(w, r, "index.html") // Serve frontend for GET requests
+	case "POST":
+		switch r.URL.Path {
+		case "/signup":
+			SignUp(w, r, data) // Call signup handler for POST /signup
+		case "/login":
+			Login(w, r, data) // Call login handler for POST /login
+		default:
+			http.Error(w, "Not Found", http.StatusNotFound)
+		}
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 // PageDetails contains the data to be passed to the HTML templates

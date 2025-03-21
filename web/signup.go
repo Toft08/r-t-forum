@@ -1,6 +1,7 @@
 package web
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -14,20 +15,20 @@ import (
 
 // signUp handles both GET and POST requests for user registration
 func SignUp(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-    w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-    // Handle different HTTP methods
-    switch r.Method {
-    case http.MethodGet:
-        // Render the initial signup page (can be used for the first load in SPA)
-        RenderTemplate(w, "signup", data)
-    case http.MethodPost:
-        // Handle signup via AJAX, return JSON responses
-        handleSignUpPost(w, r)
-    default:
-        // If method is not GET or POST, return Method Not Allowed error
-        ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-    }
+	// Handle different HTTP methods
+	switch r.Method {
+	case http.MethodGet:
+		// Render the initial signup page (can be used for the first load in SPA)
+		RenderTemplate(w, "index", data)
+	case http.MethodPost:
+		// Handle signup via AJAX, return JSON responses
+		handleSignUpPost(w, r)
+	default:
+		// If method is not GET or POST, return Method Not Allowed error
+		http.Error(w, `{"error": "Method Not Allowed"}`, http.StatusMethodNotAllowed)
+	}
 }
 
 func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
@@ -40,9 +41,10 @@ func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
 	// Decode the JSON request body
 	err := json.NewDecoder(r.Body).Decode(&requestData)
 	if err != nil {
-		http.Error(w, "Invalid input", http.StatusBadRequest)
+		http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
 		return
 	}
+	log.Println("Response:", `{"success": true, "message": "Signup successful"}`)
 
 	// Validate username
 	if !IsValidUsername(requestData.Username) {
@@ -62,7 +64,8 @@ func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(requestData.Username, requestData.Email)
+	// Check if username or email is already taken
+	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(db, requestData.Username, requestData.Email)
 	if err != nil {
 		log.Println("Error checking if username is unique:", err)
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
@@ -87,7 +90,7 @@ func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert user into database
-	err = insertUserIntoDB(requestData.Username, requestData.Email, hashedPassword, "0", "0", "0", "0")
+	err = insertUserIntoDB(db, requestData.Username, requestData.Email, hashedPassword, "0", "0", "0", "0")
 	if err != nil {
 		log.Println("Error inserting user into database:", err)
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
@@ -116,13 +119,12 @@ func hashPassword(password string) (string, error) {
 //			username, email, hashedPassword, time.Now().Format("2006-01-02 15:04:05"))
 //		return err
 //	}
-func insertUserIntoDB(username, email, hashedPassword, age, gender, firstname, lastname string) error {
+func insertUserIntoDB(db *sql.DB, username, email, password, age, gender, firstname, lastname string) error {
 	_, err := db.Exec(`
         INSERT INTO User (username, email, password, age, gender, firstname, lastname, created_at) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		username, email, hashedPassword, age, gender, firstname, lastname, time.Now().Format("2006-01-02 15:04:05"))
+		username, email, password, age, gender, firstname, lastname, time.Now().Format("2006-01-02 15:04:05"))
 	return err
-
 }
 
 // isValidEmail checks if the email address is valid
@@ -138,24 +140,43 @@ func IsValidUsername(username string) bool {
 }
 
 // isUsernameOrEmailUnique checks if the username or email is unique in the database
-func isUsernameOrEmailUnique(username, email string) (bool, bool, error) {
+func isUsernameOrEmailUnique(db *sql.DB, username, email string) (bool, bool, error) {
+	// Normalize input
+	if db == nil {
+        log.Fatal("DB is nil in isUsernameOrEmailUnique")
+    }
 	username = strings.ToLower(username)
 	email = strings.ToLower(email)
 
 	var count int
+
+	// Check if username is unique
 	err := db.QueryRow(`
         SELECT COUNT(*) 
         FROM User 
         WHERE username = ?`, username).Scan(&count)
-	if err != nil || count != 0 {
+	if err != nil {
 		return false, false, err
 	}
+	if count != 0 {
+		// Username is not unique
+		return false, true, nil
+	}
+
+	// Check if email is unique
 	err = db.QueryRow(`
         SELECT COUNT(*) 
         FROM User 
         WHERE email = ?`, email).Scan(&count)
-	if err != nil || count != 0 {
-		return true, false, err
+	if err != nil {
+		return false, false, err
 	}
-	return true, true, nil // Returns true if neither username nor email exists
+	if count != 0 {
+		// Email is not unique
+		return true, false, nil
+	}
+
+	// Both username and email are unique
+	return true, true, nil
 }
+

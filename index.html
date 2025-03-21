@@ -29,7 +29,7 @@
             <!-- Login page -->
             <div id="login-form" class="page container">
                 <h1>Login</h1>
-                <form id="login-form-element">
+                <form id="login-form">
                     <label for="username">Username</label>
                     <input type="text" id="login-username" name="username" placeholder="Enter your username" required>
                     
@@ -38,6 +38,8 @@
                     
                     <button type="submit">Login</button>
                 </form>
+                <!-- Error message for login -->
+                <div id="login-error" style="color: red; margin-top: 10px;"></div>
                 <br>
                 <div class="signup-link">
                     Don't have an account? <button onclick="showPage('signup-form')">Register here</button>
@@ -47,7 +49,7 @@
             <!-- signup page -->
             <div id="signup-form" class="page container">
                 <h1>Sign Up</h1>
-                <form id="signup-form-element">
+                <form id="signup-form">
                     <label for="username">Username</label>
                     <input type="text" id="signup-username" name="username" placeholder="Enter your username" required>
                     
@@ -81,6 +83,8 @@
 
                     <button type="submit">Sign Up</button>
                 </form>
+                <!-- Error message for signup -->
+                <div id="signup-error" style="color: red; margin-top: 10px;"></div>
                 <div class="signup-link">Already have an account? 
                     <button type="button" onclick="showPage('login-form')">Back to Login</button>
                 </div>
