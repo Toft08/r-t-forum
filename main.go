@@ -15,6 +15,8 @@ func main() {
 	db := database.InitDB()
 	if db == nil {
 		log.Fatal("Database initialization failed.")
+	} else {
+		log.Println("Database initialized successfully.")
 	}
 	defer db.Close()
 
