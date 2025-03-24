@@ -1,9 +1,6 @@
 package web
 
 import (
-	"database/sql"
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
@@ -16,95 +13,74 @@ import (
 
 // signUp handles both GET and POST requests for user registration
 func SignUp(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-	w.Header().Set("Content-Type", "application/json")
-
-	// Handle different HTTP methods
+	data.ValidationError = ""
 	switch r.Method {
 	case http.MethodGet:
-		// Render the initial signup page (can be used for the first load in SPA)
-		RenderTemplate(w, "index", data)
+		//RenderTemplate(w, "signup", data)
 	case http.MethodPost:
-		// Handle signup via AJAX, return JSON responses
-		handleSignUpPost(w, r)
+		handleSignUpPost(w, r, data)
 	default:
-		// If method is not GET or POST, return Method Not Allowed error
-		http.Error(w, `{"error": "Method Not Allowed"}`, http.StatusMethodNotAllowed)
+		//ErrorHandler(w, "Method Not Allowed", http.StatusNotFound)
 	}
 }
 
-func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
-	var requestData struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
-
-	// Decode the JSON request body
-	err := json.NewDecoder(r.Body).Decode(&requestData)
-	if err != nil {
-		http.Error(w, `{"error": "Invalid input"}`, http.StatusBadRequest)
-		return
-	}
-	log.Println("Response:", `{"success": true, "message": "Signup successful"}`)
+func handleSignUpPost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
+	username := r.FormValue("username")
+	email := r.FormValue("email")
+	password := r.FormValue("password")
 
 	// Validate username
-	if !IsValidUsername(requestData.Username) {
-		http.Error(w, `{"error": "Invalid username: must be 3-20 characters, letters, numbers, or _"}`, http.StatusBadRequest)
+	if !IsValidUsername(username) {
+		data.ValidationError = "Invalid username: must be 3-20 characters, letters, numbers, or _"
+		//RenderTemplate(w, "signup", data)
 		return
 	}
 
-	// Validate email
-	if !isValidEmail(requestData.Email) {
-		http.Error(w, `{"error": "Invalid email address"}`, http.StatusBadRequest)
+	if !isValidEmail(email) {
+		data.ValidationError = "Invalid email address"
+		//RenderTemplate(w, "signup", data)
+		return
+	}
+	if password == "" {
+		data.ValidationError = "Password cannot be empty"
+		//RenderTemplate(w, "signup", data)
 		return
 	}
 
-	// Check password
-	if requestData.Password == "" {
-		http.Error(w, `{"error": "Password cannot be empty"}`, http.StatusBadRequest)
-		return
-	}
-
-	// Check if username or email is already taken
-	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(db, requestData.Username, requestData.Email)
+	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(username, email)
 	if err != nil {
 		log.Println("Error checking if username is unique:", err)
-		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
+		//ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
 	if !uniqueUsername {
-		http.Error(w, `{"error": "Username is already taken"}`, http.StatusBadRequest)
+		data.ValidationError = "Username is already taken"
+		//RenderTemplate(w, "signup", data)
 		return
 	}
 	if !uniqueEmail {
-		http.Error(w, `{"error": "Email is already registered to existing user"}`, http.StatusBadRequest)
+		data.ValidationError = "Email is already registered to existing user"
+		//RenderTemplate(w, "signup", data)
 		return
 	}
 
 	// Hash the password
-	hashedPassword, err := hashPassword(requestData.Password)
+	hashedPassword, err := hashPassword(password)
 	if err != nil {
 		log.Println("Error hashing password:", err)
-		http.Error(w, `{"error1": "Internal Server Error"}`, http.StatusInternalServerError)
+		//ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	// Insert user into database
-	err = insertUserIntoDB(db, requestData.Username, requestData.Email, hashedPassword)
+	err = insertUserIntoDB(username, email, hashedPassword)
 	if err != nil {
 		log.Println("Error inserting user into database:", err)
-		http.Error(w, `{"error2": "Internal Server Error"}`, http.StatusInternalServerError)
+		//ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	// Return success message in JSON format
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write([]byte(`{"success": true, "message": "Signup successful"}`))
-	if err != nil {
-		log.Println("Error writing response:", err)
-		http.Error(w, `{"error3": "Internal Server Error"}`, http.StatusInternalServerError)
-	}
+	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
 // hashPassword hashes the user's password using bcrypt
@@ -113,11 +89,10 @@ func hashPassword(password string) (string, error) {
 	return string(hashed), err
 }
 
-func insertUserIntoDB(db *sql.DB, username, email, password string) error {
-	_, err := db.Exec(`
-        INSERT INTO User (username, email, password, age, gender, firstname, lastname, created_at) 
-        VALUES (?, ?, ?, ?)`,
-		username, email, password, time.Now().Format("2006-01-02 15:04:05"))
+// insertUserIntoDB inserts the user's details into the database
+func insertUserIntoDB(username, email, hashedPassword string) error {
+	_, err := db.Exec("INSERT INTO User (username, email, password, created_at) VALUES (?, ?, ?, ?)",
+		username, email, hashedPassword, time.Now().Format("2006-01-02 15:04:05"))
 	return err
 }
 
@@ -134,30 +109,24 @@ func IsValidUsername(username string) bool {
 }
 
 // isUsernameOrEmailUnique checks if the username or email is unique in the database
-func isUsernameOrEmailUnique(db *sql.DB, username, email string) (bool, bool, error) {
-	if db == nil {
-		return false, false, fmt.Errorf("database connection is nil")
-	}
+func isUsernameOrEmailUnique(username, email string) (bool, bool, error) {
 	username = strings.ToLower(username)
 	email = strings.ToLower(email)
 
-	var usernameCount, emailCount int
-
-	// Check if username is unique
-	err := db.QueryRow(`SELECT COUNT(*) FROM User WHERE username = ?`, username).Scan(&usernameCount)
-	if err != nil {
+	var count int
+	err := db.QueryRow(`
+        SELECT COUNT(*) 
+        FROM User 
+        WHERE username = ?`, username).Scan(&count)
+	if err != nil || count != 0 {
 		return false, false, err
 	}
-
-	// Check if email is unique
-	err = db.QueryRow(`SELECT COUNT(*) FROM User WHERE email = ?`, email).Scan(&emailCount)
-	if err != nil {
-		return false, false, err
+	err = db.QueryRow(`
+        SELECT COUNT(*) 
+        FROM User 
+        WHERE email = ?`, email).Scan(&count)
+	if err != nil || count != 0 {
+		return true, false, err
 	}
-
-	// Determine uniqueness
-	isUsernameUnique := usernameCount == 0
-	isEmailUnique := emailCount == 0
-
-	return isUsernameUnique, isEmailUnique, nil
+	return true, true, nil // Returns true if neither username nor email exists
 }
