@@ -3,126 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./assets/styles.css">
-    <!-- <link rel="icon" type="image/png" href="/assets/favicon.png"> -->
+    <link rel="icon" type="image/png" href="/assets/favicon.ico">
+
     <title>Forum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .welcome-text {
+            margin: 0;
+        }
+        .logout-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .feed-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .post-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .post-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .post-content {
+            margin-bottom: 15px;
+        }
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+            font-size: 14px;
+        }
+        .categories {
+            color: #2196F3;
+        }
+        .post-stats {
+            display: flex;
+            gap: 15px;
+        }
+        .likes, .dislikes {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .likes { color: #4CAF50; }
+        .dislikes { color: #f44336; }
+    </style> -->
 </head>
 <body>
-        <!-- nav bar -->
-        <nav class="nav">
-            <div class="nav-left">
-                <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
-            </div>
-            <div class="nav-right">
-                    <p class="welcome-text">Logged in as: <strong>Username placeholder</strong></p>
-                    <form action="/logout" method="POST">
-                    <button type="submit" class="logout-button">Log Out</button>
-                    </form>
-            </div>
-        </nav>
-    <div class="wrapper">
-        <header>
-            <h1>grit:forum</h1>
-        </header>
-
-        <div id="app">
-            <!-- Login page -->
-            <div id="login-form" class="page container">
-                <h1>Login</h1>
-                <form action="/login" method="POST">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username" required>
-                    
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                    
-                    <button type="submit">Login</button>
-                </form>
-                <br>
-                {{if .ValidationError}}
-                    <div class="error">
-                        {{.ValidationError}}
-                    </div>
-                {{end}}
-                <div class="signup-link">
-                    Don't have an account? <button onclick="showPage('signup-form')">Register here</button>
-                </div>
-            </div>
+    <!-- nav bar -->
+    <nav class="nav">
+        <div class="nav-left">
+            <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
         </div>
-
-        <!-- signup page -->
-        <div id="signup-form" class="page container">
-            <h1>Sign Up</h1>
-            <form action="/signup" method="POST">
-                <label for="username">Username
-                    <div class="hover-icon">
-                        <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
-                        <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
-                    </div>
-                </label>
-                <input type="text" id="username" name="username" placeholder="Enter your username" required>
-                
-                <label for="email">Email</label>
-                <input type="text" id="email" name="email" placeholder="Enter your email" required>
-    
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                <div class="form-group">
-                    <label for="register-age">Age</label>
-                    <input type="number" id="register-age" required min="13">
-                </div>
-                <div class="form-group">
-                    <label for="register-gender">Gender</label>
-                    <select id="register-gender" required>
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Attack Helicopter</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="register-firstname">First Name</label>
-                    <input type="text" id="register-firstname" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-lastname">Last Name</label>
-                    <input type="text" id="register-lastname" required>
-                </div>
-    
-                <button type="submit">Sign Up</button>
+        <div class="nav-right">
+            <p class="welcome-text">Logged in as: <strong>admin</strong></p>
+            <form action="/logout" method="POST">
+                <button type="submit" class="logout-button">Log Out</button>
             </form>
-            <br>
-            {{if .ValidationError}}
-                <div class="error">
-                    {{.ValidationError}}
-                </div>
-            {{end}}
-            <div class="signup-link">Already have an account? 
-                <button type="button" onclick="showPage('login-form')">Back to Login</button>
-            </div>
-          </div>
         </div>
+    </nav>
+    
+    <!-- dynamic forum -->
+    <div id="posts-container">
+        <!-- Posts will be inserted here dynamically -->
     </div>
-    </div>
-
+    
+    <script src="/scripts.js"></script>
 </body>
-<script>
-
-    // Function to show only one page at a time
-    function showPage(pageId) {
-        // Hide all pages
-        document.querySelectorAll('.page').forEach(page => {
-            page.style.display = 'none';
-        });
-        //show the page with the given id
-        document.getElementById(pageId).style.display = 'block';
-
-    }
-
-    // Show login form by default
-    window.onload = function() {
-        showPage('login-form');
-    }
-
-</script>
-</html>§§
+</html>

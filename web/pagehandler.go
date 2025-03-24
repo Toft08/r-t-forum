@@ -9,11 +9,16 @@ import (
 
 var db *sql.DB
 
-var tmpl = template.Must(template.ParseGlob("index.html"))
+var tmpl = template.Must(template.ParseFiles(
+	"./index.html",
+	"templates/login.html",
+	"templates/signup.html",
+	"templates/error.html",
+))
 
-func PageHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "index.html")
-}
+// func PageHandler(w http.ResponseWriter, r *http.Request) {
+// 	http.ServeFile(w, r, "index.html")
+// }
 
 // PageDetails contains the data to be passed to the HTML templates
 // func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
