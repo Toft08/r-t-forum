@@ -3,6 +3,7 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
@@ -85,15 +86,15 @@ func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := hashPassword(requestData.Password)
 	if err != nil {
 		log.Println("Error hashing password:", err)
-		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
+		http.Error(w, `{"error1": "Internal Server Error"}`, http.StatusInternalServerError)
 		return
 	}
 
 	// Insert user into database
-	err = insertUserIntoDB(db, requestData.Username, requestData.Email, hashedPassword, "0", "0", "0", "0")
+	err = insertUserIntoDB(db, requestData.Username, requestData.Email, hashedPassword)
 	if err != nil {
 		log.Println("Error inserting user into database:", err)
-		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
+		http.Error(w, `{"error2": "Internal Server Error"}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -102,7 +103,7 @@ func handleSignUpPost(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write([]byte(`{"success": true, "message": "Signup successful"}`))
 	if err != nil {
 		log.Println("Error writing response:", err)
-		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
+		http.Error(w, `{"error3": "Internal Server Error"}`, http.StatusInternalServerError)
 	}
 }
 
@@ -112,18 +113,11 @@ func hashPassword(password string) (string, error) {
 	return string(hashed), err
 }
 
-// insertUserIntoDB inserts the user's details into the database
-//
-//	func insertUserIntoDB(username, email, hashedPassword string) error {
-//		_, err := db.Exec("INSERT INTO User (username, email, password, created_at) VALUES (?, ?, ?, ?)",
-//			username, email, hashedPassword, time.Now().Format("2006-01-02 15:04:05"))
-//		return err
-//	}
-func insertUserIntoDB(db *sql.DB, username, email, password, age, gender, firstname, lastname string) error {
+func insertUserIntoDB(db *sql.DB, username, email, password string) error {
 	_, err := db.Exec(`
         INSERT INTO User (username, email, password, age, gender, firstname, lastname, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		username, email, password, age, gender, firstname, lastname, time.Now().Format("2006-01-02 15:04:05"))
+        VALUES (?, ?, ?, ?)`,
+		username, email, password, time.Now().Format("2006-01-02 15:04:05"))
 	return err
 }
 
@@ -141,42 +135,29 @@ func IsValidUsername(username string) bool {
 
 // isUsernameOrEmailUnique checks if the username or email is unique in the database
 func isUsernameOrEmailUnique(db *sql.DB, username, email string) (bool, bool, error) {
-	// Normalize input
 	if db == nil {
-        log.Fatal("DB is nil in isUsernameOrEmailUnique")
-    }
+		return false, false, fmt.Errorf("database connection is nil")
+	}
 	username = strings.ToLower(username)
 	email = strings.ToLower(email)
 
-	var count int
+	var usernameCount, emailCount int
 
 	// Check if username is unique
-	err := db.QueryRow(`
-        SELECT COUNT(*) 
-        FROM User 
-        WHERE username = ?`, username).Scan(&count)
+	err := db.QueryRow(`SELECT COUNT(*) FROM User WHERE username = ?`, username).Scan(&usernameCount)
 	if err != nil {
 		return false, false, err
-	}
-	if count != 0 {
-		// Username is not unique
-		return false, true, nil
 	}
 
 	// Check if email is unique
-	err = db.QueryRow(`
-        SELECT COUNT(*) 
-        FROM User 
-        WHERE email = ?`, email).Scan(&count)
+	err = db.QueryRow(`SELECT COUNT(*) FROM User WHERE email = ?`, email).Scan(&emailCount)
 	if err != nil {
 		return false, false, err
 	}
-	if count != 0 {
-		// Email is not unique
-		return true, false, nil
-	}
 
-	// Both username and email are unique
-	return true, true, nil
+	// Determine uniqueness
+	isUsernameUnique := usernameCount == 0
+	isEmailUnique := emailCount == 0
+
+	return isUsernameUnique, isEmailUnique, nil
 }
-

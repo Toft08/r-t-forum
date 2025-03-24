@@ -14,8 +14,8 @@ func main() {
 
 	db := database.InitDB()
 	if db == nil {
-        log.Fatal("Database connection failed")
-    }
+		log.Fatal("Database initialization failed.")
+	}
 	defer db.Close()
 
 	database.MakeTables(db)
