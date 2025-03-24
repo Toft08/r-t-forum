@@ -1,0 +1,122 @@
+{{template "head"}}
+<body>
+{{template "navBar" .}}
+   <div class="wrapper">
+    <main>
+        {{range .Posts}}
+        <div class="post-header-like-dislike">
+            <h2 class="post-title">{{.PostTitle}}</h2>
+            <form action="/post/{{.PostID}}" method="POST" class="like-dislike-form">
+                <div class="reaction-buttons">
+                {{if .LikedNow}}
+                    <button type="submit" name="vote" value="like" title="like" class="like-button" style="color: #54956d;">
+                    <span class="material-symbols-outlined">thumb_up</span></button>
+                    <span class="reaction-count">{{.Likes}}</span>
+                {{else}}
+                    <button type="submit" name="vote" value="like" title="like" class="like-button">
+                    <span class="material-symbols-outlined">thumb_up</span></button>
+                    <span class="reaction-count">{{.Likes}}</span>
+                {{end}}
+
+                {{if .DislikedNow}}
+                    <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button" style="color: rgb(197, 54, 64);">
+                    <span class="material-symbols-outlined">thumb_down</span></button>
+                    <span class="reaction-count">{{.Dislikes}}</span>
+                {{else}}
+                    <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button">
+                    <span class="material-symbols-outlined">thumb_down</span></button>
+                    <span class="reaction-count">{{.Dislikes}}</span>
+                {{end}}
+                </div>
+            </form>
+        </div>
+        <div class="category-container">
+        {{range $index, $category := .Categories}}
+            <p class="category-tags">
+                {{if $index}}{{end}} 
+                {{$category}}{{end}}
+            </p>
+        </div>
+        <div class="post-info">
+            <span class="material-symbols-outlined" style="font-size: 24px;">filter_vintage</span>
+            <span class="username">{{.Username}}</span>
+        </div>
+            <p>{{.CreatedAt}}</p>
+        <div class="post-card">
+            <pre>{{.PostContent}}</pre>
+        </div>
+        {{ if eq (len .Comments) 0 }}
+            <p>No comments yet. Be the first to create one!</p>
+        {{ else }}
+            <h3 class="comment-header">Comments:</h3>
+            {{ range $index, $comment := .Comments }} 
+            <div class="comment">
+                <div class="container-post">
+                    <p><strong>{{ $comment.Username }}</strong>: {{ $comment.CreatedAt }}</p> 
+                    <form action="/post/{{.PostID}}" method="POST" class="like-dislike-form">
+                        <div class="reaction-buttons">
+                            <input type="hidden" name="comment-id" value="{{.CommentID}}">
+                            {{if .LikedNow}}
+                                <button type="submit" name="vote" value="like" title="like" class="like-button" style="color: #54956d;">
+                                <span class="material-symbols-outlined">thumb_up</span></button>
+                                <span class="reaction-count">{{ $comment.Likes }}</span>
+                            {{else}}
+                                <button type="submit" name="vote" value="like" title="like" class="like-button">
+                                <span class="material-symbols-outlined">thumb_up</span></button>
+                                <span class="reaction-count">{{ $comment.Likes }}</span>
+                            {{end}}
+
+                            {{if .DislikedNow}}
+                                <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button" style="color: rgb(197, 54, 64);">
+                                <span class="material-symbols-outlined">thumb_down</span></button>
+                                <span class="reaction-count">{{ $comment.Dislikes }}</span>
+                            {{else}}
+                                <button type="submit" name="vote" value="dislike" title="dislike" class="dislike-button">
+                                <span class="material-symbols-outlined">thumb_down</span></button>
+                                <span class="reaction-count">{{ $comment.Dislikes }}</span>
+                            {{end}}
+                        </div>
+                    </form>
+                </div>
+                <div class="post-card">
+                    <pre>{{ $comment.Content }}</pre>
+                </div>
+            </div>
+            {{ end }}
+        {{ end }}
+        {{ end }}
+        
+        {{if .LoggedIn }}
+            {{range .Posts}}
+            <form action="/post/{{.PostID}}" method="POST">
+                <label for="comment"></label>
+                <textarea class="comment-textarea" id="comment" name="comment" placeholder="Enter comment here" required></textarea>
+                <br>
+                <button type="submit">Submit Comment</button>
+            </form>
+        {{else}}
+            <p>You must be logged in to leave a comment.</p>
+        {{end}}
+        {{end}}
+    </main>
+   </div>
+{{template "footer"}}
+</body>
+<script>
+    const textarea = document.getElementById("comment");
+
+    textarea.addEventListener("input", function () {
+        this.style.height = "auto"; // Reset height to auto
+        let newHeight = this.scrollHeight; // Get the height of the content
+
+        if (newHeight > 200) { // Limit the height to 200px
+            newHeight = 200;
+            this.style.overflowY = "auto"; // Enable scrolling when max height is reached
+        } else {
+            this.style.overflowY = "hidden"; // Hide scrollbar when below max height
+        }
+
+        this.style.height = newHeight + "px"; // Apply height
+    });
+</script>
+</html>

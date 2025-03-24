@@ -1,0 +1,37 @@
+{{template "head"}}
+<body>
+   {{template "navBar" .}}
+    <div class="wrapper">
+      <div class="container">
+        <h1>Sign Up</h1>
+        <form action="/signup" method="POST">
+            <label for="username">Username
+                <div class="hover-icon">
+                    <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
+                    <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
+                </div>
+            </label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" placeholder="Enter your email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit">Sign Up</button>
+        </form>
+        <br>
+        {{if .ValidationError}}
+            <div class="error">
+                {{.ValidationError}}
+            </div>
+        {{end}}
+        <div class="signup-link">Already have an account? 
+            <a href="/login">Login here</a>
+        </div>
+      </div>
+    </div>
+</body>
+{{template "footer"}}
+</html>

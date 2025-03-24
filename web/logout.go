@@ -22,7 +22,7 @@ func Logout(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 		Name:     "session_id",
 		Value:    "",
 		Expires:  time.Now().Add(-1 * time.Hour),
-		HttpOnly: true,
+		HttpOnly: true, // Prevent JavaScript from accessing the cookie
 		Path:     "/",
 	})
 

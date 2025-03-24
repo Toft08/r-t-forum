@@ -79,7 +79,7 @@ func createSession(w http.ResponseWriter, userID int) error {
 		Name:     "session_id",
 		Value:    sessionID,
 		Expires:  time.Now().Add(30 * time.Minute),
-		HttpOnly: true,
+		HttpOnly: true, // Prevent JavaScript from accessing the cookie
 		Path:     "/",
 	})
 

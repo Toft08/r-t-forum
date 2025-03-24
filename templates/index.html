@@ -1,16 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./assets/styles.css">
-    <!-- <link rel="icon" type="image/png" href="/assets/favicon.png"> -->
-    <title>Forum</title>
-</head>
+{{template "head"}}
 <body>
+{{template "navBar" .}}
     <div class="wrapper">
         <header>
-            <h1>grit:forum</h1>
+            <h1>grit:garden</h1>
         </header>
         <main>
             <!-- Button to toggle filter visibility -->
@@ -83,21 +76,49 @@
             {{end}}
         </main>
     </div>
-
-<nav class="nav">
-    <div class="nav-left">
-        <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
-    </div>
-    <div class="nav-right">
-        {{if .LoggedIn}}
-            <p class="welcome-text">Logged in as: <strong>{{.Username}}</strong></p>
-            <form action="/logout" method="POST">
-            <button type="submit" class="logout-button">Log Out</button>
-            </form>
-        {{else}}
-            <button class="signup-button" onclick="window.location.href='/signup';">Sign Up</button>
-            <button class="login-button" onclick="window.location.href='/login';">Log In</button>
-        {{end}}
-    </div>
-</nav>
+{{template "footer"}}
 </body>
+<script>
+    // function to toggle filter visibility
+    function toggleFilter() {
+        var filter = document.querySelector('.filter');
+        var button = document.querySelector('.show-filter-button');
+
+        if (filter.classList.contains('show')) {
+            filter.style.opacity = '0';
+            setTimeout(() => {
+                filter.classList.remove('show');
+                filter.style.display = 'none';
+            }, 300); // Transition duration
+            button.textContent = 'Show Filters';
+        } else {
+            filter.style.display = 'flex';  // Display as flex
+            setTimeout(() => {
+                filter.classList.add('show');
+                filter.style.opacity = '1';
+            }, 10); // Ensure display is set before transitioning
+            button.textContent = 'Hide Filters';
+        }
+    }
+
+    // To ensure only one filter is selected at a time
+    document.addEventListener("DOMContentLoaded", function() {
+        var topicFilter = document.getElementById("topicFilter");
+        var postFilter = document.getElementById("postFilter");
+
+        if (topicFilter && postFilter) {
+            topicFilter.addEventListener("change", function() {
+                if (this.value !== "") {
+                    postFilter.value = ""; // Reset the other dropdown
+                }
+            });
+
+            postFilter.addEventListener("change", function() {
+                if (this.value !== "") {
+                    topicFilter.value = ""; // Reset the other dropdown
+                }
+            });
+        }
+    });
+</script>
+</html>

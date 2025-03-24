@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined');
+@import url('https://fonts.googleapis.com/css2?family=Limelight&display=swap');
+
+/*------ General styles ------*/
+
 body {
     font-family: Arial, sans-serif;
     background-color: white;
@@ -229,7 +234,7 @@ header {
 .post-info-home {
     display: flex;
     align-items: center;
-    margin: 5px 0; 
+    margin: 5px 0 10px; 
     color: #1b2218;
     font-weight: bold;
     border-bottom: #ccc 1px solid;
@@ -238,13 +243,13 @@ header {
 
 /* For general post text (home page) */
 .post-content {
-    padding-top: 2px;
-    padding-bottom: 2px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .icons-container {
@@ -254,6 +259,7 @@ header {
     margin-bottom: 10px;
     border-top: #ccc 1px solid;
     padding-top: 5px;
+    margin-top: 10px;
 }
 
 /* Post Cards styling (post page) */

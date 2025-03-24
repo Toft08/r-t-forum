@@ -10,7 +10,7 @@ import (
 
 var db *sql.DB
 
-var tmpl = template.Must(template.ParseGlob("index.html"))
+var tmpl = template.Must(template.ParseGlob("templates/*.html"))
 
 // PageDetails contains the data to be passed to the HTML templates
 func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {

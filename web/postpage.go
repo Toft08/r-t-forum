@@ -90,6 +90,7 @@ func HandlePostPagePost(w http.ResponseWriter, r *http.Request, data *PageDetail
 				ErrorHandler(w, "Bad Request", http.StatusBadRequest)
 				return
 			}
+			// Check if the vote is for a post or a comment
 			if commentID == "" {
 				comment_id = 0
 				post_id = postID
@@ -166,7 +167,7 @@ func AddVotes(userID, postID, commentID, vote int) error {
 	query += addon
 	deleteQuery += addon
 	updateQuery += addon
-
+	// Check if the user has already liked the post or comment
 	row = db.QueryRow(query, userID, ID)
 	var likeType int
 	err := row.Scan(&likeType)
