@@ -125,11 +125,11 @@ func MakeTables(db *sql.DB) {
 	}
 	//Insert initial data into Post
 	insertPostQuery := `
-    INSERT INTO post (title, content, user_id, created_at) 
-    SELECT 'Welcome to the forum', 'This is the first post!', 1, datetime('now')
-    WHERE NOT EXISTS (
-        SELECT 1 FROM post WHERE title = 'Welcome to the forum'
-    );
+    INSERT INTO post (title, content, user_id, created_at)
+	VALUES
+		('THIS IS THE THIRD POST', 'This is the third post!', 1, datetime('now')),
+		('THIS IS THE SECOND POST', 'This is the second post!', 1, datetime('now')),
+    	('Welcome to the forum', 'This is the first post!', 1, datetime('now'));
 `
 	result, err := db.Exec(insertPostQuery)
 	if err != nil {
@@ -146,7 +146,11 @@ func MakeTables(db *sql.DB) {
 
 	insertPostCategoryQuery := `
     INSERT INTO Post_category (post_id, category_id)
-	VALUES (?, 1);
+	SELECT id, 1 FROM Post WHERE title = 'Welcome to the forum'
+    UNION ALL
+    SELECT id, 2 FROM Post WHERE title = 'THIS IS THE SECOND POST'
+    UNION ALL
+    SELECT id, 3 FROM Post WHERE title = 'THIS IS THE THIRD POST';
 `
 
 	if _, err := db.Exec(insertPostCategoryQuery, int(lastInsertID)); err != nil {
