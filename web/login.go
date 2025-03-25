@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -12,12 +13,12 @@ import (
 func Login(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 	data.ValidationError = ""
 	switch r.Method {
-	case http.MethodGet:
-		// RenderTemplate(w, "login", data)
+	// case http.MethodGet:
+	// RenderTemplate(w, "login", data)
 	case http.MethodPost:
 		HandleLoginPost(w, r, data)
 	default:
-		// ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -46,8 +47,9 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request, data *PageDetails) 
 		return
 	}
 
-	data.LoggedIn = true
-	http.Redirect(w, r, "/", http.StatusFound)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 }
 
 // getUserCredentials retrieves the user's ID and hashed password from the database

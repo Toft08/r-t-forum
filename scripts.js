@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function handleRoute() {
     const route = window.location.pathname; // Get the hash part (without #)
-    console.log(route)
     const container = document.getElementById('content'); // Main content container
 
     // Check if we are in the signup or login route, otherwise load homepage content
@@ -122,8 +121,8 @@ function loadLoginPage() {
     container.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
-            <label for="email">Email</label>
-            <input type="text" id="email" name="email" placeholder="Enter your email" required>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>

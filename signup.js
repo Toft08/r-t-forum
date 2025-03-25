@@ -41,7 +41,7 @@ function loadSignupPage() {
         if (response.ok) {
             messageElement.style.color = "green";
             messageElement.textContent = "Signup successful! Redirecting...";
-            setTimeout(() => loadLoginPage(), 2000); // Redirect to login page
+            setTimeout(() => loadLoginPage(), 1000); // Redirect to login page
         } else {
             messageElement.style.color = "red";
             messageElement.textContent = result.error || "Signup failed.";

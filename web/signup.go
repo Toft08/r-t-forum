@@ -3,7 +3,6 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
@@ -83,7 +82,6 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Respond with success message
-	fmt.Println("hellll")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful"})
