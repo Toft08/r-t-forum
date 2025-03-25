@@ -13,11 +13,11 @@ func Login(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 	data.ValidationError = ""
 	switch r.Method {
 	case http.MethodGet:
-		RenderTemplate(w, "login", data)
+		// RenderTemplate(w, "login", data)
 	case http.MethodPost:
 		HandleLoginPost(w, r, data)
 	default:
-		ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		// ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
 
@@ -29,20 +29,20 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request, data *PageDetails) 
 	userID, hashedPassword, err := getUserCredentials(username)
 	if err != nil {
 		data.ValidationError = "Invalid username"
-		RenderTemplate(w, "login", data)
+		// RenderTemplate(w, "login", data)
 		return
 	}
 
 	// Verify password
 	if err := verifyPassword(hashedPassword, password); err != nil {
 		data.ValidationError = "Invalid password"
-		RenderTemplate(w, "login", data)
+		// RenderTemplate(w, "login", data)
 		return
 	}
 
 	// Create session
 	if err := createSession(w, userID); err != nil {
-		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
+		// ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
