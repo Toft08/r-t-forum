@@ -1,5 +1,5 @@
-document.getElementById("login-form").addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent the form from submitting the traditional way
+document.getElementById("login-form").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent the form from submitting the traditional way
 
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -8,10 +8,11 @@ document.getElementById("login-form").addEventListener("submit", function (e) {
     fetch('/login', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/json',
         },
-        body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
-    })
+        body: JSON.stringify({ username, password })
+        })
+
     .then(response => response.json())
     .then(data => {
         if (data.message === "Login successful") {
@@ -31,6 +32,6 @@ document.getElementById("login-form").addEventListener("submit", function (e) {
 function loadHomePage() {
     // This is where you would update your SPA to show the homepage without refreshing
     console.log("Loading homepage content...");
+    const contentContainer = document.getElementById("content"); // Ensure you have a container for content
     // Example: Update the DOM with homepage content
-    document.getElementById("content").innerHTML = "Welcome to the homepage!";
 }
