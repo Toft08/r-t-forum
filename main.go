@@ -1,10 +1,10 @@
 package main
 
 import (
-	"forum/database"
-	"forum/web"
 	"log"
 	"net/http"
+	"r-t-forum/database"
+	"r-t-forum/web"
 )
 
 // func main() {

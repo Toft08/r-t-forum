@@ -2,8 +2,8 @@ package web
 
 import (
 	"database/sql"
-	"forum/database"
 	"log"
+	"r-t-forum/database"
 )
 
 // GetCategories retrieves all categories from the database
