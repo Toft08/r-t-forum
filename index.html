@@ -89,6 +89,23 @@
         }
         .likes { color: #4CAF50; }
         .dislikes { color: #f44336; }
+        
+        .popup {
+            position: fixed;
+            top: 15%;
+            left: 30%;
+            min-width: 25%;
+            min-height: 20%;
+            background-color: white;
+            display: block;
+            border: #1d1c1c 1px solid;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -105,11 +122,15 @@
         </div>
     </nav>
     
+    <div> <button id="create-post-btn">Create Post</button></div>
     <!-- dynamic forum -->
     <div id="posts-container">
         <!-- Posts will be inserted here dynamically -->
     </div>
+
+    <!-- post pop up -->
+    <div id="create-post-popup" class="popup hidden"></div>
     
     <script src="/scripts.js"></script>
 </body>
-</html>
+</html> 
