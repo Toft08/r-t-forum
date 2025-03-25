@@ -32,6 +32,4 @@ document.getElementById("login-form").addEventListener("submit", function (event
 function loadHomePage() {
     // This is where you would update your SPA to show the homepage without refreshing
     console.log("Loading homepage content...");
-    const contentContainer = document.getElementById("content"); // Ensure you have a container for content
-    // Example: Update the DOM with homepage content
 }
