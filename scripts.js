@@ -3,6 +3,55 @@ document.addEventListener('DOMContentLoaded', function () {
         .then((response) => response.json())
         .then((data) => insertPosts(data))
         .catch((error) => console.error("Error loading posts:", error));
+
+    // Create post popup window.
+    const createPostBtn = document.getElementById('create-post-btn');
+    const createPostPopup = document.getElementById('create-post-popup');
+
+    // Create popup content dynamically
+    const createPopupContent = () => {
+        createPostPopup.innerHTML = `
+                <h2>Create a new post</h2>
+                <form id="create-form" action="/create" method="POST">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" required maxlength="50">
+                    <br>
+                    <label for="content">Content:</label>
+                    <textarea class="content-textarea" id="content" name="content" required></textarea>
+                    <br>
+                    <label for="categories">Categories</label>
+                    <input type="text" id="categories" name="categories" required>
+                    <br>
+                    <button type="submit">Create</button>
+                </form>
+                <button id="close-popup-btn" class="close-button">Close</button>
+            `;
+
+        const closePopupBtn = document.getElementById('close-popup-btn');
+        const createForm = createPostPopup.querySelector('#create-form');
+
+        closePopupBtn.addEventListener('click', () => {
+            createPostPopup.classList.add('hidden');
+        });
+
+        createForm.addEventListener('submit', (e) => {
+            // You can add form submission logic here
+            // For now, we'll just prevent default and hide popup
+            e.preventDefault();
+            createPostPopup.classList.add('hidden');
+        });
+    };
+
+    // Show popup when create post button is clicked
+    createPostBtn.addEventListener('click', () => {
+        // Create popup content if not already created
+        if (createPostPopup.innerHTML.trim() === '') {
+            createPopupContent();
+        }
+
+        // Show popup
+        createPostPopup.classList.remove('hidden');
+    });
 });
 
 function insertPosts(posts) {
