@@ -1,6 +1,7 @@
 document.getElementById('signup-button').addEventListener('click', function () {
     console.log("Sign Up button clicked!");
-    window.location.hash = 'signup'; // Change the URL to #signup
+    history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
+    loadSignupPage(); // Load the signup form dynamically
 });
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -14,15 +15,16 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function handleRoute() {
-    const route = window.location.hash.substring(1); // Get the hash part (without #)
+    const route = window.location.pathname; // Get the hash part (without #)
+    console.log(route)
     const container = document.getElementById('content'); // Main content container
 
     // Check if we are in the signup or login route, otherwise load homepage content
     switch (route) {
-        case 'signup':
+        case '/signup':
             loadSignupPage(); // Load the signup page
             break;
-        case 'login':
+        case '/login':
             loadLoginPage(); // Load the login page
             break;
         default:
@@ -42,7 +44,9 @@ function loadHomePage() {
     signupButton.id = 'signup-button';
     signupButton.textContent = 'Sign Up';
     signupButton.addEventListener('click', function () {
-        window.location.hash = 'signup';
+        console.log("Sign Up button clicked!");
+        history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
+        loadSignupPage(); // Load the signup form dynamically
     });
 
     container.appendChild(signupButton); // Append the Sign Up button

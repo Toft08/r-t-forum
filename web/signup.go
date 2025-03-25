@@ -1,7 +1,9 @@
 package web
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/mail"
@@ -13,7 +15,7 @@ import (
 )
 
 // SignUp handles user registration via JSON requests
-func SignUp(w http.ResponseWriter, r *http.Request) {
+func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -49,7 +51,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if username or email is already in use
-	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(user.Username, user.Email)
+	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(user.Username, user.Email, db)
 	if err != nil {
 		log.Println("Error checking user uniqueness:", err)
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
@@ -73,7 +75,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Insert user into database
-	err = insertUserIntoDB(user.Username, user.Email, hashedPassword)
+	err = insertUserIntoDB(user.Username, user.Email, hashedPassword, db)
 	if err != nil {
 		log.Println("Error inserting user into database:", err)
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
@@ -81,6 +83,7 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with success message
+	fmt.Println("hellll")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful"})
@@ -152,7 +155,7 @@ func hashPassword(password string) (string, error) {
 }
 
 // insertUserIntoDB inserts the user's details into the database
-func insertUserIntoDB(username, email, hashedPassword string) error {
+func insertUserIntoDB(username, email, hashedPassword string, db *sql.DB) error {
 	_, err := db.Exec("INSERT INTO User (username, email, password, created_at) VALUES (?, ?, ?, ?)",
 		username, email, hashedPassword, time.Now().Format("2006-01-02 15:04:05"))
 	return err
@@ -171,7 +174,7 @@ func IsValidUsername(username string) bool {
 }
 
 // isUsernameOrEmailUnique checks if the username or email is unique in the database
-func isUsernameOrEmailUnique(username, email string) (bool, bool, error) {
+func isUsernameOrEmailUnique(username, email string, db *sql.DB) (bool, bool, error) {
 	username = strings.ToLower(username)
 	email = strings.ToLower(email)
 
