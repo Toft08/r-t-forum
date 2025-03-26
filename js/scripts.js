@@ -3,10 +3,15 @@ document.addEventListener('DOMContentLoaded', function () {
     handleRoute(); // Load the correct page on initial load
     window.addEventListener('hashchange', handleRoute); // Listen for hash changes
 
-    fetch("/posts")
-        .then((response) => response.json())
-        .then((data) => insertPosts(data))
-        .catch((error) => console.error("Error loading posts:", error));
+    fetch("/api/posts", {
+        method: "GET", // Using GET method for loading posts
+        headers: {
+            "Accept": "application/json", // Expecting JSON response
+        }
+    })
+    .then((response) => response.json())
+    .then((data) => insertPosts(data))
+    .catch((error) => console.error("Error loading posts:", error));
 
     // Create post popup window.
     const createPostBtn = document.getElementById('create-post-btn');
@@ -94,11 +99,7 @@ function loadHomePage() {
 
     container.appendChild(signupButton); // Append the Sign Up button
 
-    // Load posts from the backend
-    fetch("/posts")
-        .then((response) => response.json())
-        .then((data) => insertPosts(data))
-        .catch((error) => console.error("Error loading posts:", error));
+    
 }
 
 

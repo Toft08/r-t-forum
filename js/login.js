@@ -25,7 +25,7 @@ function loadLoginPage() {
 
         try {
             console.log("Sending fetch request to /login"); // Debug log
-            const response = await fetch('/login', {
+            const response = await fetch('/api/login', {
                 method: 'POST', // Explicitly set method to POST
                 headers: {
                     'Content-Type': 'application/json',

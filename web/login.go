@@ -1,6 +1,7 @@
 package web
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 // Login handles both GET and POST requests for user authentication
-func Login(w http.ResponseWriter, r *http.Request) {
+func Login(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	log.Printf("Login request received - Method: %s", r.Method)
 	switch r.Method {
 	case http.MethodPost:
