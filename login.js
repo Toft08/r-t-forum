@@ -1,3 +1,27 @@
+document.getElementById('signup-button').addEventListener('click', function () {
+    console.log("Log in button clicked!");
+    history.pushState({}, '', '/login');
+    loadLoginPage();
+});
+
+function loadLoginPage() {
+    console.log("loading login page")
+    const container = document.getElementById('content');
+    container.innerHTML = `
+        <h1>Login</h1>
+        <form id="login-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+        </form>
+    `;
+    console.log("Loading homepage content...");
+}
+
 document.getElementById("login-form").addEventListener("submit", function (event) {
     event.preventDefault(); // Prevent the form from submitting the traditional way
 
@@ -17,7 +41,7 @@ document.getElementById("login-form").addEventListener("submit", function (event
     .then(data => {
         if (data.message === "Login successful") {
             // Handle successful login, redirect or load homepage content dynamically
-            loadHomePage(); // Replace with your logic to load the homepage dynamically
+            loadHomePage(); 
         } else {
             // Show the error message (e.g., invalid username/password)
             alert(data.error);
@@ -27,9 +51,3 @@ document.getElementById("login-form").addEventListener("submit", function (event
         console.error("Error during login:", error);
     });
 });
-
-// Function to dynamically load homepage (you can update your SPA content here)
-function loadHomePage() {
-    // This is where you would update your SPA to show the homepage without refreshing
-    console.log("Loading homepage content...");
-}

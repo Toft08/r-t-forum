@@ -11,9 +11,9 @@ var db *sql.DB
 
 var tmpl = template.Must(template.ParseFiles(
 	"./index.html",
-	"templates/login.html",
-	"templates/signup.html",
-	"templates/error.html",
+	// "templates/login.html",
+	// "templates/signup.html",
+	// "templates/error.html",
 ))
 
 // func PageHandler(w http.ResponseWriter, r *http.Request) {

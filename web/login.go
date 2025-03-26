@@ -22,28 +22,45 @@ func Login(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 	}
 }
 
-// HandleLoginPost handles the user login form submission
 func HandleLoginPost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+	// Decode JSON payload
+	var loginRequest struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
 
+	// Attempt to decode JSON body
+	err := json.NewDecoder(r.Body).Decode(&loginRequest)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	username := loginRequest.Username
+	password := loginRequest.Password
+
+	// Rest of your existing authentication logic remains the same
 	userID, hashedPassword, err := getUserCredentials(username)
 	if err != nil {
-		data.ValidationError = "Invalid username"
-		// RenderTemplate(w, "login", data)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid username"})
 		return
 	}
 
 	// Verify password
 	if err := verifyPassword(hashedPassword, password); err != nil {
-		data.ValidationError = "Invalid password"
-		// RenderTemplate(w, "login", data)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid password"})
 		return
 	}
 
 	// Create session
 	if err := createSession(w, userID); err != nil {
-		// ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
 		return
 	}
 

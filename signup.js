@@ -1,7 +1,17 @@
+document.getElementById('signup-button').addEventListener('click', function () {
+    console.log("Sign Up button clicked!");
+    history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
+    loadSignupPage(); // Load the signup form dynamically
+});
+
+
 function loadSignupPage() {
-    document.getElementById("content").innerHTML = `
+    history.pushState({}, '', '/signup');
+
+    const container = document.getElementById('content');
+    container.innerHTML = `
         <h1>Sign Up</h1>
-        <form id="signupForm">
+        <form id="signup-form">
             <label for="username">Username
                 <div class="hover-icon">
                     <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
@@ -18,33 +28,41 @@ function loadSignupPage() {
 
             <button type="submit">Sign Up</button>
         </form>
-
-        <p id="signupMessage"></p>
+         <p id="signupMessage"></p>
     `;
 
-    document.getElementById("signupForm").addEventListener("submit", async function(event) {
+    // Event listener for the form submission
+    document.getElementById("signup-form").addEventListener("submit", async function(event) {
         event.preventDefault(); // Prevent traditional form submission
 
         const username = document.getElementById("username").value;
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
 
-        const response = await fetch("/signup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, email, password })
-        });
-
-        const result = await response.json();
-        const messageElement = document.getElementById("signupMessage");
-
-        if (response.ok) {
-            messageElement.style.color = "green";
-            messageElement.textContent = "Signup successful! Redirecting...";
-            setTimeout(() => loadLoginPage(), 1000); // Redirect to login page
-        } else {
+        try {
+            const response = await fetch("/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, email, password })
+            });
+    
+            const result = await response.json(); // Parse JSON response
+    
+            const messageElement = document.getElementById("signupMessage");
+            
+            if (response.ok) {
+                messageElement.style.color = "green";
+                messageElement.textContent = "Signup successful! Redirecting...";
+                window.location.href = "/login";
+            } else {
+                messageElement.style.color = "red";
+                messageElement.textContent = result.error || "Signup failed.";
+            }
+        } catch (error) {
+            console.error("Signup error:", error);
+            const messageElement = document.getElementById("signupMessage");
             messageElement.style.color = "red";
-            messageElement.textContent = result.error || "Signup failed.";
+            messageElement.textContent = "An error occurred. Please try again later.";
         }
     });
 }
