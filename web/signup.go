@@ -16,7 +16,7 @@ import (
 // SignUp handles user registration via JSON requests
 func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		http.Error(w, "Method Not Allowed1", http.StatusMethodNotAllowed)
 		return
 	}
 

@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function handleRoute() {
     const route = window.location.pathname; // Get the hash part (without #)
+    console.log(route)
     const container = document.getElementById('content'); // Main content container
 
     // Check if we are in the signup or login route, otherwise load homepage content
@@ -66,6 +67,7 @@ function handleRoute() {
             loadSignupPage(); // Load the signup page
             break;
         case '/login':
+            console.log("Loading login page")
             loadLoginPage(); // Load the login page
             break;
         default:
@@ -86,7 +88,7 @@ function loadHomePage() {
     signupButton.textContent = 'Sign Up';
     signupButton.addEventListener('click', function () {
         console.log("Sign Up button clicked!");
-        // history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
+        // window.history.href = "/signup"; // Change the URL to /signup without the hash
         loadSignupPage(); // Load the signup form dynamically
     });
 

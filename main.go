@@ -48,7 +48,7 @@ func main() {
 		web.SignUp(w, r, db)
 	})
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
-		web.Login(w, r, &web.PageDetails{})
+		web.Login(w, r)
 	})
 
 	log.Println("Server is running on http://localhost:8080")

@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -10,25 +11,19 @@ import (
 )
 
 // Login handles both GET and POST requests for user authentication
-func Login(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-	data.ValidationError = ""
+func Login(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Login request received - Method: %s", r.Method)
 	switch r.Method {
-	// case http.MethodGet:
-	// RenderTemplate(w, "login", data)
 	case http.MethodPost:
-		HandleLoginPost(w, r, data)
+		HandleLoginPost(w, r)
 	default:
+		log.Printf("Unsupported method: %s", r.Method)
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
 
-func HandleLoginPost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-	// Decode JSON payload
-	var loginRequest struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
-
+func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
+	var loginRequest LoginRequest
 	// Attempt to decode JSON body
 	err := json.NewDecoder(r.Body).Decode(&loginRequest)
 	if err != nil {
@@ -36,11 +31,8 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request, data *PageDetails) 
 		return
 	}
 
-	username := loginRequest.Username
-	password := loginRequest.Password
-
 	// Rest of your existing authentication logic remains the same
-	userID, hashedPassword, err := getUserCredentials(username)
+	userID, hashedPassword, err := getUserCredentials(loginRequest.Username)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -49,7 +41,7 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request, data *PageDetails) 
 	}
 
 	// Verify password
-	if err := verifyPassword(hashedPassword, password); err != nil {
+	if err := verifyPassword(hashedPassword, loginRequest.Password); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid password"})

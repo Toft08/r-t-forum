@@ -2,19 +2,11 @@ package web
 
 import (
 	"database/sql"
-	"html/template"
 	"log"
 	"net/http"
 )
 
 var db *sql.DB
-
-var tmpl = template.Must(template.ParseFiles(
-	"./index.html",
-	// "templates/login.html",
-	// "templates/signup.html",
-	// "templates/error.html",
-))
 
 // func PageHandler(w http.ResponseWriter, r *http.Request) {
 // 	http.ServeFile(w, r, "index.html")
@@ -31,7 +23,7 @@ func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	var err error
 	data.Categories, err = GetCategories()
 	if err != nil {
-		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
+		// ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -39,9 +31,9 @@ func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	case "/":
 		// HomePage(w, r, &data)
 	case "/login":
-		Login(w, r, &data)
+		Login(w, r)
 	case "/signup":
-		SignUp(w, r,db)
+		SignUp(w, r, db)
 	case "/create-post":
 		// CreatePost(w, r, &data)
 	default:
@@ -51,35 +43,36 @@ func PageHandler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		// 	Logout(w, r, &data)
 		// } else {
 		// 	ErrorHandler(w, "Page Not Found", http.StatusNotFound)
-		}
 	}
+}
+
 // }
 
 // RenderTemplate handles the rendering of HTML templates with provided data
-func RenderTemplate(w http.ResponseWriter, t string, data interface{}) {
+// func RenderTemplate(w http.ResponseWriter, t string, data interface{}) {
 
-	err := tmpl.ExecuteTemplate(w, t+".html", data)
-	if err != nil {
-		log.Println("Error executing template:", err)
-		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-}
+// 	err := tmpl.ExecuteTemplate(w, t+".html", data)
+// 	if err != nil {
+// 		log.Println("Error executing template:", err)
+// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
+// 		return
+// 	}
+// }
 
-// ErrorHandler handles the rendering of error pages
-func ErrorHandler(w http.ResponseWriter, errorMessage string, statusCode int) {
+// // ErrorHandler handles the rendering of error pages
+// func ErrorHandler(w http.ResponseWriter, errorMessage string, statusCode int) {
 
-	w.WriteHeader(statusCode)
+// 	w.WriteHeader(statusCode)
 
-	err := tmpl.ExecuteTemplate(w, "error.html", map[string]string{
-		"ErrorMessage": errorMessage,
-	})
-	if err != nil {
-		log.Println("Error executing template error.html:", err)
-		http.Error(w, errorMessage, statusCode)
-		return
-	}
-}
+// 	err := tmpl.ExecuteTemplate(w, "error.html", map[string]string{
+// 		"ErrorMessage": errorMessage,
+// 	})
+// 	if err != nil {
+// 		log.Println("Error executing template error.html:", err)
+// 		http.Error(w, errorMessage, statusCode)
+// 		return
+// 	}
+// }
 
 // VerifySession checks if the session ID exists in the database
 func VerifySession(r *http.Request) (bool, int, string) {
