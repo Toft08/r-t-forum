@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"r-t-forum/database"
+	"strings"
 )
 
 // GetCategories retrieves all categories from the database
@@ -28,48 +29,48 @@ func GetCategories() ([]CategoryDetails, error) {
 }
 
 // GetPostDetails fetches the details of a specific post from the database
-// func GetPostDetails(postID, userID int) (*PostDetails, error) {
+func GetPostDetails(postID, userID int) (*PostDetails, error) {
 
-// 	row := db.QueryRow(database.PostContent(), postID)
-// 	var err error
-// 	// Scan the data into a PostDetails struct
-// 	post := PostDetails{}
-// 	var categories string
-// 	err = row.Scan(
-// 		&post.PostID,
-// 		&post.UserID,
-// 		&post.Username,
-// 		&post.PostTitle,
-// 		&post.PostContent,
-// 		&post.CreatedAt,
-// 		&post.Likes,
-// 		&post.Dislikes,
-// 		&categories,
-// 	)
+	row := db.QueryRow(database.PostContent(), postID)
+	var err error
+	// Scan the data into a PostDetails struct
+	post := PostDetails{}
+	var categories string
+	err = row.Scan(
+		&post.PostID,
+		&post.UserID,
+		&post.Username,
+		&post.PostTitle,
+		&post.PostContent,
+		&post.CreatedAt,
+		&post.Likes,
+		&post.Dislikes,
+		&categories,
+	)
 
-// 	if err != nil {
-// 		log.Println("Error scanning rows")
-// 		return nil, err
-// 	}
+	if err != nil {
+		log.Println("Error scanning rows")
+		return nil, err
+	}
 
-// 	if categories != "" {
-// 		post.Categories = strings.Split(categories, ",")
-// 	}
+	if categories != "" {
+		post.Categories = strings.Split(categories, ",")
+	}
 
-// 	post.Comments, err = GetComments(postID, userID)
-// 	if err != nil {
-// 		log.Println("Error getting comments")
-// 		return nil, err
-// 	}
+	post.Comments, err = GetComments(postID, userID)
+	if err != nil {
+		log.Println("Error getting comments")
+		return nil, err
+	}
 
-// 	post.LikedNow, post.DislikedNow, err = GetVotes(userID, postID, 0)
-// 	if err != nil {
-// 		log.Println("Error getting votes")
-// 		return nil, err
-// 	}
+	post.LikedNow, post.DislikedNow, err = GetVotes(userID, postID, 0)
+	if err != nil {
+		log.Println("Error getting votes")
+		return nil, err
+	}
 
-// 	return &post, nil
-// }
+	return &post, nil
+}
 
 // GetComments fetches all comments for a specific post from the database
 func GetComments(postID, userID int) ([]CommentDetails, error) {

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
         method: "GET", // Using GET method for loading posts
         headers: {
             "Accept": "application/json", // Expecting JSON response
+            "Content-Type": "application/json"
         }
     })
     .then((response) => response.json())

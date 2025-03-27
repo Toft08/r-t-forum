@@ -29,10 +29,13 @@ type PostDetails struct {
 	Username    string `json:"username"`
 	PostTitle   string `json:"post_title"`
 	PostContent string `json:"post_content"`
+	Comments   []CommentDetails	`json:"comments"`
+	LikedNow    bool   `json:"liked_now"`
+	DislikedNow bool   `json:"disliked_now"`
 	CreatedAt   string `json:"created_at"`
 	Likes       int    `json:"likes"`
 	Dislikes    int    `json:"dislikes"`
-	Categories  string `json:"categories"`
+	Categories  []string `json:"categories"`
 }
 
 type CategoryDetails struct {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"r-t-forum/database"
+	"r-t-forum/web"
 )
 
 func main() {
@@ -36,10 +37,7 @@ func main() {
 	})
 
 	http.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Content-Type") != "application/json" {
-			http.Error(w, "Unsupported media type", http.StatusUnsupportedMediaType)
-			return
-		}
+		web.Handler(w, r, db)
 	})
 
 	log.Println("Server is running on http://localhost:8080")

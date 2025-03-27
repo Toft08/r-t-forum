@@ -14,14 +14,14 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := FetchPosts(db)
 	if err != nil {
-		log.Println("❌ Error fetching posts:", err) // Log the actual error
+		log.Println("Error fetching posts:", err) // Log the actual error
 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
 		return
 	}
 
 	jsonData, err := json.Marshal(posts)
 	if err != nil {
-		log.Println("❌ Error marshalling JSON:", err) // Log JSON error if any
+		log.Println("Error marshalling JSON:", err) // Log JSON error if any
 		http.Error(w, "Error processing data", http.StatusInternalServerError)
 		return
 	}
@@ -61,7 +61,7 @@ func FetchPosts(db *sql.DB) ([]PostDetails, error) {
 
 	rows, err := db.Query(query)
 	if err != nil {
-		log.Println("❌ Error executing query:", err)
+		log.Println("Error executing query:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -70,7 +70,7 @@ func FetchPosts(db *sql.DB) ([]PostDetails, error) {
 	for rows.Next() {
 		var p PostDetails
 		if err := rows.Scan(&p.PostID, &p.UserID, &p.Username, &p.PostTitle, &p.PostContent, &p.CreatedAt, &p.Likes, &p.Dislikes, &p.Categories); err != nil {
-			log.Println("❌ Error scanning row:", err)
+			log.Println("Error scanning row:", err)
 			return nil, err
 		}
 		posts = append(posts, p)
