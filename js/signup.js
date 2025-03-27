@@ -27,6 +27,7 @@ function loadSignupPage() {
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
             <button type="submit">Sign Up</button>
+            
         </form>
          <p id="signupMessage"></p>
     `;
