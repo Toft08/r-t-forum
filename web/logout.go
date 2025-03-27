@@ -1,6 +1,7 @@
 package web
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -15,7 +16,20 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
 		return
 	}
+	log.Printf("Session ID to delete: %s", cookie.Value)
 
+	var sessionID string
+	err = db.QueryRow("SELECT id FROM Session WHERE id = ? AND status = 'active'", cookie.Value).Scan(&sessionID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Println("No active session found for ID:", cookie.Value)
+		} else {
+			log.Println("Error checking session:", err)
+		}
+		http.Error(w, `{"error": "Session not found"}`, http.StatusNotFound)
+		return
+	}
+  
 	_, err = db.Exec("UPDATE Session SET status = 'deleted', updated_at = ? WHERE id = ? AND status = 'active'",
 		time.Now().Format("2006-01-02 15:04:05"), cookie.Value)
 	if err != nil {
