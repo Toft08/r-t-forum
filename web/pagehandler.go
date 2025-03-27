@@ -34,6 +34,8 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{"message": "Posts retrieved successfully"})
+	case "/api/logout":
+		Logout(w, r)
 	default:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)

@@ -83,11 +83,15 @@ func verifyPassword(hashedPassword, password string) error {
 // createSession creates a new session for the user and stores it in the database
 func createSession(w http.ResponseWriter, userID int) error {
 	// First check for and delete any existing sessions for this user
-	_, err := db.Exec("DELETE FROM Session WHERE user_id = ?", userID)
+	_, err := db.Exec("UPDATE Session SET status = 'deleted', updated_at = ? WHERE user_id = ? AND status = 'active'", 
+		time.Now().Format("2006-01-02 15:04:05"), userID)
 	if err != nil {
+		log.Println("Error deleting existing session:", err)
 		return err
 	}
 	sessionID := uuid.NewString()
+	expiredAt := time.Now().Add(30 * time.Minute).Format("2006-01-02 15:04:05")
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_id",
 		Value:    sessionID,
@@ -96,9 +100,14 @@ func createSession(w http.ResponseWriter, userID int) error {
 		Path:     "/",
 	})
 
-	// Store session ID in database
-	_, err = db.Exec("INSERT INTO Session (id, user_id, created_at) VALUES (?, ?, ?)",
-		sessionID, userID, time.Now().Format("2006-01-02 15:04:05"))
+	// Store session ID in database, including the expired_at field
+	_, err = db.Exec("INSERT INTO Session (id, user_id, created_at, updated_at, expired_at) VALUES (?, ?, ?, ?, ?)",
+		sessionID, userID, time.Now().Format("2006-01-02 15:04:05"), time.Now().Format("2006-01-02 15:04:05"), expiredAt)
+	if err != nil {
+		log.Println("Error inserting session into database:", err)
+		return err
+	}
 
-	return err
+	return nil
 }
+
