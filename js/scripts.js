@@ -81,21 +81,16 @@ function loadHomePage() {
         <h1>Home</h1>
         <div id="posts-container"></div>
     `;
-  fetch("/api/posts")
+    fetch("/api/posts")
     .then((response) => response.json())
-    .then((data) => {
-      console.log("Received posts:", data);
-      if (data.posts) {
-        insertPosts(data.posts); // Extract the posts array
-      } else {
-        console.error("Posts data not found:", data);
-      }
+    .then((posts) => {
+        console.log("Received posts:", posts);
+        insertPosts(posts);
     })
     .catch((error) => {
-      console.error("Error loading posts:", error);
-      document.getElementById(
-        "posts-container"
-      ).innerHTML = `<p>Error loading posts: ${error.message}</p>`;
+        console.error("Error loading posts:", error);
+        const container = document.getElementById('posts-container');
+        container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
     });
 
   // Add the Sign Up button on the home page
