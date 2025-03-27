@@ -9,25 +9,26 @@ import (
 )
 
 func PostsHandler(w http.ResponseWriter, r *http.Request) {
-	db := database.InitDB()
-	defer db.Close()
+    db := database.InitDB()
+    defer db.Close()
 
-	posts, err := FetchPosts(db)
-	if err != nil {
-		log.Println("❌ Error fetching posts:", err) // Log the actual error
-		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
-		return
-	}
+    posts, err := FetchPosts(db)
+    if err != nil {
+        log.Println("❌ Error fetching posts:", err)
+        http.Error(w, "Error fetching posts", http.StatusInternalServerError)
+        return
+    }
 
-	jsonData, err := json.Marshal(posts)
-	if err != nil {
-		log.Println("❌ Error marshalling JSON:", err) // Log JSON error if any
-		http.Error(w, "Error processing data", http.StatusInternalServerError)
-		return
-	}
+    log.Printf("Number of posts fetched: %d", len(posts))
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonData)
+    // Directly encode the posts array
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    
+    if err := json.NewEncoder(w).Encode(posts); err != nil {
+        log.Println("❌ Error encoding JSON:", err)
+        http.Error(w, "Error processing data", http.StatusInternalServerError)
+    }
 }
 
 func FetchPosts(db *sql.DB) ([]PostDetails, error) {

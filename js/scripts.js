@@ -1,25 +1,20 @@
-document.getElementById('signup-button').addEventListener('click', function () {
-    console.log("Sign Up button clicked!");
-    history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
-    loadSignupPage(); // Load the signup form dynamically
+document.getElementById("signup-button").addEventListener("click", function () {
+  console.log("Sign Up button clicked!");
+  history.pushState({}, "", "/signup"); // Change the URL to /signup without the hash
+  loadSignupPage(); // Load the signup form dynamically
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    handleRoute(); // Load the correct page on initial load
-    window.addEventListener('hashchange', handleRoute); // Listen for hash changes
+document.addEventListener("DOMContentLoaded", function () {
+  handleRoute(); // Load the correct page on initial load
+  window.addEventListener("hashchange", handleRoute); // Listen for hash changes
 
-    fetch("/api/posts")
-        .then((response) => response.json())
-        .then((data) => insertPosts(data))
-        .catch((error) => console.error("Error loading posts:", error));
+  // Create post popup window.
+  const createPostBtn = document.getElementById("create-post-btn");
+  const createPostPopup = document.getElementById("create-post-popup");
 
-    // Create post popup window.
-    const createPostBtn = document.getElementById('create-post-btn');
-    const createPostPopup = document.getElementById('create-post-popup');
-
-    // Create popup content dynamically
-    const createPopupContent = () => {
-        createPostPopup.innerHTML = `
+  // Create popup content dynamically
+  const createPopupContent = () => {
+    createPostPopup.innerHTML = `
                 <h2>Create a new post</h2>
                 <form id="create-form" action="/create" method="POST">
                     <label for="title">Title</label>
@@ -36,88 +31,98 @@ document.addEventListener('DOMContentLoaded', function () {
                 <button id="close-popup-btn" class="close-button">Close</button>
             `;
 
-        const closePopupBtn = document.getElementById('close-popup-btn');
-        const createForm = createPostPopup.querySelector('#create-form');
+    const closePopupBtn = document.getElementById("close-popup-btn");
+    const createForm = createPostPopup.querySelector("#create-form");
 
-        closePopupBtn.addEventListener('click', () => {
-            createPostPopup.classList.add('hidden');
-        });
-
-        createForm.addEventListener('submit', (e) => {
-            // You can add form submission logic here
-            // For now, we'll just prevent default and hide popup
-            e.preventDefault();
-            createPostPopup.classList.add('hidden');
-        });
-    };
-
-    // Show popup when create post button is clicked
-    createPostBtn.addEventListener('click', () => {
-        // Create popup content if not already created
-        if (createPostPopup.innerHTML.trim() === '') {
-            createPopupContent();
-        }
-
-        // Show popup
-        createPostPopup.classList.remove('hidden');
+    closePopupBtn.addEventListener("click", () => {
+      createPostPopup.classList.add("hidden");
     });
+
+    createForm.addEventListener("submit", (e) => {
+      // You can add form submission logic here
+      // For now, we'll just prevent default and hide popup
+      e.preventDefault();
+      createPostPopup.classList.add("hidden");
+    });
+  };
+
+  // Show popup when create post button is clicked
+  createPostBtn.addEventListener("click", () => {
+    // Create popup content if not already created
+    if (createPostPopup.innerHTML.trim() === "") {
+      createPopupContent();
+    }
+
+    // Show popup
+    createPostPopup.classList.remove("hidden");
+  });
 });
 
 function handleRoute() {
-    const route = window.location.pathname; // Get the hash part (without #)
-    const container = document.getElementById('content'); // Main content container
+  const route = window.location.pathname; // Get the hash part (without #)
+  const container = document.getElementById("content"); // Main content container
 
-    // Check if we are in the signup or login route, otherwise load homepage content
-    switch (route) {
-        case '/signup':
-            loadSignupPage(); // Load the signup page
-            break;
-        case '/login':
-            loadLoginPage(); // Load the login page
-            break;
-        default:
-            loadHomePage(); // Load the homepage
-    }
+  // Check if we are in the signup or login route, otherwise load homepage content
+  switch (route) {
+    case "/signup":
+      loadSignupPage(); // Load the signup page
+      break;
+    case "/login":
+      loadLoginPage(); // Load the login page
+      break;
+    default:
+      loadHomePage(); // Load the homepage
+  }
 }
 
 function loadHomePage() {
-    const container = document.getElementById('content');
-    container.innerHTML = `
+  const container = document.getElementById("content");
+  container.innerHTML = `
         <h1>Home</h1>
         <div id="posts-container"></div>
     `;
-
-    // Add the Sign Up button on the home page
-    const signupButton = document.createElement('button');
-    signupButton.id = 'signup-button';
-    signupButton.textContent = 'Sign Up';
-    signupButton.addEventListener('click', function () {
-        console.log("Sign Up button clicked!");
-        history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
-        loadSignupPage(); // Load the signup form dynamically
+  fetch("/api/posts")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Received posts:", data);
+      if (data.posts) {
+        insertPosts(data.posts); // Extract the posts array
+      } else {
+        console.error("Posts data not found:", data);
+      }
+    })
+    .catch((error) => {
+      console.error("Error loading posts:", error);
+      document.getElementById(
+        "posts-container"
+      ).innerHTML = `<p>Error loading posts: ${error.message}</p>`;
     });
-    const loginButton = document.createElement('button');
-    loginButton.id = 'login-button';
-    loginButton.textContent = 'Login';
-    loginButton.addEventListener('click', function () {
-        console.log("Login button clicked!");
-        history.pushState({}, '', '/login'); // Change the URL to /login without the hash
-        loadLoginPage(); // Load the login form dynamically
-    });
-    container.appendChild(loginButton);
 
-    container.appendChild(signupButton); // Append the Sign Up button
+  // Add the Sign Up button on the home page
+  const signupButton = document.createElement("button");
+  signupButton.id = "signup-button";
+  signupButton.textContent = "Sign Up";
+  signupButton.addEventListener("click", function () {
+    console.log("Sign Up button clicked!");
+    history.pushState({}, "", "/signup"); // Change the URL to /signup without the hash
+    loadSignupPage(); // Load the signup form dynamically
+  });
+  const loginButton = document.createElement("button");
+  loginButton.id = "login-button";
+  loginButton.textContent = "Login";
+  loginButton.addEventListener("click", function () {
+    console.log("Login button clicked!");
+    history.pushState({}, "", "/login"); // Change the URL to /login without the hash
+    loadLoginPage(); // Load the login form dynamically
+  });
+  container.appendChild(loginButton);
 
-    // Load posts from the backend
-    fetch("/api/posts")
-        .then((response) => response.json())
-        .then((data) => insertPosts(data))
-        .catch((error) => console.error("Error loading posts:", error));
+  container.appendChild(signupButton); // Append the Sign Up button
 }
 
 function loadSignupPage() {
-    const container = document.getElementById('content');
-    container.innerHTML = `
+  const container = document.getElementById("content");
+  container.innerHTML = `
         <h1>Sign Up</h1>
         <form id="signup-form">
             <label for="username">Username
@@ -138,45 +143,48 @@ function loadSignupPage() {
         </form>
     `;
 
-    // Event listener for the form submission
-    document.getElementById("signup-form").addEventListener("submit", async function(event) {
-        event.preventDefault(); // Prevent traditional form submission
+  // Event listener for the form submission
+  document
+    .getElementById("signup-form")
+    .addEventListener("submit", async function (event) {
+      event.preventDefault(); // Prevent traditional form submission
 
-        const username = document.getElementById("username").value;
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+      const username = document.getElementById("username").value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-        try {
-            const response = await fetch("/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password })
-            });
-    
-            const result = await response.json(); // Parse JSON response
-    
-            const messageElement = document.getElementById("signupMessage");
-            
-            if (response.ok) {
-                messageElement.style.color = "green";
-                messageElement.textContent = "Signup successful! Redirecting...";
-                setTimeout(() => window.location.hash = 'login', 2000); // Redirect to login page after a short delay
-            } else {
-                messageElement.style.color = "red";
-                messageElement.textContent = result.error || "Signup failed.";
-            }
-        } catch (error) {
-            console.error("Signup error:", error);
-            const messageElement = document.getElementById("signupMessage");
-            messageElement.style.color = "red";
-            messageElement.textContent = "An error occurred. Please try again later.";
+      try {
+        const response = await fetch("/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, email, password }),
+        });
+
+        const result = await response.json(); // Parse JSON response
+
+        const messageElement = document.getElementById("signupMessage");
+
+        if (response.ok) {
+          messageElement.style.color = "green";
+          messageElement.textContent = "Signup successful! Redirecting...";
+          setTimeout(() => (window.location.hash = "login"), 2000); // Redirect to login page after a short delay
+        } else {
+          messageElement.style.color = "red";
+          messageElement.textContent = result.error || "Signup failed.";
         }
+      } catch (error) {
+        console.error("Signup error:", error);
+        const messageElement = document.getElementById("signupMessage");
+        messageElement.style.color = "red";
+        messageElement.textContent =
+          "An error occurred. Please try again later.";
+      }
     });
 }
 
 function loadLoginPage() {
-    const container = document.getElementById('content');
-    container.innerHTML = `
+  const container = document.getElementById("content");
+  container.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
             <label for="username">Username</label>
@@ -191,21 +199,22 @@ function loadLoginPage() {
 }
 
 function insertPosts(posts) {
-    const container = document.getElementById('posts-container');
-    container.innerHTML = ''; // Clear container first
+  const container = document.getElementById("posts-container");
+  container.innerHTML = ""; // Clear container first
 
-    if (!posts || posts.length === 0) {
-        container.innerHTML = '<p>No posts found.</p>';
-        return;
-    }
+  if (!posts || posts.length === 0) {
+    container.innerHTML = "<p>No posts found.</p>";
+    return;
+  }
 
-    posts.forEach((post) => {
-        const categoriesArray = post.categories ? post.categories.split(',') : [];
-        const categoriesText = categoriesArray.length > 0 ? categoriesArray.join(', ') : 'No categories';
+  posts.forEach((post) => {
+    const categoriesArray = post.categories ? post.categories.split(",") : [];
+    const categoriesText =
+      categoriesArray.length > 0 ? categoriesArray.join(", ") : "No categories";
 
-        const postElement = document.createElement('div');
-        postElement.className = 'post-card';
-        postElement.innerHTML = `
+    const postElement = document.createElement("div");
+    postElement.className = "post-card";
+    postElement.innerHTML = `
             <div class="post-header">
                 <span>Posted by: ${post.username}</span>
                 <span>${formatDate(post.created_at)}</span>
@@ -227,29 +236,29 @@ function insertPosts(posts) {
             </div>
         `;
 
-        container.appendChild(postElement);
-    });
+    container.appendChild(postElement);
+  });
 }
 
 function formatDate(dateString) {
-    if (!dateString) return 'Unknown date';
+  if (!dateString) return "Unknown date";
 
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-        const parts = dateString.match(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/);
-        if (parts) {
-            const year = parseInt(parts[1]);
-            const month = parseInt(parts[2]) - 1;
-            const day = parseInt(parts[3]);
-            const hour = parseInt(parts[4]);
-            const minute = parseInt(parts[5]);
-            const second = parseInt(parts[6]);
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    const parts = dateString.match(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/);
+    if (parts) {
+      const year = parseInt(parts[1]);
+      const month = parseInt(parts[2]) - 1;
+      const day = parseInt(parts[3]);
+      const hour = parseInt(parts[4]);
+      const minute = parseInt(parts[5]);
+      const second = parseInt(parts[6]);
 
-            const formattedDate = new Date(year, month, day, hour, minute, second);
-            return formattedDate.toLocaleString();
-        }
-        return dateString;
+      const formattedDate = new Date(year, month, day, hour, minute, second);
+      return formattedDate.toLocaleString();
     }
+    return dateString;
+  }
 
-    return date.toLocaleString();
+  return date.toLocaleString();
 }

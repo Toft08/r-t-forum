@@ -31,9 +31,7 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	case "/api/signup":
 		SignUp(w, r, db)
 	case "/api/posts":
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"message": "Posts retrieved successfully"})
+		PostsHandler(w, r)
 	case "/api/logout":
 		Logout(w, r)
 	default:
