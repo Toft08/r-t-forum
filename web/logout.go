@@ -1,6 +1,7 @@
 package web
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -32,5 +33,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 	})
 	log.Println("Logged out successfully")
-	http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Logout successful"})
 }
