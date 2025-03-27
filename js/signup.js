@@ -1,8 +1,8 @@
-document.getElementById('signup-button').addEventListener('click', function () {
-    console.log("Sign Up button clicked!");
-    history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
-    loadSignupPage(); // Load the signup form dynamically
-});
+// document.getElementById('signup-button').addEventListener('click', function () {
+//     console.log("Sign Up button clicked!");
+//     history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
+//     loadSignupPage(); // Load the signup form dynamically
+// });
 
 
 function loadSignupPage() {
@@ -29,7 +29,8 @@ function loadSignupPage() {
             <button type="submit">Sign Up</button>
             
         </form>
-         <p id="signupMessage"></p>
+        <p>Already have an account? <a href="/login" id="login-link">Login</a></p>
+        <p id="signupMessage"></p>
     `;
 
     // Event listener for the form submission

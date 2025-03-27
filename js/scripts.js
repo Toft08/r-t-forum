@@ -1,8 +1,8 @@
-document.getElementById("signup-button").addEventListener("click", function () {
-  console.log("Sign Up button clicked!");
-  history.pushState({}, "", "/signup"); // Change the URL to /signup without the hash
-  loadSignupPage(); // Load the signup form dynamically
-});
+// document.getElementById("signup-button").addEventListener("click", function () {
+//   console.log("Sign Up button clicked!");
+//   history.pushState({}, "", "/signup"); // Change the URL to /signup without the hash
+//   loadSignupPage(); // Load the signup form dynamically
+// });
 
 document.addEventListener("DOMContentLoaded", function () {
   handleRoute(); // Load the correct page on initial load
@@ -61,23 +61,58 @@ document.addEventListener("DOMContentLoaded", function () {
 function handleRoute() {
   const route = window.location.pathname; // Get the hash part (without #)
   const container = document.getElementById("content"); // Main content container
+  container.innerHTML = ""; // Clear the container
+
+  // Redirect to login if not logged in and trying to access restricted routes
+  if (!isLoggedIn() && route !== "/signup" && route !== "/login") {
+    history.pushState({}, "", "/login");
+    loadLoginPage();
+    return;
+}
 
   // Check if we are in the signup or login route, otherwise load homepage content
   switch (route) {
+    case "/":
+        if (!isLoggedIn()) {
+            history.pushState({}, "", "/login");
+            loadLoginPage();
+        } else {
+            loadHomePage(); // Load the homepage
+        }
+        break;
     case "/signup":
       loadSignupPage(); // Load the signup page
       break;
     case "/login":
       loadLoginPage(); // Load the login page
       break;
-    default:
+    case "/home":
       loadHomePage(); // Load the homepage
+      break;
+    default:
+        console.error('Unknown page:', route);
+        container.innerHTML = "<h1>404 - Page Not Found</h1>";
   }
 }
 
+// Helper function to check if the user is logged in
+function isLoggedIn() {
+    const token = localStorage.getItem('sessionToken');
+    const loggedIn = !!token; // Convert token existence to a boolean
+    console.log("Is user logged in?", loggedIn); // Log the result
+    return loggedIn; // Return the result
+}
+
 function loadHomePage() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
+    if (!isLoggedIn()) {
+        console.error("Unauthorized access to home page");
+        history.pushState({}, "", "/login");
+        loadLoginPage();
+        return;
+    }
+
+    const container = document.getElementById("content");
+    container.innerHTML = `
         <h1>Home</h1>
         <div id="posts-container"></div>
     `;
@@ -115,83 +150,83 @@ function loadHomePage() {
   container.appendChild(signupButton); // Append the Sign Up button
 }
 
-function loadSignupPage() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
-        <h1>Sign Up</h1>
-        <form id="signup-form">
-            <label for="username">Username
-                <div class="hover-icon">
-                    <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
-                    <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
-                </div>
-            </label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+// function loadSignupPage() {
+//   const container = document.getElementById("content");
+//   container.innerHTML = `
+//         <h1>Sign Up</h1>
+//         <form id="signup-form">
+//             <label for="username">Username
+//                 <div class="hover-icon">
+//                     <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
+//                     <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
+//                 </div>
+//             </label>
+//             <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
-            <label for="email">Email</label>
-            <input type="text" id="email" name="email" placeholder="Enter your email" required>
+//             <label for="email">Email</label>
+//             <input type="text" id="email" name="email" placeholder="Enter your email" required>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+//             <label for="password">Password</label>
+//             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-            <button type="submit">Sign Up</button>
-        </form>
-    `;
+//             <button type="submit">Sign Up</button>
+//         </form>
+//     `;
 
-  // Event listener for the form submission
-  document
-    .getElementById("signup-form")
-    .addEventListener("submit", async function (event) {
-      event.preventDefault(); // Prevent traditional form submission
+//   // Event listener for the form submission
+//   document
+//     .getElementById("signup-form")
+//     .addEventListener("submit", async function (event) {
+//       event.preventDefault(); // Prevent traditional form submission
 
-      const username = document.getElementById("username").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+//       const username = document.getElementById("username").value;
+//       const email = document.getElementById("email").value;
+//       const password = document.getElementById("password").value;
 
-      try {
-        const response = await fetch("/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password }),
-        });
+//       try {
+//         const response = await fetch("/signup", {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({ username, email, password }),
+//         });
 
-        const result = await response.json(); // Parse JSON response
+//         const result = await response.json(); // Parse JSON response
 
-        const messageElement = document.getElementById("signupMessage");
+//         const messageElement = document.getElementById("signupMessage");
 
-        if (response.ok) {
-          messageElement.style.color = "green";
-          messageElement.textContent = "Signup successful! Redirecting...";
-          setTimeout(() => (window.location.hash = "login"), 2000); // Redirect to login page after a short delay
-        } else {
-          messageElement.style.color = "red";
-          messageElement.textContent = result.error || "Signup failed.";
-        }
-      } catch (error) {
-        console.error("Signup error:", error);
-        const messageElement = document.getElementById("signupMessage");
-        messageElement.style.color = "red";
-        messageElement.textContent =
-          "An error occurred. Please try again later.";
-      }
-    });
-}
+//         if (response.ok) {
+//           messageElement.style.color = "green";
+//           messageElement.textContent = "Signup successful! Redirecting...";
+//           setTimeout(() => (window.location.hash = "login"), 2000); // Redirect to login page after a short delay
+//         } else {
+//           messageElement.style.color = "red";
+//           messageElement.textContent = result.error || "Signup failed.";
+//         }
+//       } catch (error) {
+//         console.error("Signup error:", error);
+//         const messageElement = document.getElementById("signupMessage");
+//         messageElement.style.color = "red";
+//         messageElement.textContent =
+//           "An error occurred. Please try again later.";
+//       }
+//     });
+// }
 
-function loadLoginPage() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
-        <h1>Login</h1>
-        <form id="login-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+// function loadLoginPage() {
+//   const container = document.getElementById("content");
+//   container.innerHTML = `
+//         <h1>Login</h1>
+//         <form id="login-form">
+//             <label for="username">Username</label>
+//             <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+//             <label for="password">Password</label>
+//             <input type="password" id="password" name="password" placeholder="Enter your password" required>
 
-            <button type="submit">Login</button>
-        </form>
-    `;
-}
+//             <button type="submit">Login</button>
+//         </form>
+//     `;
+// }
 
 function insertPosts(posts) {
   const container = document.getElementById("posts-container");

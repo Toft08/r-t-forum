@@ -12,6 +12,7 @@ function loadLoginPage() {
 
             <button type="submit">Login</button>
         </form>
+        <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
     console.log("Login page loaded");
 
@@ -41,9 +42,12 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
+                // Store the session token in localStorage
+                localStorage.setItem('sessionToken', data.token);
+
                 // Handle successful login, redirect or load homepage content dynamically
-                history.pushState({}, '', '/');
-                loadHomePage();
+                history.pushState({}, '', '/home');
+                handleRoute();
             } else {
                 // Show the error message (e.g., invalid username/password)
                 alert(data.error);
