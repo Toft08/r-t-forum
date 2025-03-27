@@ -14,7 +14,8 @@ func MakeTables(db *sql.DB) {
 		email TEXT UNIQUE NOT NULL,
 		username TEXT UNIQUE NOT NULL COLLATE NOCASE,
 		password TEXT NOT NULL,
-		created_at TEXT NOT NULL
+		created_at TEXT NOT NULL,
+		status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'deleted'))
 	);`
 	if _, err := db.Exec(createUserTableQuery); err != nil {
 		fmt.Println("Error creating User table:", err)
@@ -86,9 +87,12 @@ func MakeTables(db *sql.DB) {
 	}
 	createSessionTableQuery := `
 		CREATE TABLE IF NOT EXISTS Session (
-		id TEXT PRIMARY KEY, -- Unique session ID (UUID)
+		id TEXT PRIMARY KEY,
+		status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'inactive', 'deleted')),
     	user_id INTEGER NOT NULL,
     	created_at TEXT NOT NULL,
+		updated_at TEXT NOT NULL,
+		expired_at TEXT NOT NULL,
     	FOREIGN KEY (user_id) REFERENCES User (id) ON DELETE CASCADE
 	);`
 	if _, err := db.Exec(createSessionTableQuery); err != nil {

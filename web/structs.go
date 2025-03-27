@@ -45,3 +45,7 @@ type Post struct {
 	Title   string `json:"title"`
 	Content string `json:"content"`
 }
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
