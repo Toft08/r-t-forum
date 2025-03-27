@@ -15,9 +15,13 @@ import (
 
 // SignUp handles user registration via JSON requests
 func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
-		return
+        w.WriteHeader(http.StatusMethodNotAllowed)
+        json.NewEncoder(w).Encode(map[string]string{
+            "error": "Method Not Allowed",
+        })
+        return
 	}
 
 	var user struct {

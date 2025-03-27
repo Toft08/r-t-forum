@@ -3,9 +3,9 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
-	"forum/database"
 	"log"
 	"net/http"
+	"r-t-forum/database"
 )
 
 func PostsHandler(w http.ResponseWriter, r *http.Request) {
