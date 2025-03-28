@@ -115,44 +115,6 @@ function loadHomePage() {
   container.appendChild(signupButton); // Append the Sign Up button
 }
 
-  // Event listener for the form submission
-  document
-    .getElementById("signup-form")
-    .addEventListener("submit", async function (event) {
-      event.preventDefault(); // Prevent traditional form submission
-
-      const username = document.getElementById("username").value;
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      try {
-        const response = await fetch("/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, email, password }),
-        });
-
-        const result = await response.json(); // Parse JSON response
-
-        const messageElement = document.getElementById("signupMessage");
-
-        if (response.ok) {
-          messageElement.style.color = "green";
-          messageElement.textContent = "Signup successful! Redirecting...";
-          setTimeout(() => (window.location.hash = "login"), 2000); // Redirect to login page after a short delay
-        } else {
-          messageElement.style.color = "red";
-          messageElement.textContent = result.error || "Signup failed.";
-        }
-      } catch (error) {
-        console.error("Signup error:", error);
-        const messageElement = document.getElementById("signupMessage");
-        messageElement.style.color = "red";
-        messageElement.textContent =
-          "An error occurred. Please try again later.";
-      }
-    });
-
 function insertPosts(posts) {
   const container = document.getElementById("posts-container");
   container.innerHTML = ""; // Clear container first
