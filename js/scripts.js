@@ -2,60 +2,12 @@ document.addEventListener("DOMContentLoaded", function () {
   handleRoute(); // Load the correct page on initial load
   window.addEventListener("hashchange", handleRoute); // Listen for hash changes
 
-  // Create post popup window.
-  const createPostBtn = document.getElementById("create-post-btn");
-  const createPostPopup = document.getElementById("create-post-popup");
-
-  // Create popup content dynamically
-  const createPopupContent = () => {
-    createPostPopup.innerHTML = `
-                <h2>Create a new post</h2>
-                <form id="create-form" action="/create" method="POST">
-                    <label for="title">Title</label>
-                    <input type="text" id="title" name="title" required maxlength="50">
-                    <br>
-                    <label for="content">Content:</label>
-                    <textarea class="content-textarea" id="content" name="content" required></textarea>
-                    <br>
-                    <label for="categories">Categories</label>
-                    <input type="text" id="categories" name="categories" required>
-                    <br>
-                    <button type="submit">Create</button>
-                </form>
-                <button id="close-popup-btn" class="close-button">Close</button>
-            `;
-
-    const closePopupBtn = document.getElementById("close-popup-btn");
-    const createForm = createPostPopup.querySelector("#create-form");
-
-    closePopupBtn.addEventListener("click", () => {
-      createPostPopup.classList.add("hidden");
-    });
-
-    createForm.addEventListener("submit", (e) => {
-      // You can add form submission logic here
-      // For now, we'll just prevent default and hide popup
-      e.preventDefault();
-      createPostPopup.classList.add("hidden");
-    });
-  };
-
-  // Show popup when create post button is clicked
-  createPostBtn.addEventListener("click", () => {
-    // Create popup content if not already created
-    if (createPostPopup.innerHTML.trim() === "") {
-      createPopupContent();
-    }
-
-    // Show popup
-    createPostPopup.classList.remove("hidden");
-  });
 });
 
 function handleRoute() {
   const route = window.location.pathname; // Get the hash part (without #)
   const container = document.getElementById("content");
-  container.innerHTML = ""; // Clear the container
+  // container.innerHTML = ""; // Clear the container
 
 const publicRoutes = ["/login", "/signup"];
 const loggedIn = isLoggedIn();
@@ -82,14 +34,14 @@ const loggedIn = isLoggedIn();
         }
         break;
     case "/login":
-        loadLoginPage(); // Load the login page
+        loadLoginPage();
         break;
     case "/signup":
-        loadSignupPage(); // Load the signup page
+        loadSignupPage();
         break;
     case "/home":
         if (loggedIn) {
-            loadHomePage(); // Load the homepage
+            loadHomePage();
         } else {
             history.pushSatate({}, "", "/login");
             loadLoginPage(); // Redirect to login if not logged in
@@ -148,6 +100,62 @@ function loadHomePage() {
         return;
     }
 
+    const container = document.getElementById("content");
+    container.innerHTML = `
+        <h1>Home</h1>
+    <div> <button id="create-post-btn">Create Post</button></div>
+        <div id="posts-container"></div>
+    `;
+
+      // Create post popup window.
+  const createPostBtn = document.getElementById("create-post-btn");
+  const createPostPopup = document.getElementById("create-post-popup");
+
+  // Create popup content dynamically
+  const createPopupContent = () => {
+    createPostPopup.innerHTML = `
+                <h2>Create a new post</h2>
+                <form id="create-form" action="/create" method="POST">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" required maxlength="50">
+                    <br>
+                    <label for="content">Content:</label>
+                    <textarea class="content-textarea" id="content" name="content" required></textarea>
+                    <br>
+                    <label for="categories">Categories</label>
+                    <input type="text" id="categories" name="categories" required>
+                    <br>
+                    <button type="submit">Create</button>
+                </form>
+                <button id="close-popup-btn" class="close-button">Close</button>
+            `;
+
+    const closePopupBtn = document.getElementById("close-popup-btn");
+    const createForm = createPostPopup.querySelector("#create-form");
+
+    closePopupBtn.addEventListener("click", () => {
+      createPostPopup.classList.add("hidden");
+    });
+
+    createForm.addEventListener("submit", (e) => {
+      // You can add form submission logic here
+      // For now, we'll just prevent default and hide popup
+      e.preventDefault();
+      createPostPopup.classList.add("hidden");
+    });
+  };
+
+  // Show popup when create post button is clicked
+  createPostBtn.addEventListener("click", () => {
+    // Create popup content if not already created
+    if (createPostPopup.innerHTML.trim() === "") {
+      createPopupContent();
+    }
+
+    // Show popup
+    createPostPopup.classList.remove("hidden");
+  });
+
     fetch("/api/posts")
     .then((response) => response.json())
     .then((posts) => {
@@ -158,8 +166,7 @@ function loadHomePage() {
         console.error("Error loading posts:", error);
         const container = document.getElementById('posts-container');
         container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
-    });
-
+    }); 
 }
 
 function insertPosts(posts) {
