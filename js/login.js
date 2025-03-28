@@ -13,6 +13,7 @@ function loadLoginPage() {
             <button type="submit">Login</button>
         </form>
         <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
+        <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
     console.log("Login page loaded");
 
@@ -42,8 +43,10 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
+                storeSessionToken(data.token); // Store the token in localStorage
+
                 // Handle successful login, redirect or load homepage content dynamically
-                history.pushState({}, '', '/');
+                history.pushState({}, '', '/home');
                 handleRoute();
             } else {
                 // Show the error message (e.g., invalid username/password)
@@ -53,4 +56,20 @@ function loadLoginPage() {
             console.error("Error during login:", error);
         }
     });
+}
+
+// Modify login logic to store token with expiration
+function storeSessionToken(token) {
+    const tokenData = {
+        token: token,
+        // Set expiration
+        expiration: Date.now() + 10 * 60 * 1000 // 10 minutes in milliseconds
+    };
+    
+    try {
+        localStorage.setItem('sessionToken', JSON.stringify(tokenData));
+        console.log("Token stored with 10-minute expiration");
+    } catch (error) {
+        console.error("Error storing token:", error);
+    }
 }

@@ -1,9 +1,3 @@
-document.getElementById("signup-button").addEventListener("click", function () {
-  console.log("Sign Up button clicked!");
-  history.pushState({}, "", "/signup"); // Change the URL to /signup without the hash
-  loadSignupPage(); // Load the signup form dynamically
-});
-
 document.addEventListener("DOMContentLoaded", function () {
   handleRoute(); // Load the correct page on initial load
   window.addEventListener("hashchange", handleRoute); // Listen for hash changes
@@ -60,24 +54,102 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function handleRoute() {
   const route = window.location.pathname; // Get the hash part (without #)
-  // const container = document.getElementById("content"); // Main content container
+  const container = document.getElementById("content");
+//   container.innerHTML = ""; // Clear the container
+
+const publicRoutes = ["/login", "/signup"];
+const loggedIn = isLoggedIn();
+
+  // If not logged in, restrict navigation to only login and signup pages
+  if (!loggedIn) {
+    // If trying to access a route other than login or signup, redirect to login
+    if (!publicRoutes.includes(route)) {
+      history.pushState({}, "", "/login");
+      loadLoginPage();
+      return;
+    }
+  }
 
   // Check if we are in the signup or login route, otherwise load homepage content
   switch (route) {
-    case "/signup":
-      loadSignupPage(); // Load the signup page
-      break;
+    case "/":
+        if (loggedIn) {
+            history.pushState({}, "", "/home");
+            loadHomePage();
+        } else {
+            history.pushSatate({}, "", "/login");
+            loadLoginPage();
+        }
+        break;
     case "/login":
-      loadLoginPage(); // Load the login page
-      break;
+        loadLoginPage(); // Load the login page
+        break;
+    case "/signup":
+        loadSignupPage(); // Load the signup page
+        break;
+    case "/home":
+        if (loggedIn) {
+            loadHomePage(); // Load the homepage
+        } else {
+            history.pushSatate({}, "", "/login");
+            loadLoginPage(); // Redirect to login if not logged in
+        }
+        break;
     default:
-      loadHomePage(); // Load the homepage
-  }
+        // For any unknown route when not logged in
+        if (!loggedIn) {
+            history.pushState({}, "", "/login");
+            loadLoginPage();
+        } else {
+            console.error('Unknown page:', route);
+            container.innerHTML = "<h1>404 - Page Not Found</h1>";
+    }
+}
+
+// Helper function to check if the user is logged in
+function isLoggedIn() {
+    const tokenData = localStorage.getItem('sessionToken');
+    
+    if (!tokenData) {
+        console.log("No token found");
+        return false;
+    }
+
+    try {
+        // Parse the token data
+        const parsedToken = JSON.parse(tokenData);
+        
+        // Check if token has expiration
+        const currentTime = Date.now();
+        
+        // If token is expired, remove it and return false
+        if (currentTime > parsedToken.expiration) {
+            localStorage.removeItem('sessionToken');
+            console.log("Token expired");
+            return false;
+        }
+        
+        // Token is valid
+        console.log("Token is valid");
+        return true;
+    } catch (error) {
+        // If parsing fails, consider token invalid
+        console.log("Invalid token format");
+        localStorage.removeItem('sessionToken');
+        return false;
+    }
 }
 
 function loadHomePage() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
+    if (!isLoggedIn()) {
+        console.error("Unauthorized access to home page");
+        history.pushState({}, "", "/login");
+        loadLoginPage();
+        return;
+    }
+
+    const container = document.getElementById("content");
+    container.innerHTML = `
         <h1>Home</h1>
         <button id="signup-button">Sign Up</button>
         <button id="login-button">Log In</button>
@@ -107,7 +179,6 @@ function loadHomePage() {
     history.pushState({}, "", "/login"); 
     loadLoginPage();
   });
-
 }
 
 function insertPosts(posts) {
@@ -174,4 +245,5 @@ function formatDate(dateString) {
   }
 
   return date.toLocaleString();
+}
 }

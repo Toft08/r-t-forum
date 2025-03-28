@@ -50,7 +50,7 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create session
+	// Create a session for the user
 	if err := createSession(w, userID); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -60,7 +60,10 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Login successful",
+		"token":   "Session",
+	})
 }
 
 // getUserCredentials retrieves the user's ID and hashed password from the database
@@ -83,7 +86,7 @@ func verifyPassword(hashedPassword, password string) error {
 // createSession creates a new session for the user and stores it in the database
 func createSession(w http.ResponseWriter, userID int) error {
 	// First check for and delete any existing sessions for this user
-	_, err := db.Exec("UPDATE Session SET status = 'deleted', updated_at = ? WHERE user_id = ? AND status = 'active'", 
+	_, err := db.Exec("UPDATE Session SET status = 'deleted', updated_at = ? WHERE user_id = ? AND status = 'active'",
 		time.Now().Format("2006-01-02 15:04:05"), userID)
 	if err != nil {
 		log.Println("Error deleting existing session:", err)
@@ -110,4 +113,3 @@ func createSession(w http.ResponseWriter, userID int) error {
 
 	return nil
 }
-
