@@ -115,29 +115,6 @@ function loadHomePage() {
   container.appendChild(signupButton); // Append the Sign Up button
 }
 
-function loadSignupPage() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
-        <h1>Sign Up</h1>
-        <form id="signup-form">
-            <label for="username">Username
-                <div class="hover-icon">
-                    <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
-                    <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
-                </div>
-            </label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
-
-            <label for="email">Email</label>
-            <input type="text" id="email" name="email" placeholder="Enter your email" required>
-
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
-            <button type="submit">Sign Up</button>
-        </form>
-    `;
-
   // Event listener for the form submission
   document
     .getElementById("signup-form")
@@ -175,23 +152,6 @@ function loadSignupPage() {
           "An error occurred. Please try again later.";
       }
     });
-}
-
-function loadLoginPage() {
-  const container = document.getElementById("content");
-  container.innerHTML = `
-        <h1>Login</h1>
-        <form id="login-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
-
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-
-            <button type="submit">Login</button>
-        </form>
-    `;
-}
 
 function insertPosts(posts) {
   const container = document.getElementById("posts-container");
