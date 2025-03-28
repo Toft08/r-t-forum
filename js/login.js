@@ -42,8 +42,7 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
-                // Store the session token in localStorage
-                localStorage.setItem('sessionToken', data.token);
+                storeSessionToken(data.token); // Store the token in localStorage
 
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
@@ -56,4 +55,15 @@ function loadLoginPage() {
             console.error("Error during login:", error);
         }
     });
+}
+
+// Modify login logic to store token with expiration
+function storeSessionToken(token) {
+    const tokenData = {
+        token: token,
+        // Set expiration to 1 hour from now
+        expiration: Date.now() + 60 * 60 * 1000 // 1 hour in milliseconds
+    };
+    
+    localStorage.setItem('sessionToken', JSON.stringify(tokenData));
 }

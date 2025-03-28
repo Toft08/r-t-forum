@@ -9,10 +9,6 @@ import (
 
 var db *sql.DB
 
-// func PageHandler(w http.ResponseWriter, r *http.Request) {
-// 	http.ServeFile(w, r, "index.html")
-// }
-
 // PageDetails contains the data to be passed to the HTML templates
 func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 
