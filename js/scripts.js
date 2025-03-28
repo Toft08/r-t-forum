@@ -29,7 +29,7 @@ const loggedIn = isLoggedIn();
             history.pushState({}, "", "/home");
             loadHomePage();
         } else {
-            history.pushSatate({}, "", "/login");
+            history.pushState({}, "", "/login");
             loadLoginPage();
         }
         break;
@@ -43,7 +43,7 @@ const loggedIn = isLoggedIn();
         if (loggedIn) {
             loadHomePage();
         } else {
-            history.pushSatate({}, "", "/login");
+            history.pushState({}, "", "/login");
             loadLoginPage(); // Redirect to login if not logged in
         }
         break;
