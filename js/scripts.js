@@ -121,8 +121,9 @@ function insertPosts(posts) {
 
   posts.forEach((post) => {
     const categoriesArray = post.categories ? post.categories.split(",") : [];
+    const uniqueCategories = [...new Set(categoriesArray)];
     const categoriesText =
-      categoriesArray.length > 0 ? categoriesArray.join(", ") : "No categories";
+      uniqueCategories.length > 0 ? uniqueCategories.join(", ") : "No categories";
 
     const postElement = document.createElement("div");
     postElement.className = "post-card";
