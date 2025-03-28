@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function handleRoute() {
   const route = window.location.pathname; // Get the hash part (without #)
   const container = document.getElementById("content");
-//   container.innerHTML = ""; // Clear the container
+  container.innerHTML = ""; // Clear the container
 
 const publicRoutes = ["/login", "/signup"];
 const loggedIn = isLoggedIn();
@@ -148,13 +148,6 @@ function loadHomePage() {
         return;
     }
 
-    const container = document.getElementById("content");
-    container.innerHTML = `
-        <h1>Home</h1>
-        <button id="signup-button">Sign Up</button>
-        <button id="login-button">Log In</button>
-        <div id="posts-container"></div>
-    `;
     fetch("/api/posts")
     .then((response) => response.json())
     .then((posts) => {
@@ -167,18 +160,6 @@ function loadHomePage() {
         container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
     });
 
-  // signup and login event listeners
-  document.getElementById('signup-button').addEventListener("click", function () {
-    console.log("Sign Up button clicked!");
-    history.pushState({}, "", "/signup");
-    loadSignupPage();
-  });
-
-  document.getElementById('login-button').addEventListener("click", function () {
-    console.log("Login button clicked!");
-    history.pushState({}, "", "/login"); 
-    loadLoginPage();
-  });
 }
 
 function insertPosts(posts) {

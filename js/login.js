@@ -13,7 +13,6 @@ function loadLoginPage() {
             <button type="submit">Login</button>
         </form>
         <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
-        <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
     console.log("Login page loaded");
 
