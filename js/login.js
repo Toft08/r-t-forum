@@ -61,9 +61,14 @@ function loadLoginPage() {
 function storeSessionToken(token) {
     const tokenData = {
         token: token,
-        // Set expiration to 1 hour from now
-        expiration: Date.now() + 60 * 60 * 1000 // 1 hour in milliseconds
+        // Set expiration
+        expiration: Date.now() + 10 * 60 * 1000 // 10 minutes in milliseconds
     };
     
-    localStorage.setItem('sessionToken', JSON.stringify(tokenData));
+    try {
+        localStorage.setItem('sessionToken', JSON.stringify(tokenData));
+        console.log("Token stored with 10-minute expiration");
+    } catch (error) {
+        console.error("Error storing token:", error);
+    }
 }
