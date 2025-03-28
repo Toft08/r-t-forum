@@ -22,10 +22,11 @@ function logout() {
     .then(response => {
         if (response.ok) {
             // Clear the authToken from localStorage
-            localStorage.removeItem('sessionToken');
+            document.cookie = "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; // Set cookie to expire
             // Redirect to the login page
             history.pushState({}, '', '/login');
 
+            loadLoginPage();
             handleRoute();
         } else {
             console.log('Logout failed');

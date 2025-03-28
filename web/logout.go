@@ -43,7 +43,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Name:     "session_id",
 		Value:    "",
 		Expires:  time.Now().Add(-1 * time.Hour),
-		HttpOnly: true,
+		Secure:  true,
 		Path:     "/",
 	})
 	log.Println("Logged out successfully")

@@ -42,7 +42,7 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
-                storeSessionToken(data.token); // Store the token in localStorage
+                // storeSessionToken(data.token); // Store the token in localStorage
 
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
@@ -58,17 +58,17 @@ function loadLoginPage() {
 }
 
 // Modify login logic to store token with expiration
-function storeSessionToken(token) {
-    const tokenData = {
-        token: token,
-        // Set expiration
-        expiration: Date.now() + 10 * 60 * 1000 // 10 minutes in milliseconds
-    };
+// function storeSessionToken(token) {
+//     const tokenData = {
+//         token: token,
+//         // Set expiration
+//         expiration: Date.now() + 10 * 60 * 1000 // 10 minutes in milliseconds
+//     };
     
-    try {
-        localStorage.setItem('sessionToken', JSON.stringify(tokenData));
-        console.log("Token stored with 10-minute expiration");
-    } catch (error) {
-        console.error("Error storing token:", error);
-    }
-}
+//     try {
+//         localStorage.setItem('sessionToken', JSON.stringify(tokenData));
+//         console.log("Token stored with 10-minute expiration");
+//     } catch (error) {
+//         console.error("Error storing token:", error);
+//     }
+// }
