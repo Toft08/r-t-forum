@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function handleRoute() {
   const route = window.location.pathname; // Get the hash part (without #)
-  const container = document.getElementById("content"); // Main content container
+  // const container = document.getElementById("content"); // Main content container
 
   // Check if we are in the signup or login route, otherwise load homepage content
   switch (route) {
