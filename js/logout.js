@@ -15,13 +15,18 @@ function logout() {
     fetch('/api/logout', {
         method: 'POST',
         credentials: 'same-origin', // Ensure the session cookie is sent
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
     .then(response => {
         if (response.ok) {
             // Clear the authToken from localStorage
-            localStorage.removeItem('authToken');
+            localStorage.removeItem('sessionToken');
             // Redirect to the login page
-            window.location.replace('/login');
+            history.pushState({}, '', '/login');
+
+            handleRoute();
         } else {
             console.log('Logout failed');
         }
