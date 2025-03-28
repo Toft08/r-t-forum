@@ -3,6 +3,7 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -52,20 +53,17 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 // 	}
 // }
 
-// // ErrorHandler handles the rendering of error pages
-// func ErrorHandler(w http.ResponseWriter, errorMessage string, statusCode int) {
+// ErrorHandler handles the rendering of error pages
+func ErrorHandler(w http.ResponseWriter, message string, statusCode int) {
+	w.Header().Set("Content-Type", "application/javascript")
+	w.WriteHeader(statusCode)
 
-// 	w.WriteHeader(statusCode)
-
-// 	err := tmpl.ExecuteTemplate(w, "error.html", map[string]string{
-// 		"ErrorMessage": errorMessage,
-// 	})
-// 	if err != nil {
-// 		log.Println("Error executing template error.html:", err)
-// 		http.Error(w, errorMessage, statusCode)
-// 		return
-// 	}
-// }
+	// Sending JavaScript code as a response
+	_, err := fmt.Fprintf(w, `alert("%s");`, message)
+	if err != nil {
+		log.Println("Error sending JavaScript response:", err)
+	}
+}
 
 // VerifySession checks if the session ID exists in the database
 func VerifySession(r *http.Request) (bool, int, string) {
