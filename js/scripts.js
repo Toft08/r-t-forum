@@ -79,6 +79,8 @@ function loadHomePage() {
   const container = document.getElementById("content");
   container.innerHTML = `
         <h1>Home</h1>
+        <button id="signup-button">Sign Up</button>
+        <button id="login-button">Log In</button>
         <div id="posts-container"></div>
     `;
     fetch("/api/posts")
@@ -93,26 +95,19 @@ function loadHomePage() {
         container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
     });
 
-  // Add the Sign Up button on the home page
-  const signupButton = document.createElement("button");
-  signupButton.id = "signup-button";
-  signupButton.textContent = "Sign Up";
-  signupButton.addEventListener("click", function () {
+  // signup and login event listeners
+  document.getElementById('signup-button').addEventListener("click", function () {
     console.log("Sign Up button clicked!");
-    history.pushState({}, "", "/signup"); // Change the URL to /signup without the hash
-    loadSignupPage(); // Load the signup form dynamically
+    history.pushState({}, "", "/signup");
+    loadSignupPage();
   });
-  const loginButton = document.createElement("button");
-  loginButton.id = "login-button";
-  loginButton.textContent = "Login";
-  loginButton.addEventListener("click", function () {
-    console.log("Login button clicked!");
-    history.pushState({}, "", "/login"); // Change the URL to /login without the hash
-    loadLoginPage(); // Load the login form dynamically
-  });
-  container.appendChild(loginButton);
 
-  container.appendChild(signupButton); // Append the Sign Up button
+  document.getElementById('login-button').addEventListener("click", function () {
+    console.log("Login button clicked!");
+    history.pushState({}, "", "/login"); 
+    loadLoginPage();
+  });
+
 }
 
 function insertPosts(posts) {

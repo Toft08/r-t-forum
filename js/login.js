@@ -12,6 +12,7 @@ function loadLoginPage() {
 
             <button type="submit">Login</button>
         </form>
+        <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
     console.log("Login page loaded");
 
@@ -43,7 +44,7 @@ function loadLoginPage() {
             if (response.ok) {
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/');
-                loadHomePage();
+                handleRoute();
             } else {
                 // Show the error message (e.g., invalid username/password)
                 alert(data.error);
