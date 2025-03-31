@@ -223,3 +223,25 @@ function formatDate(dateString) {
 
   return date.toLocaleString();
 }
+
+function createPost(title, content, categories) {
+  fetch("/api/posts", {
+    mathod: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title,
+      content,
+      categories: categories.split(",")
+    }),
+  })
+  .then((response) => response.json())
+  .then((data) => {
+    console.log("Post created:", data);
+    loadHomePage();
+  })
+  .catch((error) => {
+    console.error("Error creating post:", error);
+  });
+}

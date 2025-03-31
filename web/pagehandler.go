@@ -27,7 +27,7 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	case "/api/signup":
 		SignUp(w, r, db)
 	case "/api/posts":
-		PostsHandler(w, r)
+		CreatePost(w, r)
 	case "/api/logout":
 		Logout(w, r)
 	case "/api/check-session":
@@ -51,19 +51,22 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 // }
 
 // // ErrorHandler handles the rendering of error pages
-// func ErrorHandler(w http.ResponseWriter, errorMessage string, statusCode int) {
 
-// 	w.WriteHeader(statusCode)
+func ErrorHandler(w http.ResponseWriter, errorMessage string, statusCode int) {
+	// Set response status code and content type
+	w.WriteHeader(statusCode)
+	w.Header().Set("Content-Type", "application/json")
 
-// 	err := tmpl.ExecuteTemplate(w, "error.html", map[string]string{
-// 		"ErrorMessage": errorMessage,
-// 	})
-// 	if err != nil {
-// 		log.Println("Error executing template error.html:", err)
-// 		http.Error(w, errorMessage, statusCode)
-// 		return
-// 	}
-// }
+	// Create a JSON response
+	response := map[string]string{"error": errorMessage}
+
+	// Encode response as JSON
+	err := json.NewEncoder(w).Encode(response)
+	if err != nil {
+		log.Println("Error encoding JSON response:", err)
+		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
+	}
+}
 
 // VerifySession checks if the session ID exists in the database
 func VerifySession(r *http.Request) (bool, int, string) {
@@ -85,7 +88,7 @@ func VerifySession(r *http.Request) (bool, int, string) {
 		log.Println("No username found")
 		return false, 0, ""
 	}
-
+	log.Println("Session Verified - userID:", userID, "username:", username)
 	return true, userID, username
 }
 

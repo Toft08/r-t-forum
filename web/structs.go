@@ -24,15 +24,18 @@ type CommentDetails struct {
 }
 
 type PostDetails struct {
-	PostID      int    `json:"post_id"`
-	UserID      int    `json:"user_id"`
-	Username    string `json:"username"`
-	PostTitle   string `json:"post_title"`
-	PostContent string `json:"post_content"`
-	CreatedAt   string `json:"created_at"`
-	Likes       int    `json:"likes"`
-	Dislikes    int    `json:"dislikes"`
-	Categories  string `json:"categories"`
+	PostID      int              `json:"post_id"`
+	UserID      int              `json:"user_id"`
+	Username    string           `json:"username"`
+	PostTitle   string           `json:"post_title"`
+	PostContent string           `json:"post_content"`
+	CreatedAt   string           `json:"created_at"`
+	Likes       int              `json:"likes"`
+	Dislikes    int              `json:"dislikes"`
+	Categories  []string         `json:"categories"`
+	Comments    []CommentDetails `json:"comments"`
+	LikedNow    bool             `json:"liked_now"`
+	DislikedNow bool             `json:"disliked_now"`
 }
 
 type CategoryDetails struct {
