@@ -241,3 +241,36 @@ function fetchActiveUsers() {
 // Fetch users every 5 seconds
 setInterval(fetchActiveUsers, 5000);
 fetchActiveUsers();
+
+document.addEventListener("DOMContentLoaded", function () {
+  const username = prompt("Enter your username:"); // Temporary for testing
+  if (!username) return;
+
+  const socket = new WebSocket(
+    `ws://${window.location.host}/ws?username=${username}`
+  );
+
+  socket.onopen = function () {
+    console.log("WebSocket connection established.");
+    socket.send("Hello from " + username);
+  };
+
+  socket.onmessage = function (event) {
+    console.log("Message from server:", event.data);
+  };
+
+  socket.onclose = function () {
+    console.log("WebSocket connection closed.");
+  };
+
+  socket.onerror = function (error) {
+    console.error("WebSocket Error:", error);
+  };
+
+  // Send a test message when clicking anywhere
+  document.body.addEventListener("click", () => {
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send("User " + username + " clicked!");
+    }
+  });
+});
