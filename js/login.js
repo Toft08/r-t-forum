@@ -27,7 +27,7 @@ function loadLoginPage() {
         try {
             console.log("Sending fetch request to /login"); // Debug log
             const response = await fetch('/api/login', {
-                method: 'POST', // Explicitly set method to POST
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -42,33 +42,14 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
-                storeSessionToken(data.token); // Store the token in localStorage
-
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
                 handleRoute();
             } else {
-                // Show the error message (e.g., invalid username/password)
                 alert(data.error);
             }
         } catch (error) {
             console.error("Error during login:", error);
         }
     });
-}
-
-// Modify login logic to store token with expiration
-function storeSessionToken(token) {
-    const tokenData = {
-        token: token,
-        // Set expiration
-        expiration: Date.now() + 10 * 60 * 1000 // 10 minutes in milliseconds
-    };
-    
-    try {
-        localStorage.setItem('sessionToken', JSON.stringify(tokenData));
-        console.log("Token stored with 10-minute expiration");
-    } catch (error) {
-        console.error("Error storing token:", error);
-    }
 }

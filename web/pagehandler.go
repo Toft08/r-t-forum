@@ -30,6 +30,8 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		PostsHandler(w, r)
 	case "/api/logout":
 		Logout(w, r)
+	case "/api/check-session":
+		checkSessionHandler(w, r)
 	default:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -85,4 +87,20 @@ func VerifySession(r *http.Request) (bool, int, string) {
 	}
 
 	return true, userID, username
+}
+
+// API endpoint to check if the user is logged in
+func checkSessionHandler(w http.ResponseWriter, r *http.Request) {
+	loggedIn, userID, username := VerifySession(r)
+
+	// Build response based on session validity
+	response := map[string]interface{}{
+		"loggedIn": loggedIn,
+		"userID":   userID,
+		"username": username,
+	}
+
+	// Set Content-Type header and encode the response as JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

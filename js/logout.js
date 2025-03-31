@@ -21,11 +21,11 @@ function logout() {
     })
     .then(response => {
         if (response.ok) {
-            // Clear the authToken from localStorage
-            localStorage.removeItem('sessionToken');
             // Redirect to the login page
+            updateUsernameDisplay('Guest');
             history.pushState({}, '', '/login');
 
+            loadLoginPage();
             handleRoute();
         } else {
             console.log('Logout failed');

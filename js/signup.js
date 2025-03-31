@@ -1,10 +1,3 @@
-// document.getElementById('signup-button').addEventListener('click', function () {
-//     console.log("Sign Up button clicked!");
-//     history.pushState({}, '', '/signup'); // Change the URL to /signup without the hash
-//     loadSignupPage(); // Load the signup form dynamically
-// });
-
-
 function loadSignupPage() {
     history.pushState({}, '', '/signup');
 

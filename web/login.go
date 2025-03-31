@@ -99,7 +99,7 @@ func createSession(w http.ResponseWriter, userID int) error {
 		Name:     "session_id",
 		Value:    sessionID,
 		Expires:  time.Now().Add(30 * time.Minute),
-		HttpOnly: true,
+		Secure:   true,
 		Path:     "/",
 	})
 
@@ -113,3 +113,4 @@ func createSession(w http.ResponseWriter, userID int) error {
 
 	return nil
 }
+

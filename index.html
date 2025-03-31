@@ -116,7 +116,7 @@
             <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
         </div>
         <div class="nav-right">
-            <p class="welcome-text">Logged in as: {{.User}}</p>
+            <p class="welcome-text">Logged in as: <span id="username-placeholder">Guest</span></p>
                 <button type="submit" id="logout-button">Log Out</button>
         </div>
     </nav>
@@ -125,6 +125,10 @@
     <div id="content">
     </div>
     
+    <!-- dynamic forum -->
+    <div id="posts-container">
+        <!-- Posts will be inserted here dynamically -->
+    </div>
 
     <!-- post pop up -->
     <div id="create-post-popup" class="popup hidden"></div>
