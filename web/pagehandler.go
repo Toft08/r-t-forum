@@ -88,7 +88,6 @@ func VerifySession(r *http.Request) (bool, int, string) {
 		log.Println("No username found")
 		return false, 0, ""
 	}
-	log.Println("Session Verified - userID:", userID, "username:", username)
 	return true, userID, username
 }
 

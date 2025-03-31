@@ -3,8 +3,10 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -37,73 +39,72 @@ func FetchCategories(w http.ResponseWriter, r *http.Request) {
 
 // CreatePost handles both the fetching of categories (GET) and posting a new post (POST)
 func CreatePost(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+	switch r.Method {
+	case http.MethodGet:
 		FetchCategories(w, r)
-		return
-	} else if r.Method == http.MethodPost {
-		NewPost(w, r)
-		return
-	} else {
+	case http.MethodPost:
+		HandlePostCreation(w, r)
+	default:
 		ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
 	}
 }
 
 // NewPost handles the creation of a new post by extracting data from the request
-func NewPost(w http.ResponseWriter, r *http.Request) {
+func HandlePostCreation(w http.ResponseWriter, r *http.Request) {
 	_, userID, _ := VerifySession(r)
 
-	var newPost PostDetails
-	decoder := json.NewDecoder(r.Body)
-	err := decoder.Decode(&newPost)
-	if err != nil {
-		log.Println("Error decoding the data:", err)
+	var post PostDetails
+	if err := json.NewDecoder(r.Body).Decode(&post); err != nil {
+		log.Println("Error decoding data:", err)
 		ErrorHandler(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	if newPost.PostTitle == "" || newPost.PostContent == "" {
+	if post.PostTitle == "" || post.PostContent == "" {
 		ErrorHandler(w, "Title or content cannot be empty", http.StatusBadRequest)
 		return
 	}
 
-	categories := newPost.Categories
-	if len(categories) == 0 {
-		categories = append(categories, "1") // Default category if none selected
+	if len(post.Categories) == 0 {
+		post.Categories = []string{"1"} // Default category
 	}
 
 	var categoryIDs []int
-	// Convert category names to category IDs
-	for _, cat := range categories {
-		categoryID, err := HandleCategory(cat)
+	for _, cat := range post.Categories {
+		id, err := HandleCategory(cat)
 		if err != nil {
-			log.Println("Error handling categoryID in createpost:", err)
+			log.Println("Error handling category:", err)
 			ErrorHandler(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		categoryIDs = append(categoryIDs, categoryID)
+		categoryIDs = append(categoryIDs, id)
 	}
 
-	err = AddPostToDatabase(newPost.PostTitle, newPost.PostContent, categoryIDs, userID)
-	if err != nil {
+	if err := AddPostToDatabase(post.PostTitle, post.PostContent, categoryIDs, userID); err != nil {
 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	ErrorHandler(w, "Message added to database", http.StatusOK)
+	ErrorHandler(w, "Post added successfully", http.StatusOK)
 }
 
-// HandleCategory handles the conversion of category names to category IDs (ensure that they exist in the database)
-func HandleCategory(categoryName string) (int, error) {
-	// Logic to retrieve category ID by category name from the database
-	// This is an example, and you need to implement actual DB interaction
-	var categoryID int
-	err := db.QueryRow("SELECT id FROM Category WHERE name = ?", categoryName).Scan(&categoryID)
+// HandleCategory handles the conversion of category names to category ID
+func HandleCategory(category string) (int, error) {
+
+	categoryID, err := strconv.Atoi(category)
 	if err != nil {
-		log.Println("Error retrieving category ID:", err)
+		log.Println("Error converting categoryID", err)
 		return 0, err
 	}
+
+	valid := ValidateCategoryID(categoryID)
+	if !valid {
+		log.Println("Invalid categoryID", category)
+		return 0, fmt.Errorf("invalid category id: %s", category)
+	}
+
 	return categoryID, nil
+
 }
 
 // ResponseHandler sends a response with a status code and message
