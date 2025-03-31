@@ -21,9 +21,8 @@ function logout() {
     })
     .then(response => {
         if (response.ok) {
-            // Clear the authToken from localStorage
-            document.cookie = "sessionID=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"; // Set cookie to expire
             // Redirect to the login page
+            updateUsernameDisplay('Guest'); // Update the username display
             history.pushState({}, '', '/login');
 
             loadLoginPage();

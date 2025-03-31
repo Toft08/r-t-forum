@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   handleRoute(); // Load the correct page on initial load
+  isLoggedIn();
   window.addEventListener("hashchange", handleRoute); // Listen for hash changes
 });
 
@@ -58,11 +59,20 @@ function handleRoute() {
   });
 }
 
+function updateUsernameDisplay(username) {
+  const welcomeText = document.getElementById("username-placeholder");
+  if (welcomeText) {
+    welcomeText.textContent = username || "Guest";
+  }
+}
 function isLoggedIn() {
   // Send an API request to check if the session is valid
   return fetch("/api/check-session")
     .then((response) => response.json())
     .then((data) => {
+      if (data.loggedIn) {
+        updateUsernameDisplay(data.username);
+      }
       return data.loggedIn;
     })
     .catch((err) => {
