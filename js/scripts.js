@@ -166,8 +166,6 @@ const createPopupContent = () => {
   });
 
   createForm.addEventListener("submit", (e) => {
-    // You can add form submission logic here
-    // For now, we'll just prevent default and hide popup
     e.preventDefault();
     createPostPopup.classList.add("hidden");
   });
