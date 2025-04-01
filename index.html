@@ -106,7 +106,7 @@
         .hidden {
             display: none;
         }
-        .active-users {
+.active-users {
     position: fixed;
     bottom: 10px;
     right: 10px;
@@ -169,11 +169,12 @@
     <div id="create-post-popup" class="popup hidden"></div>
     <div class="active-users">
         <h3>Active Users</h3>
+        <button id="fetch-active-users-button">Fetch Active Users</button>
         <ul id="active-users-list" class="user-list">
             <!-- Active users will be dynamically inserted here -->
         </ul>
     </div>
-    
+    <script src="/js/user.js"></script>
     <script src="/js/scripts.js"></script>
     <script src="/js/signup.js"></script>
     <script src="/js/login.js"></script>

@@ -19,7 +19,7 @@ func main() {
 		log.Println("Database connection is nil")
 		return
 	}
-	go web.WsHub.RunHub() // Start the WebSocket hub in a separate goroutine
+	// go web.WsHub.RunHub() // Start the WebSocket hub in a separate goroutine
 
 	database.MakeTables(db)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
