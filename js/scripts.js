@@ -83,10 +83,10 @@ function isLoggedIn() {
 
 function loadHomePage() {
   if (!isLoggedIn()) {
-      console.error("Unauthorized access to home page");
-      history.pushState({}, "", "/login");
-      loadLoginPage();
-      return;
+    console.error("Unauthorized access to home page");
+    history.pushState({}, "", "/login");
+    loadLoginPage();
+    return;
   }
 
   const container = document.getElementById("content");
@@ -96,13 +96,13 @@ function loadHomePage() {
       <div id="posts-container"></div>
   `;
 
-    // Create post popup window.
-const createPostBtn = document.getElementById("create-post-btn");
-const createPostPopup = document.getElementById("create-post-popup");
+  // Create post popup window.
+  const createPostBtn = document.getElementById("create-post-btn");
+  const createPostPopup = document.getElementById("create-post-popup");
 
-// Create popup content dynamically
-const createPopupContent = () => {
-  createPostPopup.innerHTML = `
+  // Create popup content dynamically
+  const createPopupContent = () => {
+    createPostPopup.innerHTML = `
               <h2>Create a new post</h2>
               <form id="create-form" action="/create" method="POST">
                   <label for="title">Title</label>
@@ -119,41 +119,41 @@ const createPopupContent = () => {
               <button id="close-popup-btn" class="close-button">Close</button>
           `;
 
-  const closePopupBtn = document.getElementById("close-popup-btn");
-  const createForm = createPostPopup.querySelector("#create-form");
+    const closePopupBtn = document.getElementById("close-popup-btn");
+    const createForm = createPostPopup.querySelector("#create-form");
 
-  closePopupBtn.addEventListener("click", () => {
-    createPostPopup.classList.add("hidden");
+    closePopupBtn.addEventListener("click", () => {
+      createPostPopup.classList.add("hidden");
+    });
+
+    createForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      createPostPopup.classList.add("hidden");
+    });
+  };
+
+  // Show popup when create post button is clicked
+  createPostBtn.addEventListener("click", () => {
+    // Create popup content if not already created
+    if (createPostPopup.innerHTML.trim() === "") {
+      createPopupContent();
+    }
+
+    // Show popup
+    createPostPopup.classList.remove("hidden");
   });
-
-  createForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    createPostPopup.classList.add("hidden");
-  });
-};
-
-// Show popup when create post button is clicked
-createPostBtn.addEventListener("click", () => {
-  // Create popup content if not already created
-  if (createPostPopup.innerHTML.trim() === "") {
-    createPopupContent();
-  }
-
-  // Show popup
-  createPostPopup.classList.remove("hidden");
-});
 
   fetch("/api/posts")
-  .then((response) => response.json())
-  .then((posts) => {
+    .then((response) => response.json())
+    .then((posts) => {
       console.log("Received posts:", posts);
       insertPosts(posts);
-  })
-  .catch((error) => {
+    })
+    .catch((error) => {
       console.error("Error loading posts:", error);
       const container = document.getElementById('posts-container');
       container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
-  }); 
+    });
 }
 
 function insertPosts(posts) {
@@ -223,3 +223,21 @@ function formatDate(dateString) {
 
   return date.toLocaleString();
 }
+function fetchActiveUsers() {
+  fetch("/api/active-users")
+    .then((response) => response.json())
+    .then((users) => {
+      const userList = document.getElementById("active-users-list");
+      userList.innerHTML = ""; // Clear old users
+      users.forEach((user) => {
+        const li = document.createElement("li");
+        li.textContent = user;
+        userList.appendChild(li);
+      });
+    })
+    .catch((error) => console.error("Error fetching active users:", error));
+}
+
+// Fetch users every 5 seconds
+setInterval(fetchActiveUsers, 5000);
+fetchActiveUsers();
