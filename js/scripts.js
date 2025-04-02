@@ -10,7 +10,7 @@ function handleRoute() {
   container.innerHTML = ""; // Clear the container
 
   const publicRoutes = ["/login", "/signup"];
-  isLoggedIn().then(loggedIn => {
+  isLoggedIn().then((loggedIn) => {
     // If not logged in, restrict navigation to only login and signup pages
     if (!loggedIn) {
       // If trying to access a route other than login or signup, redirect to login
@@ -151,7 +151,7 @@ function loadHomePage() {
     })
     .catch((error) => {
       console.error("Error loading posts:", error);
-      const container = document.getElementById('posts-container');
+      const container = document.getElementById("posts-container");
       container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
     });
 }
@@ -229,13 +229,41 @@ function fetchActiveUsers() {
     .then((users) => {
       const userList = document.getElementById("active-users-list");
       userList.innerHTML = ""; // Clear old users
+
       users.forEach((user) => {
         const li = document.createElement("li");
         li.textContent = user;
+        li.style.cursor = "pointer";
+        li.onclick = () => openChat(user); // Open chat when user is clicked
+
         userList.appendChild(li);
       });
     })
     .catch((error) => console.error("Error fetching active users:", error));
+}
+function openChat(username) {
+  const chatWindow = document.getElementById("chat-window");
+
+  chatWindow.style.display = "block";
+  chatWindow.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>Chat with ${username}</h3>
+        <button onclick="closeChat()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
+      </div>
+      <div id="chat-messages" style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;"></div>
+      <input type="text" id="chat-input" placeholder="Type a message...">
+      <button onclick="sendMessage('${username}')">Send</button>
+  `;
+
+  // Open WebSocket connection
+  // connectWebSocket(username);
+}
+
+function closeChat() {
+  const chatWindow = document.getElementById("chat-window");
+  if (chatWindow) {
+    chatWindow.style.display = "none";
+  }
 }
 
 // Fetch users every 5 seconds
