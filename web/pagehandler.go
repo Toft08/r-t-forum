@@ -34,6 +34,8 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		checkSessionHandler(w, r)
 	case "/api/active-users":
 		activeUsersHandler(w, r)
+	case "/api/ws/chat":
+		handleChatWebSocket(w, r)
 	default:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)

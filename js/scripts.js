@@ -243,7 +243,10 @@ function fetchActiveUsers() {
 }
 function openChat(username) {
   const chatWindow = document.getElementById("chat-window");
-
+  if (!chatWindow) {
+    console.error("Chat window element not found!");
+    return;
+  }
   chatWindow.style.display = "block";
   chatWindow.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -256,13 +259,49 @@ function openChat(username) {
   `;
 
   // Open WebSocket connection
-  // connectWebSocket(username);
+  connectWebSocket(username);
 }
 
 function closeChat() {
   const chatWindow = document.getElementById("chat-window");
   if (chatWindow) {
     chatWindow.style.display = "none";
+  }
+  if (ws) {
+    ws.close(); // Close WebSocket connection
+    ws = null; // Reset WebSocket variable
+  }
+}
+let ws;
+
+function connectWebSocket(username) {
+  if (ws) {
+    ws.close(); // Close previous connection
+  }
+
+  ws = new WebSocket(`ws://localhost:8080/api/ws/chat?username=${username}`);
+
+  ws.onmessage = (event) => {
+    const chatMessages = document.getElementById("chat-messages");
+    const message = document.createElement("div");
+    message.textContent = event.data;
+    chatMessages.appendChild(message);
+  };
+}
+function sendMessage(username) {
+  const input = document.getElementById("chat-input");
+  if (ws && ws.readyState === WebSocket.OPEN && input.value.trim()) {
+    const msg = JSON.stringify({
+      from: currentUsername, // Current user sending the message
+      to: username, // Recipient username
+      message: input.value,
+    });
+
+    console.log("Sending message:", msg);
+    ws.send(msg);
+    input.value = "";
+  } else {
+    console.error("WebSocket is not open or input is empty.");
   }
 }
 
