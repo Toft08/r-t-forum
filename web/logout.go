@@ -45,6 +45,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(-1 * time.Hour),
 		Secure:  true,
 		Path:     "/",
+		MaxAge: -1,
 	})
 	log.Println("Logged out successfully")
 	w.Header().Set("Content-Type", "application/json")

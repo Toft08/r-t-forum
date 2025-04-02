@@ -1,8 +1,11 @@
 package web
 
 import (
+	"encoding/json"
+	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -19,101 +22,124 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	Username string
 	Conn     *websocket.Conn
-	Send     chan []byte
 }
 
 // Hub is a struct that manages WebSocket connections
 type Hub struct {
-	clients    map[string]*Client
-	broadcast  chan []byte
-	register   chan *Client
-	unregister chan *Client
-	mu         sync.Mutex
+	clients map[string]*Client
+	mu      sync.Mutex
 }
 
 var WsHub = Hub{
-	clients:    make(map[string]*Client),
-	broadcast:  make(chan []byte),
-	register:   make(chan *Client),
-	unregister: make(chan *Client),
+	clients: make(map[string]*Client),
 }
 
 func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
+	// Get session cookie
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		log.Println("Session cookie not found")
+		return
+	}
+
+	// Retrieve username from database
+	var username string
+	err = db.QueryRow("SELECT username FROM Session WHERE id = ? AND status = 'active' AND expired_at > ?",
+		cookie.Value, time.Now().Format("2006-01-02 15:04:05")).Scan(&username)
+	if err != nil {
+		log.Println("Invalid session or session expired")
+		return
+	}
+	log.Println("Retrieved username:", username)
+
+	if r.Header.Get("Upgrade") != "websocket" || r.Header.Get("Connection") != "Upgrade" {
+		return
+	}
+	// Upgrade to WebSocket
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		http.Error(w, "Could not upgrade connection", http.StatusBadRequest)
+		log.Println("WebSocket Upgrade failed:", err)
 		return
 	}
-	username := r.URL.Query().Get("username")
-	if username == "" {
-		http.Error(w, "Username is required", http.StatusBadRequest)
-		conn.Close()
-		return
-	}
+
 	client := &Client{
 		Username: username,
 		Conn:     conn,
-		Send:     make(chan []byte)}
-	WsHub.register <- client
+	}
 
-	go client.readMessages()
-	go client.writeMessages()
+	WsHub.addClient(client)
+
+	client.listenForMessages()
 }
 
-func (c *Client) readMessages() {
-	defer func() {
-		WsHub.unregister <- c
-		c.Conn.Close()
-	}()
+// add client to the hub
+func (h *Hub) addClient(client *Client) {
+	h.mu.Lock()
+	h.clients[client.Username] = client
+	h.mu.Unlock()
+	h.broadcastActiveUsers()
+}
+
+// remove client from the hub
+func (h *Hub) removeClient(username string) {
+	h.mu.Lock()
+	if client, exists := h.clients[username]; exists {
+		client.Conn.Close()
+		delete(h.clients, username)
+	}
+	h.mu.Unlock()
+	h.broadcastActiveUsers()
+}
+
+// reads messages from the websocket connection
+func (c *Client) listenForMessages() {
+	defer WsHub.removeClient(c.Username)
 
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			break
 		}
-		WsHub.broadcast <- message
+		WsHub.broadcastMessage(message)
 	}
 }
-func (c *Client) writeMessages() {
-	for message := range c.Send {
-		c.Conn.WriteMessage(websocket.TextMessage, message)
-	}
-}
-func (h *Hub) RunHub() {
-	for {
-		select {
-		case client := <-h.register:
-			h.mu.Lock()
-			h.clients[client.Username] = client
-			h.mu.Unlock()
-			h.sendActiveUsers()
 
-		case client := <-h.unregister:
-			h.mu.Lock()
-			delete(h.clients, client.Username)
-			h.mu.Unlock()
-			close(client.Send)
-			h.sendActiveUsers()
-
-		case msg := <-h.broadcast:
-			h.mu.Lock()
-			for _, client := range h.clients {
-				client.Send <- msg
-			}
-			h.mu.Unlock()
-		}
-	}
-}
-func (h *Hub) sendActiveUsers() {
+// sends message to all connected users
+func (h *Hub) broadcastMessage(message []byte) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	users := []byte("active_users:")
-	for username := range h.clients {
-		users = append(users, []byte(username+"|")...)
-	}
-
 	for _, client := range h.clients {
-		client.Send <- users
+		err := client.Conn.WriteMessage(websocket.TextMessage, message)
+		if err != nil {
+			client.Conn.Close()
+			delete(h.clients, client.Username)
+		}
+	}
+}
+
+// sends a list of active users to all clients
+func (h *Hub) broadcastActiveUsers() {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	var usernames []string
+	for username := range h.clients {
+		usernames = append(usernames, username)
+	}
+	message := map[string]interface{}{
+		"type":  "active_users",
+		"users": usernames,
+	}
+	jsonMessage, err := json.Marshal(message)
+	if err != nil {
+		return
+	}
+	for _, client := range h.clients {
+		err := client.Conn.WriteMessage(websocket.TextMessage, jsonMessage)
+		if err != nil {
+			client.Conn.Close()
+			delete(h.clients, client.Username)
+		}
 	}
 }

@@ -43,6 +43,7 @@ function loadLoginPage() {
 
             if (response.ok) {
                 // Handle successful login, redirect or load homepage content dynamically
+                startWebSocket();
                 history.pushState({}, '', '/home');
                 handleRoute();
             } else {
@@ -52,4 +53,11 @@ function loadLoginPage() {
             console.error("Error during login:", error);
         }
     });
+}
+function startWebSocket() {
+    const socket = new WebSocket(`ws://${window.location.host}/api/ws`);
+    socket.onopen = () => console.log("WebSocket connected!");
+    socket.onmessage = (event) => console.log("Received:", event.data);
+    socket.onerror = (error) => console.error("WebSocket Error:", error);
+    socket.onclose = () => console.log("WebSocket disconnected.");
 }

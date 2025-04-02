@@ -51,7 +51,7 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create a session for the user
-	if err := createSession(w, userID); err != nil {
+	if err := createSession(w, userID, loginRequest.Username); err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
@@ -85,14 +85,14 @@ func verifyPassword(hashedPassword, password string) error {
 }
 
 // createSession creates a new session for the user and stores it in the database
-func createSession(w http.ResponseWriter, userID int) error {
-	// First check for and delete any existing sessions for this user
+func createSession(w http.ResponseWriter, userID int, username string) error {
 	_, err := db.Exec("UPDATE Session SET status = 'deleted', updated_at = ? WHERE user_id = ? AND status = 'active'",
 		time.Now().Format("2006-01-02 15:04:05"), userID)
 	if err != nil {
 		log.Println("Error deleting existing session:", err)
 		return err
 	}
+
 	sessionID := uuid.NewString()
 	expiredAt := time.Now().Add(30 * time.Minute).Format("2006-01-02 15:04:05")
 
@@ -103,10 +103,11 @@ func createSession(w http.ResponseWriter, userID int) error {
 		Secure:  true,
 		Path:    "/",
 	})
+	log.Printf("Creating new session: ID=%s for user %d, expires at %s", sessionID, userID, expiredAt)
 
 	// Store session ID in database, including the expired_at field
-	_, err = db.Exec("INSERT INTO Session (id, user_id, created_at, updated_at, expired_at) VALUES (?, ?, ?, ?, ?)",
-		sessionID, userID, time.Now().Format("2006-01-02 15:04:05"), time.Now().Format("2006-01-02 15:04:05"), expiredAt)
+	_, err = db.Exec("INSERT INTO Session (id, user_id, username, status, created_at, updated_at, expired_at) VALUES (?, ?, ?, 'active', ?, ?, ?)",
+		sessionID, userID, username, time.Now().Format("2006-01-02 15:04:05"), time.Now().Format("2006-01-02 15:04:05"), expiredAt)
 	if err != nil {
 		log.Println("Error inserting session into database:", err)
 		return err

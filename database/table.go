@@ -90,6 +90,7 @@ func MakeTables(db *sql.DB) {
 		id TEXT PRIMARY KEY,
 		status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'expired', 'inactive', 'deleted')),
     	user_id INTEGER NOT NULL,
+		username TEXT NOT NULL,
     	created_at TEXT NOT NULL,
 		updated_at TEXT NOT NULL,
 		expired_at TEXT NOT NULL,
