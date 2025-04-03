@@ -103,6 +103,68 @@
             align-items: center;
         }
 
+        .category-tags {
+    padding: 5px 10px;
+    margin-top: 10px;
+    border: 2px solid #5C7164;
+    border-radius: 20px;
+    font-size: 16px;
+    display: inline-block;
+    text-align: center;
+    background-color: #5C7164;
+    color: white;
+}
+/* Textarea styling (create post page) */
+.content-textarea {
+    font-family: Arial, Helvetica, sans-serif;
+    min-height: 50px;
+}
+
+/* create-post category selection */
+.category-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.category-label {
+    padding: 10px 15px;
+    margin-top: 10px;
+    border: 2px solid #5C7164;
+    border-radius: 20px;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease-in-out;
+    background-color: white;
+    color: #5C7164;
+    display: inline-block;
+    text-align: center;
+}
+
+/* Hide the default checkbox */
+.category-label input {
+    display: none;
+}
+
+/* When checkbox is checked */
+.category-label input:checked + label,
+.category-label:has(input:checked) {  /* The :has() selector ensures the label updates */
+    background-color: #5C7164;
+    color: white;
+    border-color: #5C7164;
+}
+
+/* Hover effect */
+.category-label:hover {
+    background-color: #C9DED1;
+}
+
+/* Hide the 'General' category (index 0) */
+.hidden-category {
+    display: none;
+}
+
         .hidden {
             display: none;
         }

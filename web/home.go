@@ -3,32 +3,34 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"r-t-forum/database"
+	"strconv"
 )
 
 func PostsHandler(w http.ResponseWriter, r *http.Request) {
-    db := database.InitDB()
-    defer db.Close()
+	db := database.InitDB()
+	defer db.Close()
 
-    posts, err := FetchPosts(db)
-    if err != nil {
-        log.Println("❌ Error fetching posts:", err)
-        http.Error(w, "Error fetching posts", http.StatusInternalServerError)
-        return
-    }
+	posts, err := FetchPosts(db)
+	if err != nil {
+		log.Println("❌ Error fetching posts:", err)
+		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
+		return
+	}
 
-    log.Printf("Number of posts fetched: %d", len(posts))
+	log.Printf("Number of posts fetched: %d", len(posts))
 
-    // Directly encode the posts array
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusOK)
-    
-    if err := json.NewEncoder(w).Encode(posts); err != nil {
-        log.Println("❌ Error encoding JSON:", err)
-        http.Error(w, "Error processing data", http.StatusInternalServerError)
-    }
+	// Directly encode the posts array
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		log.Println("❌ Error encoding JSON:", err)
+		http.Error(w, "Error processing data", http.StatusInternalServerError)
+	}
 }
 
 func FetchPosts(db *sql.DB) ([]PostDetails, error) {
@@ -209,24 +211,24 @@ func FetchPosts(db *sql.DB) ([]PostDetails, error) {
 // 	RenderTemplate(w, "index", data)
 // }
 
-// // HandleCategory converts the category ID into a string and returns validated ID
-// func HandleCategory(category string) (int, error) {
+// HandleCategory converts the category ID into a string and returns validated ID
+func HandleCategory(category string) (int, error) {
 
-// 	categoryID, err := strconv.Atoi(category)
-// 	if err != nil {
-// 		log.Println("Error converting categoryID", err)
-// 		return 0, err
-// 	}
+	categoryID, err := strconv.Atoi(category)
+	if err != nil {
+		log.Println("Error converting categoryID", err)
+		return 0, err
+	}
 
-// 	valid := ValidateCategoryID(categoryID)
-// 	if !valid {
-// 		log.Println("Invalid categoryID", category)
-// 		return 0, fmt.Errorf("invalid category id: %s", category)
-// 	}
+	valid := ValidateCategoryID(categoryID)
+	if !valid {
+		log.Println("Invalid categoryID", category)
+		return 0, fmt.Errorf("invalid category id: %s", category)
+	}
 
-// 	return categoryID, nil
+	return categoryID, nil
 
-// }
+}
 
 // ValidateCategoryID checks if the category ID given exists in the databse
 func ValidateCategoryID(categoryID int) bool {

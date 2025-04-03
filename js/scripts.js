@@ -83,10 +83,10 @@ function isLoggedIn() {
 
 function loadHomePage() {
   if (!isLoggedIn()) {
-      console.error("Unauthorized access to home page");
-      history.pushState({}, "", "/login");
-      loadLoginPage();
-      return;
+    console.error("Unauthorized access to home page");
+    history.pushState({}, "", "/login");
+    loadLoginPage();
+    return;
   }
 
   const container = document.getElementById("content");
@@ -96,86 +96,120 @@ function loadHomePage() {
       <div id="posts-container"></div>
   `;
 
-    // Create post popup window.
-const createPostBtn = document.getElementById("create-post-btn");
-const createPostPopup = document.getElementById("create-post-popup");
+  // Create post popup window.
+  const createPostBtn = document.getElementById("create-post-btn");
+  const createPostPopup = document.getElementById("create-post-popup");
 
-// Create popup content dynamically
-const createPopupContent = () => {
-  createPostPopup.innerHTML = `
+  // Create popup content dynamically
+  const createPopupContent = () => {
+    createPostPopup.innerHTML = `
               <h2>Create a new post</h2>
-              <form id="create-form" action="/create" method="POST">
-                  <label for="title">Title</label>
-                  <input type="text" id="title" name="title" required maxlength="50">
+              <form id="create-form" action="/create-post" method="POST">
+
+                  <input type="text" id="title" name="title" placeholder="Title" required maxlength="50">
                   <br>
-                  <label for="content">Content:</label>
-                  <textarea class="content-textarea" id="content" name="content" required></textarea>
+                  
+                  <textarea class="content-textarea" placeholder="Write your post here!" id="content" name="content" required></textarea>
                   <br>
-                  <label for="categories">Categories</label>
-                  <input type="text" id="categories" name="categories" required>
+                  <label for="categories">Select Topics:</label>
+                  <div class="category-container">
+                    {{ range $index, $category := .Categories }}
+                    <label class="category-label {{ if eq $index 0}}hidden-category{{ end }}">
+                      <input type="checkbox" name="categories" value="{{$category.CategoryID}}">
+                      {{$category.CategoryName}}
+                    </label>
+                    {{ end }}
+                  </div>
                   <br>
-                  <button type="submit">Create</button>
+                  <button type="submit">Create Post</button>
               </form>
               <button id="close-popup-btn" class="close-button">Close</button>
           `;
 
-  const closePopupBtn = document.getElementById("close-popup-btn");
-  const createForm = createPostPopup.querySelector("#create-form");
+    const closePopupBtn = document.getElementById("close-popup-btn");
+    const createForm = createPostPopup.querySelector("#create-form");
 
-  closePopupBtn.addEventListener("click", () => {
-    createPostPopup.classList.add("hidden");
-  });
+    closePopupBtn.addEventListener("click", () => {
+      createPostPopup.classList.add("hidden");
+    });
 
-  createForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    createPostPopup.classList.add("hidden");
-  });
-};
+    createForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
 
-// Show popup when create post button is clicked
-createPostBtn.addEventListener("click", () => {
-  // Create popup content if not already created
-  if (createPostPopup.innerHTML.trim() === "") {
-    createPopupContent();
+      const title = document.getElementById("title").value;
+      const content = document.getElementById("content").value;
+      const categories = [...document.querySelectorAll("input[name='categories']:checked")].map(checkbox => checkbox.value);
+
+      if (!title || !content) {
+        alert("Please fill in all fields.");
+        console.log("Title or content is empty.");
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/create-post", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, content, categories }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          console.log("Post created successfully!");
+          createPostPopup.classList.add("hidden");
+          loadHomePage(); // Reload posts dynamically
+        } else {
+          console.error("Error creating post:", data.error);
+        }
+      } catch (error) {
+        console.error("Request failed:", error);
+      }
+    });
+
+    // Show popup when create post button is clicked
+    createPostBtn.addEventListener("click", () => {
+      // Create popup content if not already created
+      if (createPostPopup.innerHTML.trim() === "") {
+        createPopupContent();
+      }
+
+      // Show popup
+      createPostPopup.classList.remove("hidden");
+    });
+
+    fetch("/api/posts")
+      .then((response) => response.json())
+      .then((posts) => {
+        console.log("Received posts:", posts);
+        insertPosts(posts);
+      })
+      .catch((error) => {
+        console.error("Error loading posts:", error);
+        const container = document.getElementById('posts-container');
+        container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
+      });
   }
 
-  // Show popup
-  createPostPopup.classList.remove("hidden");
-});
+  function insertPosts(posts) {
+    const container = document.getElementById("posts-container");
+    container.innerHTML = ""; // Clear container first
 
-  fetch("/api/posts")
-  .then((response) => response.json())
-  .then((posts) => {
-      console.log("Received posts:", posts);
-      insertPosts(posts);
-  })
-  .catch((error) => {
-      console.error("Error loading posts:", error);
-      const container = document.getElementById('posts-container');
-      container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
-  }); 
-}
+    if (!posts || posts.length === 0) {
+      container.innerHTML = "<p>No posts found.</p>";
+      return;
+    }
 
-function insertPosts(posts) {
-  const container = document.getElementById("posts-container");
-  container.innerHTML = ""; // Clear container first
+    posts.forEach((post) => {
+      const categoriesArray = post.categories ? post.categories.split(",") : [];
+      const uniqueCategories = [...new Set(categoriesArray)];
+      const categoriesText =
+        uniqueCategories.length > 0
+          ? uniqueCategories.join(", ")
+          : "No categories";
 
-  if (!posts || posts.length === 0) {
-    container.innerHTML = "<p>No posts found.</p>";
-    return;
-  }
-
-  posts.forEach((post) => {
-    const categoriesArray = post.categories ? post.categories.split(",") : [];
-    const uniqueCategories = [...new Set(categoriesArray)];
-    const categoriesText =
-      uniqueCategories.length > 0
-        ? uniqueCategories.join(", ")
-        : "No categories";
-
-    const postElement = document.createElement("div");
-    postElement.className = "post-card";
-    postElement.innerHTML = `
+      const postElement = document.createElement("div");
+      postElement.className = "post-card";
+      postElement.innerHTML = `
           <div class="post-header">
               <span>Posted by: ${post.username}</span>
               <span>${formatDate(post.created_at)}</span>
@@ -197,10 +231,10 @@ function insertPosts(posts) {
           </div>
       `;
 
-    container.appendChild(postElement);
-  });
+      container.appendChild(postElement);
+    });
+  }
 }
-
 function formatDate(dateString) {
   if (!dateString) return "Unknown date";
 
