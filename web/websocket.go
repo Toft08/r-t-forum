@@ -80,7 +80,9 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 		clientsMu.Unlock()
 
 		if exists {
-			err := recipientConn.WriteJSON(msg)
+			// err := recipientConn.WriteJSON(msg)
+			formattedMessage := msg.From + ": " + msg.Message
+			err := recipientConn.WriteJSON(formattedMessage)
 			if err != nil {
 				log.Println("Error sending message:", err)
 			}
