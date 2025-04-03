@@ -57,7 +57,7 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
 		return
 	}
-
+	ActiveUsers.AddUser(loginRequest.Username)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
@@ -96,11 +96,11 @@ func createSession(w http.ResponseWriter, userID int) error {
 	expiredAt := time.Now().Add(30 * time.Minute).Format("2006-01-02 15:04:05")
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "session_id",
-		Value:    sessionID,
-		Expires:  time.Now().Add(30 * time.Minute),
-		Secure:   true,
-		Path:     "/",
+		Name:    "session_id",
+		Value:   sessionID,
+		Expires: time.Now().Add(30 * time.Minute),
+		Secure:  true,
+		Path:    "/",
 	})
 
 	// Store session ID in database, including the expired_at field
@@ -113,4 +113,3 @@ func createSession(w http.ResponseWriter, userID int) error {
 
 	return nil
 }
-

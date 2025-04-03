@@ -42,6 +42,7 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
+                currentUsername = username;
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
                 handleRoute();

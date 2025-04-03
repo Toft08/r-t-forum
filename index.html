@@ -106,6 +106,40 @@
         .hidden {
             display: none;
         }
+.active-users {
+     position: fixed;
+     bottom: 10px;
+     right: 10px;
+     background-color: white;
+     border: 1px solid #ddd;
+     border-radius: 8px;
+     padding: 10px;
+     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+     width: 200px;
+ }
+ 
+ .active-users h3 {
+     margin: 0;
+     font-size: 16px;
+     border-bottom: 1px solid #ddd;
+     padding-bottom: 5px;
+ }
+ 
+ .user-list {
+     list-style: none;
+     padding: 0;
+     margin: 5px 0 0 0;
+ }
+ 
+ .user-list li {
+     padding: 5px;
+     font-size: 14px;
+     border-bottom: 1px solid #eee;
+ }
+ 
+ .user-list li:last-child {
+     border-bottom: none;
+ }
     </style>
 </head>
 <body>
@@ -132,8 +166,16 @@
 
     <!-- post pop up -->
     <div id="create-post-popup" class="popup hidden"></div>
-    
+    <div class="active-users">
+        <h3>Active Users</h3>
+        <ul id="active-users-list" class="user-list">
+            <!-- Active users will be dynamically inserted here -->
+        </ul>
+    </div>
+    <div id="chat-window" style="display: none;"></div>
+
     <script src="/js/scripts.js"></script>
+    <script src="/js/chat.js"></script>
     <script src="/js/signup.js"></script>
     <script src="/js/login.js"></script>
     <script src="/js/logout.js"></script>
