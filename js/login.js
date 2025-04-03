@@ -42,7 +42,9 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
-                currentUsername = username;
+                // currentUsername = username;
+                fetchPreviousMessages(username, 'other');
+                fetchActiveUsers();
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
                 handleRoute();

@@ -49,3 +49,12 @@ type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type StoredMessage struct {
+    ID        int    `json:"id"`
+    Sender    string `json:"sender"`
+    Receiver  string `json:"receiver"`
+    UserID    int    `json:"user_id"`
+    Content   string `json:"content"`
+    CreatedAt string `json:"created_at"`
+}

@@ -57,9 +57,12 @@ function connectWebSocket(username) {
     ws = new WebSocket(`ws://localhost:8080/api/ws/chat?username=${username}`);
 
     ws.onmessage = (event) => {
+        console.log("mahdi is here")
+        const data = JSON.parse(event.data);
+        console.log(data)
         const chatMessages = document.getElementById("chat-messages");
         const message = document.createElement("div");
-        message.textContent = event.data;
+        message.textContent = data;
         chatMessages.appendChild(message);
     };
 }
@@ -79,6 +82,34 @@ function sendMessage(username) {
         console.error("WebSocket is not open or input is empty.");
     }
 }
+let currentUsername = '';
+let receiver = '';
+
+function fetchPreviousMessages(sender, receiver) {
+    fetch(`/api/getMessagesHandler?sender=${sender}&receiver=${receiver}`)
+        .then(response => response.json())
+        .then(messages => {
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.innerHTML = '';  // Clear the current chat window
+
+            // Check if messages is a valid array
+            if (Array.isArray(messages)) {
+                messages.forEach(msg => {
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = `${msg.sender}: ${msg.content} (${msg.created_at})`;
+                    chatWindow.appendChild(messageElement);
+                });
+            } else {
+                console.error('Received data is not a valid array:', messages);
+                chatWindow.innerHTML = '<p>No messages found.</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching messages:', error);
+        });
+}
+
+
 
 // Fetch users every 5 seconds
 setInterval(fetchActiveUsers, 5000);
