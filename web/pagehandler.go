@@ -32,9 +32,9 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		Logout(w, r)
 	case "/api/check-session":
 		checkSessionHandler(w, r)
-	case "/api/active-users":
-		activeUsersHandler(w, r)
-	case "/api/ws/chat":
+	case "/api/all-users":
+		allUsersHandler(w, r)
+	case "/api/ws":
 		handleChatWebSocket(w, r)
 	case "/api/getMessagesHandler":
 		getMessagesHandler(w, r)

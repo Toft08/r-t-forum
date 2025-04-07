@@ -1,29 +1,30 @@
-function fetchActiveUsers() {
-    fetch("/api/active-users")
-        .then((response) => response.json())
-        .then((users) => {
-            const userList = document.getElementById("active-users-list");
-            userList.innerHTML = ""; // Clear old users
+document.addEventListener("DOMContentLoaded", () => {
+    const activeUsersPopup = document.querySelector('.active-users');
+    const minimizeButton = document.getElementById('minimize-users');
+    const usernamePlaceholder = document.getElementById('username-placeholder');
 
-            users.forEach((user) => {
-                const li = document.createElement("li");
-                li.textContent = user;
-                li.style.cursor = "pointer";
-                li.onclick = () => openChat(user); // Open chat when user is clicked
+    // Check if the user is logged in
+    // function checkLoginStatus() {
+    //     const username = usernamePlaceholder.textContent;
+    //     if (username !== "Guest") {
+    //         // User is logged in, show the active users popup and fetch users
+    //         activeUsersPopup.style.display = "block";
+    //         fetchAllUsers(); // Fetch users if logged in
+    //     } else {
+    //         // User is not logged in, hide the active users popup
+    //         activeUsersPopup.style.display = "none";
+    //     }
+    // }
 
-                userList.appendChild(li);
-            });
-        })
-        .catch((error) => console.error("Error fetching active users:", error));
-}
-function openChat(username) {
-    const chatWindow = document.getElementById("chat-window");
-    if (!chatWindow) {
-        console.error("Chat window element not found!");
-        return;
-    }
-    chatWindow.style.display = "block";
-    chatWindow.innerHTML = `
+
+    function openChat(username) {
+        const chatWindow = document.getElementById("chat-window");
+        if (!chatWindow) {
+            console.error("Chat window element not found!");
+            return;
+        }
+        chatWindow.style.display = "block";
+        chatWindow.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h3>Chat with ${username}</h3>
           <button onclick="closeChat()" style="background: none; border: none; font-size: 20px; cursor: pointer;">✖</button>
@@ -33,84 +34,75 @@ function openChat(username) {
         <button onclick="sendMessage('${username}')">Send</button>
     `;
 
-    // Open WebSocket connection
-    connectWebSocket(username);
-}
-
-function closeChat() {
-    const chatWindow = document.getElementById("chat-window");
-    if (chatWindow) {
-        chatWindow.style.display = "none";
+        // Open WebSocket connection
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            connectWebSocket(username);
+        }
     }
-    if (ws) {
-        ws.close(); // Close WebSocket connection
-        ws = null; // Reset WebSocket variable
+    window.openChat = openChat;
+    function closeChat() {
+        const chatWindow = document.getElementById("chat-window");
+        if (chatWindow) {
+            chatWindow.style.display = "none";
+        }
+        if (socket) {
+            socket.close(); // Close WebSocket connection
+            socket = null; // Reset WebSocket variable
+        }
     }
-}
-let ws;
+    window.closeChat = closeChat;
+    function sendMessage(username) {
+        const input = document.getElementById("chat-input");
+        if (socket && socket.readyState === WebSocket.OPEN && input.value.trim()) {
+            const msg = JSON.stringify({
+                from: currentUsername, // Current user sending the message
+                to: username, // Recipient username
+                message: input.value,
+            });
 
-function connectWebSocket(username) {
-    if (ws) {
-        ws.close(); // Close previous connection
+            console.log("Sending message:", msg);
+            socket.send(msg);
+            input.value = "";
+        } else {
+            console.error("WebSocket is not open or input is empty.");
+        }
     }
+    window.sendMessage = sendMessage;
+    let currentUsername = '';
+    let receiver = '';
 
-    ws = new WebSocket(`ws://localhost:8080/api/ws/chat?username=${username}`);
+    // function fetchPreviousMessages(sender, receiver) {
+    //     fetch(`/api/getMessagesHandler?sender=${sender}&receiver=${receiver}`)
+    //         .then(response => response.json())
+    //         .then(messages => {
+    //             const chatWindow = document.getElementById('chat-window');
+    //             chatWindow.innerHTML = '';  // Clear the current chat window
 
-    ws.onmessage = (event) => {
-        console.log("mahdi is here")
-        const data = JSON.parse(event.data);
-        console.log(data)
-        const chatMessages = document.getElementById("chat-messages");
-        const message = document.createElement("div");
-        message.textContent = data;
-        chatMessages.appendChild(message);
-    };
-}
-function sendMessage(username) {
-    const input = document.getElementById("chat-input");
-    if (ws && ws.readyState === WebSocket.OPEN && input.value.trim()) {
-        const msg = JSON.stringify({
-            from: currentUsername, // Current user sending the message
-            to: username, // Recipient username
-            message: input.value,
-        });
+    //             // Check if messages is a valid array
+    //             if (Array.isArray(messages)) {
+    //                 messages.forEach(msg => {
+    //                     const messageElement = document.createElement('div');
+    //                     messageElement.textContent = `${msg.sender}: ${msg.content} (${msg.created_at})`;
+    //                     chatWindow.appendChild(messageElement);
+    //                 });
+    //             } else {
+    //                 console.error('Received data is not a valid array:', messages);
+    //                 chatWindow.innerHTML = '<p>No messages found.</p>';
+    //             }
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching messages:', error);
+    //         });
+    // }
 
-        console.log("Sending message:", msg);
-        ws.send(msg);
-        input.value = "";
-    } else {
-        console.error("WebSocket is not open or input is empty.");
-    }
-}
-let currentUsername = '';
-let receiver = '';
-
-function fetchPreviousMessages(sender, receiver) {
-    fetch(`/api/getMessagesHandler?sender=${sender}&receiver=${receiver}`)
-        .then(response => response.json())
-        .then(messages => {
-            const chatWindow = document.getElementById('chat-window');
-            chatWindow.innerHTML = '';  // Clear the current chat window
-
-            // Check if messages is a valid array
-            if (Array.isArray(messages)) {
-                messages.forEach(msg => {
-                    const messageElement = document.createElement('div');
-                    messageElement.textContent = `${msg.sender}: ${msg.content} (${msg.created_at})`;
-                    chatWindow.appendChild(messageElement);
-                });
-            } else {
-                console.error('Received data is not a valid array:', messages);
-                chatWindow.innerHTML = '<p>No messages found.</p>';
-            }
-        })
-        .catch(error => {
-            console.error('Error fetching messages:', error);
-        });
-}
-
-
-
-// Fetch users every 5 seconds
-setInterval(fetchActiveUsers, 5000);
-fetchActiveUsers();
+    // function attachUserClickHandlers() {
+    //     const userElements = document.querySelectorAll('.user'); // Assuming '.user' is the class for user elements
+    //     userElements.forEach(userElement => {
+    //         userElement.addEventListener('click', () => {
+    //             const username = userElement.textContent.trim();
+    //             openChat(username);
+    //         });
+    //     });
+    // }
+    fetchAllUsers();
+});
