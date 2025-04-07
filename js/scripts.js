@@ -93,6 +93,7 @@ function loadHomePage() {
   container.innerHTML = `
       <h1>Home</h1>
   <div> <button id="create-post-btn">Create Post</button></div>
+  <div id="create-post-popup" class="hidden"></div>
       <div id="posts-container"></div>
   `;
 
@@ -100,45 +101,55 @@ function loadHomePage() {
   const createPostBtn = document.getElementById("create-post-btn");
   const createPostPopup = document.getElementById("create-post-popup");
 
+  loadPosts();
+
+  // Show popup when clicking Create Post
+  createPostBtn.addEventListener("click", () => {
+    createPopupContent();
+    createPostPopup.classList.remove("hidden");
+  });
+
   // Create popup content dynamically
-  const createPopupContent = () => {
+  async function createPopupContent() {
+    // Fetch categories from server instead of using Go template
+    let categoryHTML = "";
+    try {
+      const res = await fetch("/api/categories");
+      const categories = await res.json();
+      categoryHTML = categories.map((cat, i) => `
+        <label class="category-label ${i === 0 ? 'hidden-category' : ''}">
+          <input type="checkbox" name="categories" value="${cat.CategoryID}">
+          ${cat.CategoryName}
+          </label>
+          `).join("");
+    } catch (error) {
+      console.error("Error failed to load categories:", error);
+    }
+
     createPostPopup.innerHTML = `
-              <h2>Create a new post</h2>
-              <form id="create-form" action="/create-post" method="POST">
+      <h2>Create a new post</h2>
+      <form id="create-form">
+        <input type="text" id="title" name="title" placeholder="Title" required maxlength="50"><br>
+        <textarea class="content-textarea" id="content" name="content" placeholder="Write your post here!" required></textarea><br>
+        <label for="categories">Select Topics:</label>
+        <div class="category-container">${categoryHTML}</div><br>
+        <button type="submit">Create Post</button>
+      </form>
+      <button id="close-popup-btn" class="close-button">Close</button>
+    `;
 
-                  <input type="text" id="title" name="title" placeholder="Title" required maxlength="50">
-                  <br>
-                  
-                  <textarea class="content-textarea" placeholder="Write your post here!" id="content" name="content" required></textarea>
-                  <br>
-                  <label for="categories">Select Topics:</label>
-                  <div class="category-container">
-                    {{ range $index, $category := .Categories }}
-                    <label class="category-label {{ if eq $index 0}}hidden-category{{ end }}">
-                      <input type="checkbox" name="categories" value="{{$category.CategoryID}}">
-                      {{$category.CategoryName}}
-                    </label>
-                    {{ end }}
-                  </div>
-                  <br>
-                  <button type="submit">Create Post</button>
-              </form>
-              <button id="close-popup-btn" class="close-button">Close</button>
-          `;
-
-    const closePopupBtn = document.getElementById("close-popup-btn");
-    const createForm = createPostPopup.querySelector("#create-form");
-
-    closePopupBtn.addEventListener("click", () => {
+    // Event: Close popup
+    document.getElementById("close-popup-btn").addEventListener("click", () => {
       createPostPopup.classList.add("hidden");
     });
 
-    createForm.addEventListener("submit", async (e) => {
+    // Event: Submit form
+    document.getElementById("create-form").addEventListener("submit", async (e) => {
       e.preventDefault();
-
       const title = document.getElementById("title").value;
       const content = document.getElementById("content").value;
-      const categories = [...document.querySelectorAll("input[name='categories']:checked")].map(checkbox => checkbox.value);
+      const categories = [...document.querySelectorAll("input[name='categories']:checked")]
+        .map(checkbox => checkbox.value);
 
       if (!title || !content) {
         alert("Please fill in all fields.");
@@ -153,63 +164,49 @@ function loadHomePage() {
           body: JSON.stringify({ title, content, categories }),
         });
 
-        const data = await response.json();
+        const result = await response.json();
         if (response.ok) {
           console.log("Post created successfully!");
           createPostPopup.classList.add("hidden");
-          loadHomePage(); // Reload posts dynamically
+          loadPosts(); // Reload posts dynamically
         } else {
-          console.error("Error creating post:", data.error);
+          console.error("Error creating post:", result.error);
         }
       } catch (error) {
-        console.error("Request failed:", error);
+        console.error("Failed to submit post:", error);
       }
     });
+  }
+}
 
-    // Show popup when create post button is clicked
-    createPostBtn.addEventListener("click", () => {
-      // Create popup content if not already created
-      if (createPostPopup.innerHTML.trim() === "") {
-        createPopupContent();
-      }
-
-      // Show popup
-      createPostPopup.classList.remove("hidden");
+function loadPosts() {
+  fetch("/api/posts")
+    .then((response) => response.json())
+    .then((posts) => insertPosts(posts))
+    .catch((error) => {
+      console.error("Error loading posts:", error);
+      document.getElementById("posts-container").innerHTML =
+        `<p>Error loading posts: ${error.message}</p>`;
     });
+}
 
-    fetch("/api/posts")
-      .then((response) => response.json())
-      .then((posts) => {
-        console.log("Received posts:", posts);
-        insertPosts(posts);
-      })
-      .catch((error) => {
-        console.error("Error loading posts:", error);
-        const container = document.getElementById('posts-container');
-        container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
-      });
+function insertPosts(posts) {
+  const container = document.getElementById("posts-container");
+  container.innerHTML = ""; // Clear container first
+
+  if (!posts || posts.length === 0) {
+    container.innerHTML = "<p>No posts found.</p>";
+    return;
   }
 
-  function insertPosts(posts) {
-    const container = document.getElementById("posts-container");
-    container.innerHTML = ""; // Clear container first
+  posts.forEach((post) => {
+    const categoriesArray = post.categories ? post.categories.split(",") : [];
+    const uniqueCategories = [...new Set(categoriesArray)];
+    const categoriesText = uniqueCategories.length > 0 ? uniqueCategories.join(", ") : "No categories";
 
-    if (!posts || posts.length === 0) {
-      container.innerHTML = "<p>No posts found.</p>";
-      return;
-    }
-
-    posts.forEach((post) => {
-      const categoriesArray = post.categories ? post.categories.split(",") : [];
-      const uniqueCategories = [...new Set(categoriesArray)];
-      const categoriesText =
-        uniqueCategories.length > 0
-          ? uniqueCategories.join(", ")
-          : "No categories";
-
-      const postElement = document.createElement("div");
-      postElement.className = "post-card";
-      postElement.innerHTML = `
+    const postElement = document.createElement("div");
+    postElement.className = "post-card";
+    postElement.innerHTML = `
           <div class="post-header">
               <span>Posted by: ${post.username}</span>
               <span>${formatDate(post.created_at)}</span>
@@ -220,21 +217,16 @@ function loadHomePage() {
               <div class="categories">Categories: ${categoriesText}</div>
               <div class="post-stats">
                   <div class="likes">
-                      <span class="material-symbols-outlined">thumb_up</span>
-                      ${post.likes}
-                  </div>
+                      <span class="material-symbols-outlined">thumb_up</span> ${post.likes}</div>
                   <div class="dislikes">
-                      <span class="material-symbols-outlined">thumb_down</span>
-                      ${post.dislikes}
-                  </div>
+                      <span class="material-symbols-outlined">thumb_down</span> ${post.dislikes}</div>
               </div>
           </div>
       `;
-
-      container.appendChild(postElement);
-    });
-  }
+    container.appendChild(postElement);
+  });
 }
+
 function formatDate(dateString) {
   if (!dateString) return "Unknown date";
 
