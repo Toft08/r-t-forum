@@ -1,21 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const activeUsersPopup = document.querySelector('.active-users');
     const minimizeButton = document.getElementById('minimize-users');
-    const usernamePlaceholder = document.getElementById('username-placeholder');
-
-    // Check if the user is logged in
-    // function checkLoginStatus() {
-    //     const username = usernamePlaceholder.textContent;
-    //     if (username !== "Guest") {
-    //         // User is logged in, show the active users popup and fetch users
-    //         activeUsersPopup.style.display = "block";
-    //         fetchAllUsers(); // Fetch users if logged in
-    //     } else {
-    //         // User is not logged in, hide the active users popup
-    //         activeUsersPopup.style.display = "none";
-    //     }
-    // }
-
+    const currentUsername = document.getElementById('username-placeholder').textContent.trim();
 
     function openChat(username) {
         const chatWindow = document.getElementById("chat-window");
@@ -33,7 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <input type="text" id="chat-input" placeholder="Type a message...">
         <button onclick="sendMessage('${username}')">Send</button>
     `;
-
+        console.log("Chat opened:", username);
+        console.log("Current user:", currentUsername);
+        fetchPreviousMessages(currentUsername, username);
         // Open WebSocket connection
         if (!socket || socket.readyState !== WebSocket.OPEN) {
             connectWebSocket(username);
@@ -68,32 +56,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     window.sendMessage = sendMessage;
-    let currentUsername = '';
     let receiver = '';
 
-    // function fetchPreviousMessages(sender, receiver) {
-    //     fetch(`/api/getMessagesHandler?sender=${sender}&receiver=${receiver}`)
-    //         .then(response => response.json())
-    //         .then(messages => {
-    //             const chatWindow = document.getElementById('chat-window');
-    //             chatWindow.innerHTML = '';  // Clear the current chat window
+    function fetchPreviousMessages(sender, receiver) {
+        fetch(`/api/getMessagesHandler?sender=${sender}&receiver=${receiver}`)
+            .then(response => response.json())
+            .then(messages => {
+                const chatWindow = document.getElementById('chat-window');
+                if (chatWindow) {
+                    chatWindow.innerHTML = '';  // Clear the current chat window
 
-    //             // Check if messages is a valid array
-    //             if (Array.isArray(messages)) {
-    //                 messages.forEach(msg => {
-    //                     const messageElement = document.createElement('div');
-    //                     messageElement.textContent = `${msg.sender}: ${msg.content} (${msg.created_at})`;
-    //                     chatWindow.appendChild(messageElement);
-    //                 });
-    //             } else {
-    //                 console.error('Received data is not a valid array:', messages);
-    //                 chatWindow.innerHTML = '<p>No messages found.</p>';
-    //             }
-    //         })
-    //         .catch(error => {
-    //             console.error('Error fetching messages:', error);
-    //         });
-    // }
+                    // Check if messages is a valid array
+                    if (Array.isArray(messages)) {
+                        messages.forEach(msg => {
+                            const messageElement = document.createElement('div');
+                            messageElement.textContent = `${msg.sender}: ${msg.content} (${msg.created_at})`;
+                            chatWindow.appendChild(messageElement);
+                        });
+                    } else {
+                        console.error('Received data is not a valid array:', messages);
+                        chatWindow.innerHTML = '<p>No messages found.</p>';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching messages:', error);
+            });
+    }
 
     // function attachUserClickHandlers() {
     //     const userElements = document.querySelectorAll('.user'); // Assuming '.user' is the class for user elements
