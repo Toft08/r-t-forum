@@ -60,7 +60,12 @@ function fetchAllUsers() {
 }
 function handleRoute() {
   const route = window.location.pathname;
+  console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
+  if (!container) {
+    console.error("Error: Element with ID 'content' not found.");
+    return;
+}
   container.innerHTML = "";
 
   isLoggedIn().then((loggedIn) => {
@@ -144,7 +149,6 @@ function loadHomePage() {
     container.innerHTML = `
       <h1>Home</h1>
       <div><button id="create-post-btn">Create Post</button></div>
-      <div id="posts-container"></div>
     `;
 
     // Create post popup logic

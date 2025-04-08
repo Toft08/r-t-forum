@@ -1,6 +1,10 @@
 async function loadLoginPage() {
     console.log("loading login page")
     const container = document.getElementById('content');
+    if (!container) {
+        console.error("Error: Element with ID 'content' not found.");
+        return;
+    }
     container.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">

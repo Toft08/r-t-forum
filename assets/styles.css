@@ -32,14 +32,23 @@ body {
 }
 .main-container {
     display: flex;
+    flex-direction: row;
     gap: 20px;
+    margin: 20px;
 }
 .posts-section {
-    flex: 1;
+    flex: 3;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .sidebar {
-    width: 220px;
-    min-width: 220px;
+    flex: 1;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 .feed-table {
     width: 100%;

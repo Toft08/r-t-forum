@@ -24,39 +24,36 @@
     </nav>
     
     <!-- Placeholder for dynamic content -->
+    <section id="content"></section>
     
     <!-- Main container with posts and sidebar -->
-    <div class="main-container">
+    <section class="main-container">
         <!-- Posts section -->
-        <div class="posts-section" id="posts-container">
+        <section class="posts-section" id="posts-container">
             <!-- Posts will be inserted here dynamically -->
-        <div id="content"></div>
-
-        </div>
-        
-        <!-- Sidebar with active users -->
-        <div class="sidebar">
-            <div class="active-users">
-                <h3>
-                    Users
-                </h3>
+        </section>
+        <aside class="sidebar">
+            <section class="active-users">
+                <h3>Users</h3>
                 <ul id="users-list" class="user-list">
                     <!-- Active users will be dynamically inserted here -->
                 </ul>
-            </div>
-        </div>
-    </div>
-
+            </section>
+        </aside>
+    </section>
+        
+    <!-- Sidebar with active users -->
+       
     <!-- post pop up -->
-    <div id="create-post-popup" class="popup hidden"></div>
-    <div id="chat-window" style="display: none;"></div>
+    <section id="create-post-popup" class="popup hidden"></section>
+    <section id="chat-window" style="display: none;"></section>
     
-    <!-- <script src="/js/user.js"></script> -->
-    <script src="/js/chat.js"></script>
-    <script src="/js/scripts.js"></script>
-    <script src="/js/signup.js"></script>
-    <script src="/js/login.js"></script>
-    <script src="/js/logout.js"></script>
+    <!-- Scripts -->
+    <script src="/js/chat.js" defer></script>
+    <script src="/js/scripts.js" defer></script>
+    <script src="/js/signup.js" defer></script>
+    <script src="/js/login.js" defer></script>
+    <script src="/js/logout.js" defer></script>
 
 </body>
 </html>
