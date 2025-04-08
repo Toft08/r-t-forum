@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
   handleRoute();
   isLoggedIn();
-  fetchAllUsers();
   window.addEventListener("hashchange", handleRoute);
 });
 let socket = null;
@@ -30,51 +29,46 @@ function connectWebSocket() {
 }
 
 function fetchAllUsers() {
+  const userList = document.getElementById("users-list");
+  
+
   fetch("/api/all-users")
-      .then((response) => response.json())
-      .then((users) => {
-          const userList = document.getElementById("users-list");
-          if (!userList) {
-              console.error("Error: Element with ID 'users-list' not found.");
-              return;
-          }
+    .then((response) => response.json())
+    .then((users) => {
+      const displayedUsers = new Set(); // Track displayed users
+      userList.innerHTML = ""; // Clear old users
 
-          const displayedUsers = new Set(); // Track displayed users
-          userList.innerHTML = ""; // Clear old users
+      users.forEach((user) => {
+        const username = user.username || user; // Handle both object and string cases
+        if (!displayedUsers.has(username)) {
+          displayedUsers.add(username); // Add username to the set
 
-          users.forEach((user) => {
-              const username = user.username || user; // Handle both object and string cases
-              if (!displayedUsers.has(username)) {
-                  displayedUsers.add(username); // Add username to the set
+          const li = document.createElement("li");
+          li.textContent = username;
+          li.style.cursor = "pointer";
+          li.onclick = () => openChat(username); // Pass the correct username
 
-                  const li = document.createElement("li");
-                  li.textContent = username;
-                  li.style.cursor = "pointer";
-                  li.onclick = () => openChat(username); // Pass the correct username
-
-                  userList.appendChild(li);
-              }
-          });
-      })
-      .catch((error) => console.error("Error fetching all users:", error));
+          userList.appendChild(li);
+        }
+      });
+    })
+    .catch((error) => console.error("Error fetching all users:", error));
 }
+
 function handleRoute() {
   const route = window.location.pathname;
   console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
-  if (!container) {
-    console.error("Error: Element with ID 'content' not found.");
-    return;
-}
+
   container.innerHTML = "";
 
   isLoggedIn().then((loggedIn) => {
-  const publicRoutes = ["/login", "/signup"];
+    const publicRoutes = ["/login", "/signup"];
     if (!loggedIn && !publicRoutes.includes(route)) {
-        history.pushState({}, "", "/login");
-        loadLoginPage();
-        return;
-      }
+      history.pushState({}, "", "/login");
+      loadLoginPage();
+      return;
+    }
 
     switch (route) {
       case "/":
@@ -151,6 +145,20 @@ function loadHomePage() {
       <div><button id="create-post-btn">Create Post</button></div>
     `;
 
+    const sidebar = document.querySelector(".sidebar");
+    if (sidebar) {
+      sidebar.innerHTML = `
+      <section class="active-users">
+          <h3>Users</h3>
+          <ul id="users-list" class="user-list">
+              <!-- Active users will be dynamically inserted here -->
+          </ul>
+      </section>
+  `;
+      fetchAllUsers();
+    } else {
+      console.error("Sidebar element not found");
+    }
     // Create post popup logic
     const createPostBtn = document.getElementById("create-post-btn");
     const createPostPopup = document.getElementById("create-post-popup");
