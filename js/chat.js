@@ -133,5 +133,4 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    fetchAllUsers();
 });

@@ -25,7 +25,7 @@ function logout() {
             updateUsernameDisplay('Guest');
             history.pushState({}, '', '/login');
 
-            loadLoginPage();
+            // loadLoginPage();
             handleRoute();
         } else {
             console.log('Logout failed');

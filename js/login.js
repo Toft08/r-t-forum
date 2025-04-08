@@ -1,10 +1,19 @@
 async function loadLoginPage() {
     console.log("loading login page")
-    const container = document.getElementById('content');
-    if (!container) {
-        console.error("Error: Element with ID 'content' not found.");
+    const container = document.getElementById("content");
+    const postsContainer = document.getElementById("posts-container");
+    const sidebar = document.querySelector(".sidebar");
+
+    if (!container || !postsContainer || !sidebar) {
+        console.error("Error: Required elements not found.");
         return;
     }
+
+    // Clear other content
+    container.innerHTML = "";
+    postsContainer.innerHTML = "";
+    sidebar.innerHTML = "";
+    
     container.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
@@ -19,7 +28,7 @@ async function loadLoginPage() {
         <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
     console.log("Login page loaded");
-
+    
     document.getElementById("login-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent the form from submitting the traditional way
 
@@ -49,7 +58,6 @@ async function loadLoginPage() {
 
             if (response.ok) {
                 // fetchPreviousMessages(username, 'other');
-                fetchAllUsers();
                 console.log("Login succesful, fetching users...")
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
