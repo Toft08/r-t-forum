@@ -112,27 +112,32 @@ function loadHomePage() {
   // Create popup content dynamically
   async function createPopupContent() {
     // Fetch categories from server instead of using Go template
-    let categoryHTML = "";
+  
+    let categories = [];
     try {
-      const res = await fetch("/api/categories");
-      const categories = await res.json();
-      categoryHTML = categories.map((cat, i) => `
-        <label class="category-label ${i === 0 ? 'hidden-category' : ''}">
-          <input type="checkbox" name="categories" value="${cat.CategoryID}">
-          ${cat.CategoryName}
-          </label>
-          `).join("");
+      const res = await fetch("/api/create-post"); // GET request
+      categories = await res.json();
     } catch (error) {
-      console.error("Error failed to load categories:", error);
+      console.error("Failed to load categories", error);
+      createPostPopup.innerHTML = "<p>Error loading categories</p>";
+      return;
     }
-
+  
     createPostPopup.innerHTML = `
       <h2>Create a new post</h2>
       <form id="create-form">
         <input type="text" id="title" name="title" placeholder="Title" required maxlength="50"><br>
         <textarea class="content-textarea" id="content" name="content" placeholder="Write your post here!" required></textarea><br>
-        <label for="categories">Select Topics:</label>
-        <div class="category-container">${categoryHTML}</div><br>
+        <label="categories">Select Topics:</label>
+        <div class="category-container"> ${categories
+                .filter(cat => cat.CategoryID !== 1)
+                .map(cat => `
+                <label class="category-tags">
+                    <input type="checkbox" class="category-checkbox" name="categories" value="${cat.CategoryID}">
+                    ${cat.CategoryName}
+                </label>
+            `).join('')}
+            </div><br>
         <button type="submit">Create Post</button>
       </form>
       <button id="close-popup-btn" class="close-button">Close</button>
@@ -148,9 +153,14 @@ function loadHomePage() {
       e.preventDefault();
       const title = document.getElementById("title").value;
       const content = document.getElementById("content").value;
-      const categories = [...document.querySelectorAll("input[name='categories']:checked")]
-        .map(checkbox => checkbox.value);
+      const selectedCategories = [...document.querySelectorAll("input[name='categories']:checked")]
+        .map(cb => cb.value);
+      // debugging check
+      console.log("Title:", title);
+      console.log("Content:", content);
+      console.log("Selected categories:", selectedCategories);
 
+      // Check if title and content are not empty
       if (!title || !content) {
         alert("Please fill in all fields.");
         console.log("Title or content is empty.");
@@ -161,7 +171,7 @@ function loadHomePage() {
         const response = await fetch("/api/create-post", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title, content, categories }),
+          body: JSON.stringify({ title, content, categories: selectedCategories }),
         });
 
         const result = await response.json();

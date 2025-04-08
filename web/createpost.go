@@ -1,6 +1,7 @@
 package web
 
 import (
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -16,6 +17,12 @@ type PostData struct {
 
 // CreatePost handles post creation via JSON API
 func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
+	if r.Method == http.MethodGet {
+		// Fetch categories for the frontend
+		FetchCategories(w, r)
+		return
+	}
+
 	if r.Method != http.MethodPost {
 		http.Error(w, `{"Error": "Method not allowed"}`, http.StatusMethodNotAllowed)
 		return
@@ -77,46 +84,23 @@ func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 // AddPostToDatabase inserts a new post into the database
 func AddPostToDatabase(title, content string, categories []int, userID int) error {
 
-	// var result sql.Result
-	// var err error
-	// result, err = db.Exec("INSERT INTO Post (title, content, user_id, created_at) VALUES (?, ?, ?, ?)",
-	// 	title, content, userID, time.Now().Format("2006-01-02 15:04:05"))
-	// if err != nil {
-	// 	log.Println("Error inserting post:", err)
-	// 	return err
-	// }
-
-	// // Get the post id for the post inserted
-	// postID, err := result.LastInsertId()
-	// if err != nil {
-	// 	log.Println("Error getting post ID:", err)
-	// 	return err
-	// }
-
-	// // Add all categories into Post_category table
-	// for _, categoryID := range categories {
-	// 	_, err = db.Exec("INSERT INTO Post_category (category_id, post_id) VALUES (?, ?)",
-	// 		categoryID, postID)
-	// 	if err != nil {
-	// 		log.Println("Error inserting post category:", err)
-	// 		return err
-	// 	}
-	// }
-
-	// return nil
-
-	result, err := db.Exec("INSERT INTO Post (title, content, user_id, created_at) VALUES (?, ?, ?, ?)",
+	var result sql.Result
+	var err error
+	result, err = db.Exec("INSERT INTO Post (title, content, user_id, created_at) VALUES (?, ?, ?, ?)",
 		title, content, userID, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		log.Println("Error inserting post:", err)
 		return err
 	}
 
+	// Get the post id for the post inserted
 	postID, err := result.LastInsertId()
 	if err != nil {
+		log.Println("Error getting post ID:", err)
 		return err
 	}
 
+	// Add all categories into Post_category table
 	for _, categoryID := range categories {
 		_, err = db.Exec("INSERT INTO Post_category (category_id, post_id) VALUES (?, ?)",
 			categoryID, postID)
@@ -125,5 +109,19 @@ func AddPostToDatabase(title, content string, categories []int, userID int) erro
 			return err
 		}
 	}
+
 	return nil
+}
+
+func FetchCategories(w http.ResponseWriter, r *http.Request) {
+	var data []CategoryDetails
+	var err error
+	data, err = GetCategories()
+	if err != nil {
+		log.Println("Error fething categories: ", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
 }
