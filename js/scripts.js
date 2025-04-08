@@ -16,7 +16,6 @@ function connectWebSocket() {
 
   socket.onmessage = (event) => {
     console.log("WebSocket message:", event.data);
-    // handle message here
   };
 
   socket.onclose = () => {

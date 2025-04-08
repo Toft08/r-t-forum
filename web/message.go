@@ -25,6 +25,7 @@ func getMessages(sender, receiver string, limit int) ([]StoredMessage, error) {
 		sender, receiver, receiver, sender, limit,
 	)
 	if err != nil {
+		log.Printf("Error fetching messages: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -34,11 +35,12 @@ func getMessages(sender, receiver string, limit int) ([]StoredMessage, error) {
 		var msg StoredMessage
 		err := rows.Scan(&msg.Sender, &msg.Receiver, &msg.Content, &msg.CreatedAt)
 		if err != nil {
+			log.Printf("Error scanning message: %v", err)
 			return nil, err
 		}
 		messages = append(messages, msg)
 	}
-	fmt.Println(messages)
+	log.Printf("Fetched %d messages", len(messages))
 	return messages, nil
 }
 

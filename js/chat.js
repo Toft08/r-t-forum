@@ -1,6 +1,4 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const activeUsersPopup = document.querySelector('.active-users');
-    const minimizeButton = document.getElementById('minimize-users');
     const usernamePlaceholder = document.getElementById('username-placeholder');
     const username = await fetchCurrentUsername();
     usernamePlaceholder.textContent = username; // Update the placeholder
@@ -70,15 +68,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
     window.sendMessage = sendMessage;
-    let receiver = '';
 
-    async function fetchPreviousMessages(sender, receiver) {
-        console.log("Requesting messages for sender:", sender, "and receiver:", receiver);
+    async function fetchPreviousMessages(currentUsername, receiver) {
+        console.log("Requesting messages for sender:", currentUsername, "and receiver:", receiver);
 
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
                 type: "fetchMessages",
-                sender: sender,
+                sender: currentUsername,
                 receiver: receiver,
             }));
         } else {
