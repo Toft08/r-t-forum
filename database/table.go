@@ -34,6 +34,20 @@ func MakeTables(db *sql.DB) {
 		fmt.Println("Error creating Post table:", err)
 		return
 	}
+	createMessageTableQuery := `
+		CREATE TABLE IF NOT EXISTS Message (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		sender TEXT NOT NULL,
+    	receiver TEXT NOT NULL,
+   		user_id INTEGER NOT NULL,
+		content TEXT NOT NULL,
+   		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    	FOREIGN KEY (user_id) REFERENCES User (id) ON DELETE CASCADE
+	);`
+	if _, err := db.Exec(createMessageTableQuery); err != nil {
+		fmt.Println("Error creating Message table:", err)
+		return
+	}
 	createCommentTableQuery := `
 		CREATE TABLE IF NOT EXISTS Comment (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,

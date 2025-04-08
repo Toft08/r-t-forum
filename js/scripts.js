@@ -1,27 +1,81 @@
 document.addEventListener("DOMContentLoaded", function () {
-  handleRoute(); // Load the correct page on initial load
+  handleRoute();
   isLoggedIn();
-  window.addEventListener("hashchange", handleRoute); // Listen for hash changes
+  fetchAllUsers();
+  window.addEventListener("hashchange", handleRoute);
 });
+let socket = null;
 
+function connectWebSocket() {
+  if (socket && socket.readyState === WebSocket.OPEN) return;
+
+  socket = new WebSocket("ws://" + window.location.host + "/api/ws");
+
+  socket.onopen = () => {
+    console.log("WebSocket connected");
+  };
+
+  socket.onmessage = (event) => {
+    console.log("WebSocket message:", event.data);
+    // handle message here
+  };
+
+  socket.onclose = () => {
+    console.log("WebSocket closed");
+  };
+
+  socket.onerror = (error) => {
+    console.error("WebSocket error:", error);
+  };
+}
+
+function fetchAllUsers() {
+  fetch("/api/all-users")
+      .then((response) => response.json())
+      .then((users) => {
+          const userList = document.getElementById("users-list");
+          if (!userList) {
+              console.error("Error: Element with ID 'users-list' not found.");
+              return;
+          }
+
+          const displayedUsers = new Set(); // Track displayed users
+          userList.innerHTML = ""; // Clear old users
+
+          users.forEach((user) => {
+              const username = user.username || user; // Handle both object and string cases
+              if (!displayedUsers.has(username)) {
+                  displayedUsers.add(username); // Add username to the set
+
+                  const li = document.createElement("li");
+                  li.textContent = username;
+                  li.style.cursor = "pointer";
+                  li.onclick = () => openChat(username); // Pass the correct username
+
+                  userList.appendChild(li);
+              }
+          });
+      })
+      .catch((error) => console.error("Error fetching all users:", error));
+}
 function handleRoute() {
-  const route = window.location.pathname; // Get the hash part (without #)
+  const route = window.location.pathname;
+  console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
-  container.innerHTML = ""; // Clear the container
+  if (!container) {
+    console.error("Error: Element with ID 'content' not found.");
+    return;
+}
+  container.innerHTML = "";
 
-  const publicRoutes = ["/login", "/signup"];
   isLoggedIn().then((loggedIn) => {
-    // If not logged in, restrict navigation to only login and signup pages
-    if (!loggedIn) {
-      // If trying to access a route other than login or signup, redirect to login
-      if (!publicRoutes.includes(route)) {
+  const publicRoutes = ["/login", "/signup"];
+    if (!loggedIn && !publicRoutes.includes(route)) {
         history.pushState({}, "", "/login");
         loadLoginPage();
         return;
       }
-    }
 
-    // Check if we are in the signup or login route, otherwise load homepage content
     switch (route) {
       case "/":
         if (loggedIn) {
@@ -33,21 +87,20 @@ function handleRoute() {
         }
         break;
       case "/login":
-        loadLoginPage(); // Load the login page
+        loadLoginPage();
         break;
       case "/signup":
-        loadSignupPage(); // Load the signup page
+        loadSignupPage();
         break;
       case "/home":
         if (loggedIn) {
-          loadHomePage(); // Load the homepage
+          loadHomePage();
         } else {
           history.pushState({}, "", "/login");
-          loadLoginPage(); // Redirect to login if not logged in
+          loadLoginPage();
         }
         break;
       default:
-        // For any unknown route when not logged in
         if (!loggedIn) {
           history.pushState({}, "", "/login");
           loadLoginPage();
@@ -82,79 +135,78 @@ function isLoggedIn() {
 }
 
 function loadHomePage() {
-  if (!isLoggedIn()) {
-    console.error("Unauthorized access to home page");
-    history.pushState({}, "", "/login");
-    loadLoginPage();
-    return;
-  }
-
-  const container = document.getElementById("content");
-  container.innerHTML = `
-      <h1>Home</h1>
-  <div> <button id="create-post-btn">Create Post</button></div>
-      <div id="posts-container"></div>
-  `;
-
-  // Create post popup window.
-  const createPostBtn = document.getElementById("create-post-btn");
-  const createPostPopup = document.getElementById("create-post-popup");
-
-  // Create popup content dynamically
-  const createPopupContent = () => {
-    createPostPopup.innerHTML = `
-              <h2>Create a new post</h2>
-              <form id="create-form" action="/create" method="POST">
-                  <label for="title">Title</label>
-                  <input type="text" id="title" name="title" required maxlength="50">
-                  <br>
-                  <label for="content">Content:</label>
-                  <textarea class="content-textarea" id="content" name="content" required></textarea>
-                  <br>
-                  <label for="categories">Categories</label>
-                  <input type="text" id="categories" name="categories" required>
-                  <br>
-                  <button type="submit">Create</button>
-              </form>
-              <button id="close-popup-btn" class="close-button">Close</button>
-          `;
-
-    const closePopupBtn = document.getElementById("close-popup-btn");
-    const createForm = createPostPopup.querySelector("#create-form");
-
-    closePopupBtn.addEventListener("click", () => {
-      createPostPopup.classList.add("hidden");
-    });
-
-    createForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      createPostPopup.classList.add("hidden");
-    });
-  };
-
-  // Show popup when create post button is clicked
-  createPostBtn.addEventListener("click", () => {
-    // Create popup content if not already created
-    if (createPostPopup.innerHTML.trim() === "") {
-      createPopupContent();
+  isLoggedIn().then((loggedIn) => {
+    if (!loggedIn) {
+      console.error("Unauthorized access to home page");
+      history.pushState({}, "", "/login");
+      loadLoginPage();
+      return;
     }
 
-    // Show popup
-    createPostPopup.classList.remove("hidden");
-  });
+    connectWebSocket();
 
-  fetch("/api/posts")
-    .then((response) => response.json())
-    .then((posts) => {
-      console.log("Received posts:", posts);
-      insertPosts(posts);
-    })
-    .catch((error) => {
-      console.error("Error loading posts:", error);
-      const container = document.getElementById("posts-container");
-      container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
+    const container = document.getElementById("content");
+    container.innerHTML = `
+      <h1>Home</h1>
+      <div><button id="create-post-btn">Create Post</button></div>
+    `;
+
+    // Create post popup logic
+    const createPostBtn = document.getElementById("create-post-btn");
+    const createPostPopup = document.getElementById("create-post-popup");
+
+    const createPopupContent = () => {
+      createPostPopup.innerHTML = `
+        <h2>Create a new post</h2>
+        <form id="create-form" action="/create" method="POST">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required maxlength="50">
+            <br>
+            <label for="content">Content:</label>
+            <textarea class="content-textarea" id="content" name="content" required></textarea>
+            <br>
+            <label for="categories">Categories</label>
+            <input type="text" id="categories" name="categories" required>
+            <br>
+            <button type="submit">Create</button>
+        </form>
+        <button id="close-popup-btn" class="close-button">Close</button>
+      `;
+
+      const closePopupBtn = document.getElementById("close-popup-btn");
+      const createForm = createPostPopup.querySelector("#create-form");
+
+      closePopupBtn.addEventListener("click", () => {
+        createPostPopup.classList.add("hidden");
+      });
+
+      createForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        createPostPopup.classList.add("hidden");
+        // Handle form submission here
+      });
+    };
+
+    createPostBtn.addEventListener("click", () => {
+      if (createPostPopup.innerHTML.trim() === "") {
+        createPopupContent();
+      }
+      createPostPopup.classList.remove("hidden");
     });
+
+    fetch("/api/posts")
+      .then((response) => response.json())
+      .then((posts) => {
+        insertPosts(posts);
+      })
+      .catch((error) => {
+        console.error("Error loading posts:", error);
+        const container = document.getElementById("posts-container");
+        container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
+      });
+  });
 }
+
 
 function insertPosts(posts) {
   const container = document.getElementById("posts-container");

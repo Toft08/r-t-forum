@@ -1,6 +1,10 @@
-function loadLoginPage() {
+async function loadLoginPage() {
     console.log("loading login page")
     const container = document.getElementById('content');
+    if (!container) {
+        console.error("Error: Element with ID 'content' not found.");
+        return;
+    }
     container.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
@@ -31,7 +35,9 @@ function loadLoginPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password }),
+                // include allows credentials to allow cookies to be sent and recieved
+                credentials: 'include'
             });
 
             console.log("Response status:", response.status); // Debug log
@@ -42,7 +48,9 @@ function loadLoginPage() {
             console.log("Response data:", data); // Debug log
 
             if (response.ok) {
-                currentUsername = username;
+                // fetchPreviousMessages(username, 'other');
+                fetchAllUsers();
+                console.log("Login succesful, fetching users...")
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
                 handleRoute();

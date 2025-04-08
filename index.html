@@ -4,143 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="assets/styles.css">
 
     <title>Forum</title>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .welcome-text {
-            margin: 0;
-        }
-        .logout-button {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .feed-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        .post-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .post-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #666;
-        }
-        .post-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .post-content {
-            margin-bottom: 15px;
-        }
-        .post-footer {
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
-            font-size: 14px;
-        }
-        .categories {
-            color: #2196F3;
-        }
-        .post-stats {
-            display: flex;
-            gap: 15px;
-        }
-        .likes, .dislikes {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .likes { color: #4CAF50; }
-        .dislikes { color: #f44336; }
-        
-        .popup {
-            position: fixed;
-            top: 15%;
-            left: 30%;
-            min-width: 25%;
-            min-height: 20%;
-            background-color: white;
-            display: block;
-            border: #1d1c1c 1px solid;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hidden {
-            display: none;
-        }
-.active-users {
-     position: fixed;
-     bottom: 10px;
-     right: 10px;
-     background-color: white;
-     border: 1px solid #ddd;
-     border-radius: 8px;
-     padding: 10px;
-     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-     width: 200px;
- }
- 
- .active-users h3 {
-     margin: 0;
-     font-size: 16px;
-     border-bottom: 1px solid #ddd;
-     padding-bottom: 5px;
- }
- 
- .user-list {
-     list-style: none;
-     padding: 0;
-     margin: 5px 0 0 0;
- }
- 
- .user-list li {
-     padding: 5px;
-     font-size: 14px;
-     border-bottom: 1px solid #eee;
- }
- 
- .user-list li:last-child {
-     border-bottom: none;
- }
-    </style>
 </head>
 <body>
 
@@ -151,35 +19,41 @@
         </div>
         <div class="nav-right">
             <p class="welcome-text">Logged in as: <span id="username-placeholder">Guest</span></p>
-                <button type="submit" id="logout-button">Log Out</button>
+            <button type="submit" id="logout-button">Log Out</button>
         </div>
     </nav>
     
     <!-- Placeholder for dynamic content -->
-    <div id="content">
-    </div>
+    <section id="content"></section>
     
-    <!-- dynamic forum -->
-    <div id="posts-container">
-        <!-- Posts will be inserted here dynamically -->
-    </div>
-
+    <!-- Main container with posts and sidebar -->
+    <section class="main-container">
+        <!-- Posts section -->
+        <section class="posts-section" id="posts-container">
+            <!-- Posts will be inserted here dynamically -->
+        </section>
+        <aside class="sidebar">
+            <section class="active-users">
+                <h3>Users</h3>
+                <ul id="users-list" class="user-list">
+                    <!-- Active users will be dynamically inserted here -->
+                </ul>
+            </section>
+        </aside>
+    </section>
+        
+    <!-- Sidebar with active users -->
+       
     <!-- post pop up -->
-    <div id="create-post-popup" class="popup hidden"></div>
-    <div class="active-users">
-        <h3>Active Users</h3>
-        <ul id="active-users-list" class="user-list">
-            <!-- Active users will be dynamically inserted here -->
-        </ul>
-    </div>
-    <div id="chat-window" style="display: none;"></div>
-
-    <script src="/js/scripts.js"></script>
-    <script src="/js/chat.js"></script>
-    <script src="/js/signup.js"></script>
-    <script src="/js/login.js"></script>
-    <script src="/js/logout.js"></script>
-
+    <section id="create-post-popup" class="popup hidden"></section>
+    <section id="chat-window" style="display: none;"></section>
+    
+    <!-- Scripts -->
+    <script src="/js/chat.js" defer></script>
+    <script src="/js/scripts.js" defer></script>
+    <script src="/js/signup.js" defer></script>
+    <script src="/js/login.js" defer></script>
+    <script src="/js/logout.js" defer></script>
 
 </body>
-</html> 
+</html>

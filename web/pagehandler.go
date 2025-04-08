@@ -31,11 +31,13 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	case "/api/logout":
 		Logout(w, r)
 	case "/api/check-session":
-		checkSessionHandler(w, r)
-	case "/api/active-users":
-		activeUsersHandler(w, r)
-	case "/api/ws/chat":
+		checkSessionHandler(w, r, db)
+	case "/api/all-users":
+		allUsersHandler(w, r)
+	case "/api/ws":
 		handleChatWebSocket(w, r)
+	case "/api/getMessagesHandler":
+		getMessagesHandler(w, r)
 	default:
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotFound)
@@ -70,7 +72,7 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 // }
 
 // VerifySession checks if the session ID exists in the database
-func VerifySession(r *http.Request) (bool, int, string) {
+func VerifySession(r *http.Request, db *sql.DB) (bool, int, string) {
 	var userID int
 	var username string
 	cookie, err := r.Cookie("session_id")
@@ -80,13 +82,13 @@ func VerifySession(r *http.Request) (bool, int, string) {
 
 	err = db.QueryRow("SELECT user_id FROM Session WHERE id = ?", cookie.Value).Scan(&userID)
 	if err != nil {
-		log.Println("No userID found for the cookie")
+		log.Printf("Error finding userID for session cookie %s: %v", cookie.Value, err)
 		return false, 0, ""
 	}
 
 	err = db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
 	if err != nil {
-		log.Println("No username found")
+		log.Printf("Error finding username for userID %d: %v", userID, err)
 		return false, 0, ""
 	}
 
@@ -94,17 +96,31 @@ func VerifySession(r *http.Request) (bool, int, string) {
 }
 
 // API endpoint to check if the user is logged in
-func checkSessionHandler(w http.ResponseWriter, r *http.Request) {
-	loggedIn, userID, username := VerifySession(r)
+func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
+	log.Printf("Handling /api/check-session for %s", r.RemoteAddr)
 
-	// Build response based on session validity
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		log.Println("No session cookie found:", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "User not logged in"})
+		return
+	}
+	log.Printf("Session cookie: %s", cookie.Value)
+
+	loggedIn, userID, username := VerifySession(r, db)
+	if loggedIn {
+		log.Printf("User %s (ID: %d) is logged in", username, userID)
+	} else {
+		log.Println("User is not logged in")
+	}
+
 	response := map[string]interface{}{
 		"loggedIn": loggedIn,
 		"userID":   userID,
 		"username": username,
 	}
 
-	// Set Content-Type header and encode the response as JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }

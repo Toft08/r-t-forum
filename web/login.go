@@ -32,6 +32,7 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+	username := loginRequest.Username
 
 	// Rest of your existing authentication logic remains the same
 	userID, hashedPassword, err := getUserCredentials(loginRequest.Username)
@@ -57,7 +58,8 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Internal server error"})
 		return
 	}
-	ActiveUsers.AddUser(loginRequest.Username)
+	AllUsers.AddUser(username)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{

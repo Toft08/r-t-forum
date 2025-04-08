@@ -21,7 +21,8 @@ var (
 )
 
 // Message structure
-type Message struct {
+type RealTimeMessage struct {
+
 	From    string `json:"from"`
 	To      string `json:"to"`
 	Message string `json:"message"`
@@ -67,11 +68,18 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	// Listen for incoming messages
 	for {
-		var msg Message
+		var msg RealTimeMessage
 		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Println(username, "disconnected")
 			break
+		}
+
+		// save the message to db
+		err = saveMessage(msg.From, msg.To, 0, msg.Message)
+		if err != nil {
+			log.Println("Error saving message: ", err)
+			continue
 		}
 
 		// Send message to recipient
