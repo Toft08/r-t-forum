@@ -59,7 +59,7 @@ import (
 func HandlePostPagePost(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
 	var userID int
 	var err error
-	data.LoggedIn, userID, data.Username = VerifySession(r)
+	data.LoggedIn, userID, data.Username = VerifySession(r, db)
 
 	if data.LoggedIn {
 		vote := r.FormValue("vote")

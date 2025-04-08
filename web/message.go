@@ -48,6 +48,8 @@ func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	sender := r.URL.Query().Get("sender")
 	receiver := r.URL.Query().Get("receiver")
 
+log.Printf("Sender: %s, Receiver: %s", sender, receiver)
+
 	if sender == "" || receiver == "" {
 		http.Error(w, "Missing sender or receiver", http.StatusBadRequest)
 		return
