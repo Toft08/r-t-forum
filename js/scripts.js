@@ -144,7 +144,6 @@ function loadHomePage() {
       <h1>Home</h1>
     <div> <button id="create-post-btn">Create Post</button></div>
     <div id="create-post-popup" class="hidden"></div>
-      <div id="posts-container"></div>
     `;
 
     const sidebar = document.querySelector(".sidebar");
@@ -153,10 +152,8 @@ function loadHomePage() {
       <section class="active-users">
           <h3>Users</h3>
           <ul id="users-list" class="user-list">
-              <!-- Active users will be dynamically inserted here -->
           </ul>
       </section>
-
   `;
       fetchAllUsers();
     } else {
