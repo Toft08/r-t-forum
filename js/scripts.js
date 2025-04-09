@@ -112,7 +112,7 @@ function loadHomePage() {
   // Create popup content dynamically
   async function createPopupContent() {
     // Fetch categories from server instead of using Go template
-  
+
     let categories = [];
     try {
       const res = await fetch("/api/create-post"); // GET request
@@ -122,23 +122,23 @@ function loadHomePage() {
       createPostPopup.innerHTML = "<p>Error loading categories</p>";
       return;
     }
-  
+
     createPostPopup.innerHTML = `
       <h2>Create a new post</h2>
       <form id="create-form">
         <input type="text" id="title" name="title" placeholder="Title" required maxlength="50"><br>
-        <textarea class="content-textarea" id="content" name="content" placeholder="Write your post here!" required></textarea><br>
+        <textarea class="content-textarea" id="post-content" name="post-content" placeholder="Write your post here!" required></textarea><br>
         <label="categories">Select Topics:</label>
         <div class="category-container"> ${categories
-                .filter(cat => cat.CategoryID !== 1)
-                .map(cat => `
+        .filter(cat => cat.CategoryID !== 1)
+        .map(cat => `
                 <label class="category-tags">
                     <input type="checkbox" class="category-checkbox" name="categories" value="${cat.CategoryID}">
                     ${cat.CategoryName}
                 </label>
             `).join('')}
             </div><br>
-        <button type="submit">Create Post</button>
+        <button type="submit">Post!</button>
       </form>
       <button id="close-popup-btn" class="close-button">Close</button>
     `;
@@ -152,7 +152,7 @@ function loadHomePage() {
     document.getElementById("create-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const title = document.getElementById("title").value;
-      const content = document.getElementById("content").value;
+      const content = document.getElementById("post-content").value;
       const selectedCategories = [...document.querySelectorAll("input[name='categories']:checked")]
         .map(cb => cb.value);
       // debugging check
