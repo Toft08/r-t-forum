@@ -106,8 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function openChat(username) {
     // Create/update chat window UI
-    const chatWindow = document.getElementById("chat-window") || 
-                       createChatWindow();
+    const chatWindow = document.getElementById("chat-window") || createChatWindow();
     
     chatWindow.style.display = "block";
     chatWindow.innerHTML = `
@@ -187,6 +186,8 @@ function sendMessage(recipient) {
 }
 
 function sendActualMessage(recipient, message) {
+
+    console.log(`Sending message to ${recipient}: ${message}`);
     // Create the message object
     const messageObj = {
       from: window.currentUsername, // Add sender information

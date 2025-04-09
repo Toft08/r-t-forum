@@ -3,30 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
   isLoggedIn();
   window.addEventListener("hashchange", handleRoute);
 });
-// let socket = null;
-
-// function connectWebSocket() {
-//   if (socket && socket.readyState === WebSocket.OPEN) return;
-
-//   socket = new WebSocket("ws://" + window.location.host + "/api/ws");
-
-//   socket.onopen = () => {
-//     console.log("WebSocket connected");
-//   };
-
-//   socket.onmessage = (event) => {
-//     console.log("WebSocket message:", event.data);
-//     // handle message here
-//   };
-
-//   socket.onclose = () => {
-//     console.log("WebSocket closed");
-//   };
-
-//   socket.onerror = (error) => {
-//     console.error("WebSocket error:", error);
-//   };
-// }
 
 function fetchAllUsers() {
   const userList = document.getElementById("users-list");

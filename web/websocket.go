@@ -22,7 +22,7 @@ var (
 
 // Message structure
 type RealTimeMessage struct {
-
+	Type	string `json:"type"`
 	From    string `json:"from"`
 	To      string `json:"to"`
 	Message string `json:"message"`
