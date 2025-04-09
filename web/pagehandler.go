@@ -28,6 +28,8 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		SignUp(w, r, db)
 	case "/api/posts":
 		PostsHandler(w, r)
+	case "/api/create-post":
+		CreatePost(w, r, &PageDetails{})
 	case "/api/logout":
 		Logout(w, r)
 	case "/api/check-session":
@@ -44,32 +46,6 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Page Not Found"})
 	}
 }
-
-// RenderTemplate handles the rendering of HTML templates with provided data
-// func RenderTemplate(w http.ResponseWriter, t string, data interface{}) {
-
-// 	err := tmpl.ExecuteTemplate(w, t+".html", data)
-// 	if err != nil {
-// 		log.Println("Error executing template:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-// }
-
-// // ErrorHandler handles the rendering of error pages
-// func ErrorHandler(w http.ResponseWriter, errorMessage string, statusCode int) {
-
-// 	w.WriteHeader(statusCode)
-
-// 	err := tmpl.ExecuteTemplate(w, "error.html", map[string]string{
-// 		"ErrorMessage": errorMessage,
-// 	})
-// 	if err != nil {
-// 		log.Println("Error executing template error.html:", err)
-// 		http.Error(w, errorMessage, statusCode)
-// 		return
-// 	}
-// }
 
 // VerifySession checks if the session ID exists in the database
 func VerifySession(r *http.Request, db *sql.DB) (bool, int, string) {

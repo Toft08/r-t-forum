@@ -30,7 +30,7 @@ function connectWebSocket() {
 
 function fetchAllUsers() {
   const userList = document.getElementById("users-list");
-  
+
 
   fetch("/api/all-users")
     .then((response) => response.json())
@@ -142,7 +142,9 @@ function loadHomePage() {
     const container = document.getElementById("content");
     container.innerHTML = `
       <h1>Home</h1>
-      <div><button id="create-post-btn">Create Post</button></div>
+    <div> <button id="create-post-btn">Create Post</button></div>
+    <div id="create-post-popup" class="hidden"></div>
+      <div id="posts-container"></div>
     `;
 
     const sidebar = document.querySelector(".sidebar");
@@ -154,65 +156,116 @@ function loadHomePage() {
               <!-- Active users will be dynamically inserted here -->
           </ul>
       </section>
+
   `;
       fetchAllUsers();
     } else {
       console.error("Sidebar element not found");
     }
-    // Create post popup logic
+
+    // Create post popup window.
     const createPostBtn = document.getElementById("create-post-btn");
     const createPostPopup = document.getElementById("create-post-popup");
 
-    const createPopupContent = () => {
-      createPostPopup.innerHTML = `
-        <h2>Create a new post</h2>
-        <form id="create-form" action="/create" method="POST">
-            <label for="title">Title</label>
-            <input type="text" id="title" name="title" required maxlength="50">
-            <br>
-            <label for="content">Content:</label>
-            <textarea class="content-textarea" id="content" name="content" required></textarea>
-            <br>
-            <label for="categories">Categories</label>
-            <input type="text" id="categories" name="categories" required>
-            <br>
-            <button type="submit">Create</button>
-        </form>
-        <button id="close-popup-btn" class="close-button">Close</button>
-      `;
+    loadPosts();
 
-      const closePopupBtn = document.getElementById("close-popup-btn");
-      const createForm = createPostPopup.querySelector("#create-form");
-
-      closePopupBtn.addEventListener("click", () => {
-        createPostPopup.classList.add("hidden");
-      });
-
-      createForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        createPostPopup.classList.add("hidden");
-        // Handle form submission here
-      });
-    };
-
+    // Show popup when clicking Create Post
     createPostBtn.addEventListener("click", () => {
-      if (createPostPopup.innerHTML.trim() === "") {
-        createPopupContent();
-      }
+      createPopupContent();
       createPostPopup.classList.remove("hidden");
     });
 
-    fetch("/api/posts")
-      .then((response) => response.json())
-      .then((posts) => {
-        insertPosts(posts);
-      })
-      .catch((error) => {
-        console.error("Error loading posts:", error);
-        const container = document.getElementById("posts-container");
-        container.innerHTML = `<p>Error loading posts: ${error.message}</p>`;
+    // Create popup content dynamically
+    async function createPopupContent() {
+      // Fetch categories from server instead of using Go template
+
+      let categories = [];
+      try {
+        const res = await fetch("/api/create-post"); // GET request
+        categories = await res.json();
+      } catch (error) {
+        console.error("Failed to load categories", error);
+        createPostPopup.innerHTML = "<p>Error loading categories</p>";
+        return;
+      }
+
+      createPostPopup.innerHTML = `
+      <h2>Create a new post</h2>
+      <form id="create-form">
+        <input type="text" id="title" name="title" placeholder="Title" required maxlength="50"><br>
+        <textarea class="content-textarea" id="post-content" name="post-content" placeholder="Write your post here!" required></textarea><br>
+        <label="categories">Select Topics:</label>
+        <div class="category-container"> ${categories
+          .filter(cat => cat.CategoryID !== 1)
+          .map(cat => `
+                <label class="category-tags">
+                    <input type="checkbox" class="category-checkbox" name="categories" value="${cat.CategoryID}">
+                    ${cat.CategoryName}
+                </label>
+            `).join('')}
+            </div><br>
+        <button type="submit">Post!</button>
+      </form>
+      <button id="close-popup-btn" class="close-button">Close</button>
+    `;
+
+      // Event: Close popup
+      document.getElementById("close-popup-btn").addEventListener("click", () => {
+        createPostPopup.classList.add("hidden");
       });
+
+      // Event: Submit form
+      document.getElementById("create-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const title = document.getElementById("title").value;
+        const content = document.getElementById("post-content").value;
+        const selectedCategories = [...document.querySelectorAll("input[name='categories']:checked")]
+          .map(cb => cb.value);
+        // debugging check
+        console.log("Title:", title);
+        console.log("Content:", content);
+        console.log("Selected categories:", selectedCategories);
+
+        // Check if title and content are not empty
+        if (!title || !content) {
+          alert("Please fill in all fields.");
+          console.log("Title or content is empty.");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/create-post", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, content, categories: selectedCategories }),
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            console.log("Post created successfully!");
+            createPostPopup.classList.add("hidden");
+            loadPosts(); // Reload posts dynamically
+          } else {
+            console.error("Error creating post:", result.error);
+          }
+        } catch (error) {
+          console.error("Failed to submit post:", error);
+        }
+      });
+    }
   });
+}
+
+
+function loadPosts() {
+  fetch("/api/posts")
+    .then((response) => response.json())
+    .then((posts) => insertPosts(posts))
+    .catch((error) => {
+      console.error("Error loading posts:", error);
+      document.getElementById("posts-container").innerHTML =
+        `<p>Error loading posts: ${error.message}</p>`;
+    });
 }
 
 
@@ -228,10 +281,7 @@ function insertPosts(posts) {
   posts.forEach((post) => {
     const categoriesArray = post.categories ? post.categories.split(",") : [];
     const uniqueCategories = [...new Set(categoriesArray)];
-    const categoriesText =
-      uniqueCategories.length > 0
-        ? uniqueCategories.join(", ")
-        : "No categories";
+    const categoriesText = uniqueCategories.length > 0 ? uniqueCategories.join(", ") : "No categories";
 
     const postElement = document.createElement("div");
     postElement.className = "post-card";
@@ -246,17 +296,12 @@ function insertPosts(posts) {
               <div class="categories">Categories: ${categoriesText}</div>
               <div class="post-stats">
                   <div class="likes">
-                      <span class="material-symbols-outlined">thumb_up</span>
-                      ${post.likes}
-                  </div>
+                      <span class="material-symbols-outlined">thumb_up</span> ${post.likes}</div>
                   <div class="dislikes">
-                      <span class="material-symbols-outlined">thumb_down</span>
-                      ${post.dislikes}
-                  </div>
+                      <span class="material-symbols-outlined">thumb_down</span> ${post.dislikes}</div>
               </div>
           </div>
       `;
-
     container.appendChild(postElement);
   });
 }

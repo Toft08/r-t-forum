@@ -3,32 +3,34 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"r-t-forum/database"
+	"strconv"
 )
 
 func PostsHandler(w http.ResponseWriter, r *http.Request) {
-    db := database.InitDB()
-    defer db.Close()
+	db := database.InitDB()
+	defer db.Close()
 
-    posts, err := FetchPosts(db)
-    if err != nil {
-        log.Println("❌ Error fetching posts:", err)
-        http.Error(w, "Error fetching posts", http.StatusInternalServerError)
-        return
-    }
+	posts, err := FetchPosts(db)
+	if err != nil {
+		log.Println("❌ Error fetching posts:", err)
+		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
+		return
+	}
 
-    log.Printf("Number of posts fetched: %d", len(posts))
+	log.Printf("Number of posts fetched: %d", len(posts))
 
-    // Directly encode the posts array
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusOK)
-    
-    if err := json.NewEncoder(w).Encode(posts); err != nil {
-        log.Println("❌ Error encoding JSON:", err)
-        http.Error(w, "Error processing data", http.StatusInternalServerError)
-    }
+	// Directly encode the posts array
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		log.Println("❌ Error encoding JSON:", err)
+		http.Error(w, "Error processing data", http.StatusInternalServerError)
+	}
 }
 
 func FetchPosts(db *sql.DB) ([]PostDetails, error) {
@@ -78,55 +80,6 @@ func FetchPosts(db *sql.DB) ([]PostDetails, error) {
 	}
 	return posts, nil
 }
-
-// HomePage handles the rendering of the home page
-// func HomePage(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-// 	data.ValidationError = ""
-
-// 	switch r.Method {
-// 	case http.MethodGet:
-// 		HandleHomeGet(w, r, data)
-// 	case http.MethodPost:
-// 		HandleHomePost(w, r, data)
-// 	default:
-// 		ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-// 	}
-// }
-
-// HandleHomeGet fetches posts from the database and renders the home page
-// func HandleHomeGet(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-// 	data.LoggedIn, _, data.Username = VerifySession(r)
-
-// 	// Fetch posts from the database
-// 	rows, err := db.Query(`
-//         SELECT Post.id
-//         FROM Post
-//         ORDER BY Post.created_at DESC;
-//     `)
-// 	if err != nil {
-// 		log.Println("Error fetching posts:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	defer rows.Close()
-
-// 	for rows.Next() {
-// 		var id int
-// 		if err := rows.Scan(&id); err != nil {
-// 			ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 			return
-// 		}
-// 		post, err := GetPostDetails(id, 0)
-
-// 		if err != nil {
-// 			ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		}
-// 		data.Posts = append(data.Posts, *post)
-
-// 	}
-
-// 	RenderTemplate(w, "index", data)
-// }
 
 // HandleHomePost handles the filtering of posts based on the user's selection
 // func HandleHomePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
@@ -209,27 +162,25 @@ func FetchPosts(db *sql.DB) ([]PostDetails, error) {
 // 	RenderTemplate(w, "index", data)
 // }
 
-// // HandleCategory converts the category ID into a string and returns validated ID
-// func HandleCategory(category string) (int, error) {
+// HandleCategory converts the category ID into a string and returns validated ID
+func HandleCategory(db *sql.DB, category string) (int, error) {
 
-// 	categoryID, err := strconv.Atoi(category)
-// 	if err != nil {
-// 		log.Println("Error converting categoryID", err)
-// 		return 0, err
-// 	}
+	categoryID, err := strconv.Atoi(category)
+	if err != nil {
+		log.Println("Error converting categoryID", err)
+		return 0, err
+	}
 
-// 	valid := ValidateCategoryID(categoryID)
-// 	if !valid {
-// 		log.Println("Invalid categoryID", category)
-// 		return 0, fmt.Errorf("invalid category id: %s", category)
-// 	}
-
-// 	return categoryID, nil
-
-// }
+	// valid := ValidateCategoryID(categoryID)
+	if !ValidateCategoryID(db, categoryID) {
+		log.Println("Invalid categoryID", category)
+		return 0, fmt.Errorf("invalid category id: %s", category)
+	}
+	return categoryID, nil
+}
 
 // ValidateCategoryID checks if the category ID given exists in the databse
-func ValidateCategoryID(categoryID int) bool {
+func ValidateCategoryID(db *sql.DB, categoryID int) bool {
 	var category int
 	err := db.QueryRow("SELECT id FROM Category WHERE id = ?", categoryID).Scan(&category)
 	if err != nil {
