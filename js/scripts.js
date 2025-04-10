@@ -6,31 +6,20 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchAllUsers() {
-  const userList = document.getElementById("users-list");
+
 
 
   fetch("/api/all-users")
     .then((response) => response.json())
-    .then((users) => {
-      const displayedUsers = new Set(); // Track displayed users
-      userList.innerHTML = ""; // Clear old users
-
-      users.forEach((user) => {
-        const username = user.username || user; // Handle both object and string cases
-        if (!displayedUsers.has(username)) {
-          displayedUsers.add(username); // Add username to the set
-
-          const li = document.createElement("li");
-          li.textContent = username;
-          li.style.cursor = "pointer";
-          li.onclick = () => openChat(username); // Pass the correct username
-
-          userList.appendChild(li);
-        }
-      });
+    .then((res) => {
+      if(res.ok){
+        console.log("All users fetched successfully");
+      }
     })
     .catch((error) => console.error("Error fetching all users:", error));
 }
+
+
 
 function handleRoute() {
   const route = window.location.pathname;

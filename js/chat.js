@@ -29,7 +29,25 @@ function connectWebSocket() {
 
     return socket;
 }
-
+function ShowUsers(users) {
+    const userList = document.getElementById("users-list");
+    const displayedUsers = new Set(); // Track displayed users
+        userList.innerHTML = ""; // Clear old users
+  
+        users.forEach((user) => {
+          const username = user.username || user; // Handle both object and string cases
+          if (!displayedUsers.has(username)) {
+            displayedUsers.add(username); // Add username to the set
+  
+            const li = document.createElement("li");
+            li.textContent = username;
+            li.style.cursor = "pointer";
+            li.onclick = () => openChat(username); // Pass the correct username
+  
+            userList.appendChild(li);
+          }
+        });
+  }
 // Add message handling functions
 function handleWebSocketMessage(event) {
     try {
@@ -39,7 +57,13 @@ function handleWebSocketMessage(event) {
         if (data.type === "messages") {
             // Handle message history
             displayMessageHistory(data.messages);
-        } else if (data.from && data.message) {
+        } else if (data.type === "allUsers"){
+            ShowUsers(data.usernames);
+
+        }else if (data.type === "update"){
+            fetchAllUsers();
+
+        }else if (data.from && data.message) {
             // Handle direct message from another user
             displayMessage(data.from, data.message);
         } else if (data.type === "error") {

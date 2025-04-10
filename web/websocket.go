@@ -27,6 +27,7 @@ type RealTimeMessage struct {
 	To      string `json:"to"`
 	Message string `json:"message"`
 	Messages []StoredMessage `json:"messages"`
+	Usernames []string `json:"usernames"`
 }
 
 // Session structure
@@ -65,7 +66,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 	clientsMu.Lock()
 	clients[username] = conn
 	clientsMu.Unlock()
-
+	tellAllToUpdate()
 	log.Println(username, "connected")
 
 	// Listen for incoming messages
@@ -159,6 +160,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 	clientsMu.Lock()
 	delete(clients, username)
 	clientsMu.Unlock()
+	tellAllToUpdate()
 }
 
 // validateSession validates the session ID and retrieves the associated username

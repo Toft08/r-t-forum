@@ -45,9 +45,24 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Method Not Allowed"})
 		return
 	}
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		log.Println("No session cookie found:", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"error": "User not logged in"})
+		return
+	}
+	log.Printf("Session cookie: %s", cookie.Value)
+
+	loggedIn, userID, username := VerifySession(r, db)
+	if loggedIn {
+		log.Printf("User %s (ID: %d) is logged in", username, userID)
+	} else {
+		log.Println("User is not logged in")
+	}
 
 	// Fetch all users from the database
-	rows, err := db.Query("SELECT username FROM User")
+	rows, err := db.Query("SELECT username FROM User where id != ?", userID)
 	if err != nil {
 		log.Println("Error fetching users from database:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -67,7 +82,25 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(users)
+	json.NewEncoder(w).Encode("ok")
+	var msg RealTimeMessage
+	msg.Type = "allUsers"
+	msg.Usernames = users
+	clientsMu.Lock()
+	conn, exists := clients[username]
+	clientsMu.Unlock()
+
+
+	
+			if exists {
+				// err := recipientConn.WriteJSON(msg)
+				err := conn.WriteJSON(msg)
+				if err != nil {
+					log.Println("Error sending message:", err)
+				}
+			} else {
+				log.Println( msg, "not found")
+			}		
 }
 
 // // ActiveUserStore is a thread-safe struct to store active users
