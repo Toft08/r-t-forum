@@ -22,10 +22,11 @@ var (
 
 // Message structure
 type RealTimeMessage struct {
-	Type	string `json:"type"`
+	Type    string `json:"type"`
 	From    string `json:"from"`
 	To      string `json:"to"`
 	Message string `json:"message"`
+	Messages []StoredMessage `json:"messages"`
 }
 
 // Session structure
@@ -46,6 +47,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	// Validate session ID and get associated user
 	username, err := validateSession(sessionID.Value)
+	fmt.Println("hello here we are: ", username)
 	if err != nil {
 		http.Error(w, "Invalid session or session expired", http.StatusUnauthorized)
 		return
@@ -74,29 +76,79 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println(username, "disconnected")
 			break
 		}
-
-		// save the message to db
-		err = saveMessage(msg.From, msg.To, 0, msg.Message)
-		if err != nil {
-			log.Println("Error saving message: ", err)
-			continue
-		}
-
-		// Send message to recipient
-		clientsMu.Lock()
-		recipientConn, exists := clients[msg.To]
-		clientsMu.Unlock()
-
-		if exists {
-			// err := recipientConn.WriteJSON(msg)
-			formattedMessage := msg.From + ": " + msg.Message
-			err := recipientConn.WriteJSON(formattedMessage)
+		if(msg.Type == "fetchMessages"){
+			var message RealTimeMessage
+			
+			messages, err := getMessages(msg.From, msg.To, 10)
 			if err != nil {
-				log.Println("Error sending message:", err)
+				log.Println("Error fetching messages:", err)
+				continue				
 			}
+			message.Type = "messages"
+			message.Messages = messages
+			message.From = msg.From
+			message.To = msg.To
+			clientsMu.Lock()
+			senderConn, exists := clients[msg.From]
+			clientsMu.Unlock()
+
+
+	
+			if exists {
+				// err := recipientConn.WriteJSON(msg)
+				err := senderConn.WriteJSON(message)
+				if err != nil {
+					log.Println("Error sending message:", err)
+				}
+			} else {
+				log.Println("Recipient", msg.From, "not found")
+			}		
+			
+	
 		} else {
-			log.Println("Recipient", msg.To, "not found")
+			err = saveMessage(msg.From, msg.To, 0, msg.Message)
+			if err != nil {
+				log.Println("Error saving message: ", err)
+				continue
+			}
+	
+			// Send message to recipient
+			clientsMu.Lock()
+			recipientConn, exists := clients[msg.To]
+			clientsMu.Unlock()
+
+
+	
+			if exists {
+				// err := recipientConn.WriteJSON(msg)
+				formattedMessage := msg.From + ": " + msg.Message
+
+				err := recipientConn.WriteJSON(formattedMessage)
+				if err != nil {
+					log.Println("Error sending message:", err)
+				}
+			} else {
+				log.Println("Recipient", msg.To, "not found")
+			}
+
+			clientsMu.Lock()
+			senderConn, exists := clients[msg.From]
+			clientsMu.Unlock()
+
+
+	
+			if exists {
+				// err := recipientConn.WriteJSON(msg)
+				formattedMessage := msg.From + ": " + msg.Message
+				err := senderConn.WriteJSON(formattedMessage)
+				if err != nil {
+					log.Println("Error sending message:", err)
+				}
+			} else {
+				log.Println("Recipient", msg.From, "not found")
+			}		
 		}
+		// save the message to db
 	}
 
 	// Remove user when disconnected

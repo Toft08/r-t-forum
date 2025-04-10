@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   handleRoute();
   isLoggedIn();
@@ -86,15 +87,18 @@ function updateUsernameDisplay(username) {
   const welcomeText = document.getElementById("username-placeholder");
   if (welcomeText) {
     welcomeText.textContent = username || "Guest";
+    window.currentUsername = username || "Guest"; // Store the current username globally
   }
 }
-function isLoggedIn() {
+async function isLoggedIn() {
   // Send an API request to check if the session is valid
   return fetch("/api/check-session")
     .then((response) => response.json())
     .then((data) => {
       if (data.loggedIn) {
         updateUsernameDisplay(data.username);
+
+        
       }
       return data.loggedIn;
     })
@@ -112,7 +116,7 @@ function loadHomePage() {
       loadLoginPage();
       return;
     }
-
+    window.currentUsername = window.currentUsername 
     connectWebSocket();
 
     const container = document.getElementById("content");
