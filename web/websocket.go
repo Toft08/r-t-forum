@@ -106,11 +106,16 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			
 	
 		} else {
+
 			err = saveMessage(msg.From, msg.To, 0, msg.Message)
 			if err != nil {
 				log.Println("Error saving message: ", err)
 				continue
 			}
+			var message RealTimeMessage
+			message.From = msg.From
+			message.To = msg.To
+			message.Message = msg.Message
 	
 			// Send message to recipient
 			clientsMu.Lock()
@@ -121,9 +126,9 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 	
 			if exists {
 				// err := recipientConn.WriteJSON(msg)
-				formattedMessage := msg.From + ": " + msg.Message
 
-				err := recipientConn.WriteJSON(formattedMessage)
+
+				err := recipientConn.WriteJSON(message)
 				if err != nil {
 					log.Println("Error sending message:", err)
 				}
@@ -139,8 +144,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 	
 			if exists {
 				// err := recipientConn.WriteJSON(msg)
-				formattedMessage := msg.From + ": " + msg.Message
-				err := senderConn.WriteJSON(formattedMessage)
+				err := senderConn.WriteJSON(message)
 				if err != nil {
 					log.Println("Error sending message:", err)
 				}

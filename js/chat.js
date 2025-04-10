@@ -198,8 +198,8 @@ function sendActualMessage(recipient, message) {
     // Send the message
     socket.send(JSON.stringify(messageObj));
 
-    // Also display in our own chat (for immediate feedback)
-    displayMessage(window.currentUsername, message);
+    // // Also display in our own chat (for immediate feedback)
+    // displayMessage(window.currentUsername, message);
 }
 
 function requestMessageHistory(otherUser) {
