@@ -24,15 +24,18 @@ type CommentDetails struct {
 }
 
 type PostDetails struct {
-	PostID      int    `json:"post_id"`
-	UserID      int    `json:"user_id"`
-	Username    string `json:"username"`
-	PostTitle   string `json:"post_title"`
-	PostContent string `json:"post_content"`
-	CreatedAt   string `json:"created_at"`
-	Likes       int    `json:"likes"`
-	Dislikes    int    `json:"dislikes"`
-	Categories  string `json:"categories"`
+	PostID      int              `json:"post_id"`
+	UserID      int              `json:"user_id"`
+	Username    string           `json:"username"`
+	PostTitle   string           `json:"post_title"`
+	PostContent string           `json:"post_content"`
+	CreatedAt   string           `json:"created_at"`
+	Likes       int              `json:"likes"`
+	LikedNow    bool             `json:"liked_now"`
+	Dislikes    int              `json:"dislikes"`
+	DislikedNow bool             `json:"disliked_now"`
+	Categories  []string         `json:"categories"`
+	Comments    []CommentDetails `json:"comments"`
 }
 
 type CategoryDetails struct {
@@ -51,10 +54,10 @@ type LoginRequest struct {
 }
 
 type StoredMessage struct {
-    ID        int    `json:"id"`
-    Sender    string `json:"sender"`
-    Receiver  string `json:"receiver"`
-    UserID    int    `json:"user_id"`
-    Content   string `json:"content"`
-    CreatedAt string `json:"created_at"`
+	ID        int    `json:"id"`
+	Sender    string `json:"sender"`
+	Receiver  string `json:"receiver"`
+	UserID    int    `json:"user_id"`
+	Content   string `json:"content"`
+	CreatedAt string `json:"created_at"`
 }

@@ -197,12 +197,13 @@ function insertPosts(posts) {
 
     const postElement = document.createElement("div");
     postElement.className = "post-card";
+    // postElement.dataset.postId = post.post_id;
     postElement.innerHTML = `
           <div class="post-header">
               <span>Posted by: ${post.username}</span>
               <span>${formatDate(post.created_at)}</span>
           </div>
-          <div class="post-title">${post.post_title}</div>
+          <h3 class="post-title">${post.post_title}</h3>
           <div class="post-content">${post.post_content}</div>
           <div class="post-footer">
               <div class="categories">Categories: ${categoriesText}</div>
@@ -214,7 +215,28 @@ function insertPosts(posts) {
               </div>
           </div>
       `;
+      // Add event listener for post click
+      postElement.addEventListener("click", () => {
+        fetchPostDetails(post.post_id);
+      });
     container.appendChild(postElement);
+  });
+}
+
+function fetchPostDetails(postId) {
+  fetch(`/api/posts/${postId}`)
+  .then((response) => {
+    if (!response.ok) {
+      throw new Error("Failed to fetch post details");
+    }
+    return response.json();
+  })
+  .then((post) => {
+    renderPost(post);
+  })
+  .catch((error) => {
+    console.error("Error fetching post details:", error);
+    alert("Failed to load post details");
   });
 }
 
