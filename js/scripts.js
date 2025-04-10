@@ -165,94 +165,9 @@ function loadHomePage() {
     const createPostPopup = document.getElementById("create-post-popup");
 
     loadPosts();
-
-    // Show popup when clicking Create Post
-    createPostBtn.addEventListener("click", () => {
-      createPopupContent();
-      createPostPopup.classList.remove("hidden");
-    });
-
-    // Create popup content dynamically
-    async function createPopupContent() {
-      // Fetch categories from server instead of using Go template
-
-      let categories = [];
-      try {
-        const res = await fetch("/api/create-post"); // GET request
-        categories = await res.json();
-      } catch (error) {
-        console.error("Failed to load categories", error);
-        createPostPopup.innerHTML = "<p>Error loading categories</p>";
-        return;
-      }
-
-      createPostPopup.innerHTML = `
-      <h2>Create a new post</h2>
-      <form id="create-form">
-        <input type="text" id="title" name="title" placeholder="Title" required maxlength="50"><br>
-        <textarea class="content-textarea" id="post-content" name="post-content" placeholder="Write your post here!" required></textarea><br>
-        <label="categories">Select Topics:</label>
-        <div class="category-container"> ${categories
-          .filter(cat => cat.CategoryID !== 1)
-          .map(cat => `
-                <label class="category-tags">
-                    <input type="checkbox" class="category-checkbox" name="categories" value="${cat.CategoryID}">
-                    ${cat.CategoryName}
-                </label>
-            `).join('')}
-            </div><br>
-        <button type="submit">Post!</button>
-      </form>
-      <button id="close-popup-btn" class="close-button">Close</button>
-    `;
-
-      // Event: Close popup
-      document.getElementById("close-popup-btn").addEventListener("click", () => {
-        createPostPopup.classList.add("hidden");
-      });
-
-      // Event: Submit form
-      document.getElementById("create-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const title = document.getElementById("title").value;
-        const content = document.getElementById("post-content").value;
-        const selectedCategories = [...document.querySelectorAll("input[name='categories']:checked")]
-          .map(cb => cb.value);
-        // debugging check
-        console.log("Title:", title);
-        console.log("Content:", content);
-        console.log("Selected categories:", selectedCategories);
-
-        // Check if title and content are not empty
-        if (!title || !content) {
-          alert("Please fill in all fields.");
-          console.log("Title or content is empty.");
-          return;
-        }
-
-        try {
-          const response = await fetch("/api/create-post", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title, content, categories: selectedCategories }),
-          });
-
-          const result = await response.json();
-          if (response.ok) {
-            console.log("Post created successfully!");
-            createPostPopup.classList.add("hidden");
-            loadPosts(); // Reload posts dynamically
-          } else {
-            console.error("Error creating post:", result.error);
-          }
-        } catch (error) {
-          console.error("Failed to submit post:", error);
-        }
-      });
-    }
+    initializeCreatePostFeature();
   });
 }
-
 
 function loadPosts() {
   fetch("/api/posts")
