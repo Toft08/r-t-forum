@@ -89,8 +89,15 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful"})
+	tellAllToUpdate()
 }
-
+func tellAllToUpdate() {
+	var msg RealTimeMessage
+	msg.Type = "update"
+	for _, conn := range clients {
+		conn.WriteJSON(msg)
+	}
+}
 // func handleSignUpPost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 // 	username := r.FormValue("username")
 // 	email := r.FormValue("email")
