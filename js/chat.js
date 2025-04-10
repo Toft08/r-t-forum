@@ -83,11 +83,28 @@ function displayMessageHistory(messages) {
     if (Array.isArray(messages) && messages.length > 0) {
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
-            messageElement.textContent = `${msg.sender}: ${msg.content} (${msg.created_at})`;
-            chatMessages.prepend(messageElement);
+            
+            // Add appropriate class based on sender
+            if (msg.sender === window.currentUsername) {
+                messageElement.className = 'sent';
+            } else {
+                messageElement.className = 'received';
+            }
+            
+            // Format the message with timestamp
+            const timestamp = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            messageElement.innerHTML = `
+                <strong>${msg.sender}</strong>: ${msg.content}
+                <span class="timestamp">${timestamp}</span>
+            `;
+            
+            chatMessages.appendChild(messageElement);
         });
     } else {
-        chatMessages.innerHTML = '<p>No messages found.</p>';
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-chat';
+        emptyMessage.innerHTML = '<p>No messages yet. Start the conversation!</p>';
+        chatMessages.appendChild(emptyMessage);
     }
 
     // Auto-scroll to the bottom
@@ -99,16 +116,32 @@ function displayMessage(sender, message) {
     if (!chatMessages) return;
 
     const messageElement = document.createElement('div');
-    messageElement.textContent = `${sender}: ${message}`;
+    
+    // Add appropriate class based on sender
+    if (sender === window.currentUsername) {
+        messageElement.className = 'sent new';
+    } else {
+        messageElement.className = 'received new';
+    }
+    
+    // Format the message with sender name and content
+    messageElement.innerHTML = `
+        <strong>${sender}</strong>: ${message}
+        <span class="timestamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+    `;
+    
     chatMessages.appendChild(messageElement);
 
     // Auto-scroll to the bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    // Remove the 'new' class after animation completes
+    setTimeout(() => {
+        messageElement.classList.remove('new');
+    }, 300);
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const activeUsersPopup = document.querySelector('.active-users');
-    const minimizeButton = document.getElementById('minimize-users');
     const usernamePlaceholder = document.getElementById('username-placeholder');
     const username = await fetchCurrentUsername();
 
@@ -132,6 +165,7 @@ function openChat(username) {
     // Create/update chat window UI
     const chatWindow = document.getElementById("chat-window") || createChatWindow();
 
+    chatWindow.classList.remove("hidden");
     chatWindow.style.display = "block";
     chatWindow.innerHTML = `
       <div class="chat-header">
@@ -183,6 +217,7 @@ function closeChat() {
     const chatWindow = document.getElementById("chat-window");
     if (chatWindow) {
         chatWindow.style.display = "none";
+        chatWindow.classList.add("hidden");
     }
     window.currentChatPartner = null;
 }
@@ -222,8 +257,6 @@ function sendActualMessage(recipient, message) {
     // Send the message
     socket.send(JSON.stringify(messageObj));
 
-    // // Also display in our own chat (for immediate feedback)
-    // displayMessage(window.currentUsername, message);
 }
 
 function requestMessageHistory(otherUser) {
