@@ -207,8 +207,8 @@ function createChatWindow() {
     chatWindow.id = "chat-window";
     chatWindow.className = "chat-window";
     chatWindow.style.position = "fixed";
-    chatWindow.style.top = "50%";
-    chatWindow.style.left = "50%";
+    chatWindow.style.top = "69%";
+    chatWindow.style.left = "69%";
     chatWindow.style.transform = "translate(-50%, -50%)";
     chatWindow.style.width = "300px";
     chatWindow.style.Height = "400px";
