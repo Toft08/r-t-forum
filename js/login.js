@@ -62,6 +62,7 @@ async function loadLoginPage() {
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
                 handleRoute();
+                connectWebSocket()
             } else {
                 alert(data.error);
             }

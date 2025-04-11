@@ -66,7 +66,9 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		"message": "Login successful",
 		"token":   "Session",
 	})
+	
 }
+
 
 // getUserCredentials retrieves the user's ID and hashed password from the database
 func getUserCredentials(username string) (int, string, error) {

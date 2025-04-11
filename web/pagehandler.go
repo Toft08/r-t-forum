@@ -92,7 +92,7 @@ func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	response := map[string]interface{}{
-		"loggedIn": loggedIn,
+		"loggedIn": loggedIn, 
 		"userID":   userID,
 		"username": username,
 	}

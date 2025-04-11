@@ -1,59 +1,25 @@
+
 document.addEventListener("DOMContentLoaded", function () {
   handleRoute();
   isLoggedIn();
   window.addEventListener("hashchange", handleRoute);
 });
-let socket = null;
-
-function connectWebSocket() {
-  if (socket && socket.readyState === WebSocket.OPEN) return;
-
-  socket = new WebSocket("ws://" + window.location.host + "/api/ws");
-
-  socket.onopen = () => {
-    console.log("WebSocket connected");
-  };
-
-  socket.onmessage = (event) => {
-    console.log("WebSocket message:", event.data);
-    // handle message here
-  };
-
-  socket.onclose = () => {
-    console.log("WebSocket closed");
-  };
-
-  socket.onerror = (error) => {
-    console.error("WebSocket error:", error);
-  };
-}
 
 function fetchAllUsers() {
-  const userList = document.getElementById("users-list");
+
 
 
   fetch("/api/all-users")
     .then((response) => response.json())
-    .then((users) => {
-      const displayedUsers = new Set(); // Track displayed users
-      userList.innerHTML = ""; // Clear old users
-
-      users.forEach((user) => {
-        const username = user.username || user; // Handle both object and string cases
-        if (!displayedUsers.has(username)) {
-          displayedUsers.add(username); // Add username to the set
-
-          const li = document.createElement("li");
-          li.textContent = username;
-          li.style.cursor = "pointer";
-          li.onclick = () => openChat(username); // Pass the correct username
-
-          userList.appendChild(li);
-        }
-      });
+    .then((res) => {
+      if(res.ok){
+        console.log("All users fetched successfully");
+      }
     })
     .catch((error) => console.error("Error fetching all users:", error));
 }
+
+
 
 function handleRoute() {
   const route = window.location.pathname;
@@ -110,15 +76,18 @@ function updateUsernameDisplay(username) {
   const welcomeText = document.getElementById("username-placeholder");
   if (welcomeText) {
     welcomeText.textContent = username || "Guest";
+    window.currentUsername = username || "Guest"; // Store the current username globally
   }
 }
-function isLoggedIn() {
+async function isLoggedIn() {
   // Send an API request to check if the session is valid
   return fetch("/api/check-session")
     .then((response) => response.json())
     .then((data) => {
       if (data.loggedIn) {
         updateUsernameDisplay(data.username);
+
+        
       }
       return data.loggedIn;
     })
@@ -136,7 +105,7 @@ function loadHomePage() {
       loadLoginPage();
       return;
     }
-
+    window.currentUsername = window.currentUsername 
     connectWebSocket();
 
     const container = document.getElementById("content");

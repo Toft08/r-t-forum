@@ -38,7 +38,7 @@ func getMessages(sender, receiver string, limit int) ([]StoredMessage, error) {
 		}
 		messages = append(messages, msg)
 	}
-	fmt.Println(messages)
+	fmt.Println("messages are: ",messages)
 	return messages, nil
 }
 

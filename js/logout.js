@@ -24,8 +24,11 @@ function logout() {
             // Redirect to the login page
             updateUsernameDisplay('Guest');
             history.pushState({}, '', '/login');
-
-            // loadLoginPage();
+            const chatWindow = document.getElementById("chat-window");
+            if (chatWindow) {
+                chatWindow.style.display = "none";
+                chatWindow.innerHTML = "";
+            }
             handleRoute();
         } else {
             console.log('Logout failed');
