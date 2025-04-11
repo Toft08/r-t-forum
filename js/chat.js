@@ -81,6 +81,7 @@ function displayMessageHistory(messages) {
     chatMessages.innerHTML = ''; // Clear the current chat window
 
     if (Array.isArray(messages) && messages.length > 0) {
+        messages.reverse();
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
             
