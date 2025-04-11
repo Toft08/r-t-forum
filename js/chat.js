@@ -81,7 +81,12 @@ function displayMessageHistory(messages) {
     chatMessages.innerHTML = ''; // Clear the current chat window
 
     if (Array.isArray(messages) && messages.length > 0) {
-        messages.reverse();
+        messages.sort((a, b) => {
+            if (a.created_at === b.created_at) {
+                return a.id - b.id;
+            }
+            return new Date(a.created_at) - new Date(b.created_at);
+        });
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
             
