@@ -81,6 +81,7 @@ function displayMessageHistory(messages) {
     chatMessages.innerHTML = ''; // Clear the current chat window
 
     if (Array.isArray(messages) && messages.length > 0) {
+        messages.reverse(); // Reverse the order to show the latest messages at the bottom
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
             
@@ -126,7 +127,7 @@ function displayMessage(sender, message) {
     
     // Format the message with sender name and content
     messageElement.innerHTML = `
-        <strong>${sender}</strong>: ${message}
+        <strong>${sender}</strong> ${message}
         <span class="timestamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
     `;
     
