@@ -160,13 +160,21 @@ function insertPosts(posts) {
   }
 
   posts.forEach((post) => {
-    const categoriesArray = post.categories ? post.categories.split(",") : [];
+    let categoriesArray = [];
+    if (post.categories) {
+      if (Array.isArray(post.categories)) {
+        categoriesArray = post.categories;
+      }
+      else if (typeof post.categories === "string") {
+        categoriesArray = post.categories.split(",");
+      }
+    }
     const uniqueCategories = [...new Set(categoriesArray)];
     const categoriesText = uniqueCategories.length > 0 ? uniqueCategories.join(", ") : "No categories";
 
     const postElement = document.createElement("div");
     postElement.className = "post-card";
-    // postElement.dataset.postId = post.post_id;
+    postElement.dataset.postId = post.post_id;
     postElement.innerHTML = `
           <div class="post-header">
               <span>Posted by: ${post.username}</span>

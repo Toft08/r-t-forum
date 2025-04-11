@@ -3,6 +3,14 @@ function renderPost(post) {
   const postModal = document.getElementById('post-modal');
   const closeModal = document.getElementById('close-modal');
 
+  const categoriesHMTL = post.categories ?
+  (Array.isArray(post.categories) 
+    ? post.categories.map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('') 
+    : typeof post.categories === 'string'
+      ? post.categories.split(',').map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('')
+      : '') 
+  : '';
+
   // Clear previous content
   postDetails.innerHTML = '';
 
@@ -23,7 +31,7 @@ function renderPost(post) {
         </div>
       </div>
       <div class="category-container">
-        ${post.categories ? post.categories.split(',').map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('') : ''}
+        ${categoriesHMTL}
       </div>
       <div class="post-info">
         <div class="left">

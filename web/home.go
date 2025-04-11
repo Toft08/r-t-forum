@@ -13,7 +13,7 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	// db := database.InitDB()
 	// defer db.Close()
 
-	posts, err := FetchPosts(db)
+	posts, err := FetchPosts(0)
 	if err != nil {
 		log.Println("❌ Error fetching posts:", err)
 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
@@ -32,7 +32,7 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func FetchPosts(db *sql.DB) ([]PostDetails, error) {
+func FetchPosts(userID int) ([]PostDetails, error) {
 	// Modified query that gets all posts without a WHERE clause
 	// query := `
 	// 	SELECT
@@ -76,14 +76,14 @@ func FetchPosts(db *sql.DB) ([]PostDetails, error) {
 	for rows.Next() {
 		var postID int
 		if err := rows.Scan(&postID); err != nil {
-			log.Println("Error scanning post ID:", err)
+			log.Println("❌ Error scanning post ID:", err)
 			return nil, err
 		}
 
 		// Get the details for each post
-		p, err := GetPostDetails(postID, 0)
+		p, err := GetPostDetails(postID, userID)
 		if err != nil {
-			log.Println("Error getting post details:", err)
+			log.Println("❌ Error getting post details:", err)
 			return nil, err
 		}
 		posts = append(posts, *p)
