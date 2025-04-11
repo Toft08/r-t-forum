@@ -94,7 +94,7 @@ function displayMessageHistory(messages) {
             // Format the message with timestamp
             const timestamp = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             messageElement.innerHTML = `
-                <strong>${msg.sender}</strong>: ${msg.content}
+                <strong>${msg.sender}</strong> ${msg.content}
                 <span class="timestamp">${timestamp}</span>
             `;
             
@@ -201,12 +201,16 @@ function createChatWindow() {
     chatWindow.id = "chat-window";
     chatWindow.className = "chat-window";
     chatWindow.style.position = "fixed";
-    chatWindow.style.bottom = "20px";
-    chatWindow.style.right = "20px";
+    chatWindow.style.top = "50%";
+    chatWindow.style.left = "50%";
+    chatWindow.style.transform = "translate(-50%, -50%)";
     chatWindow.style.width = "300px";
+    chatWindow.style.Height = "400px";
+    chatWindow.style.maxHeight = "80vh";
+    chatWindow.style.overflow = "hidden";
     chatWindow.style.backgroundColor = "#fff";
     chatWindow.style.border = "1px solid #ccc";
-    chatWindow.style.borderRadius = "5px";
+    chatWindow.style.borderRadius = "16px";
     chatWindow.style.boxShadow = "0 0 10px rgba(0, 0, 0, 0.1)";
     chatWindow.style.zIndex = "1000";
     document.body.appendChild(chatWindow);
