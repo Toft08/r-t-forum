@@ -6,54 +6,51 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
 // PostHandler handles requests to view a specific post
-// func PostHandler(w http.ResponseWriter, r *http.Request, data *PageDetails) {
+func PostHandler(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 
-// 	postID, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/"))
-// 	if err != nil {
-// 		log.Println("Error converting postID to int:", err)
-// 		ErrorHandler(w, "Page Not Found", http.StatusNotFound)
-// 		return
-// 	}
+	postID, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/"))
+	if err != nil {
+		log.Println("Error converting postID to int:", err)
+		return
+	}
 
-// 	valid := ValidatePostID(postID)
-// 	if !valid {
-// 		log.Println("Invalid postID")
-// 		ErrorHandler(w, "Page Not Found", http.StatusNotFound)
-// 		return
-// 	}
+	valid := ValidatePostID(postID)
+	if !valid {
+		log.Println("Invalid postID")
+		return
+	}
 
-// 	switch r.Method {
-// 	case http.MethodGet:
-// 		HandlePostPageGet(w, r, data, postID)
-// 	case http.MethodPost:
-// 		HandlePostPagePost(w, r, data, postID)
-// 	default:
-// 		ErrorHandler(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-// 	}
+	switch r.Method {
+	case http.MethodGet:
+		HandlePostPageGet(w, r, data, postID)
+	case http.MethodPost:
+		HandlePostPagePost(w, r, data, postID)
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
 
-// }
+}
 
 // HandlePostPageGet handles get requests to the post page
-// func HandlePostPageGet(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
-// 	var userID int
-// 	data.LoggedIn, userID, data.Username = VerifySession(r)
-// 	data.Posts = nil
+func HandlePostPageGet(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
+	var userID int
+	data.LoggedIn, userID, data.Username = VerifySession(r, db)
+	data.Posts = nil
 
-// 	post, err := GetPostDetails(postID, userID)
-// 	if err != nil {
-// 		log.Println("Error fetching post details:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
+	post, err := GetPostDetails(postID, userID)
+	if err != nil {
+		log.Println("1Error fetching post details:", err)
+		return
+	}
 
-// 	data.Posts = append(data.Posts, *post)
+	data.Posts = append(data.Posts, *post)
 
-// 	RenderTemplate(w, "post", data)
-// }
+}
 
 // HandlePostPagePost handles post requests to the post page
 func HandlePostPagePost(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
