@@ -108,17 +108,7 @@ async function isLoggedIn() {
 }
 
 function loadHomePage() {
-  isLoggedIn().then((loggedIn) => {
-    if (!loggedIn) {
-      console.error("Unauthorized access to home page");
-      history.pushState({}, "", "/login");
-      loadLoginPage();
-      return;
-    }
-    window.currentUsername = window.currentUsername 
-    connectWebSocket();
-
-    const navbar = document.getElementById("navbar");
+  const navbar = document.getElementById("navbar");
     if (navbar) {
       navbar.innerHTML = `
       <nav class="nav">
@@ -132,6 +122,17 @@ function loadHomePage() {
     </nav>
     `;
     }
+  isLoggedIn().then((loggedIn) => {
+    if (!loggedIn) {
+      console.error("Unauthorized access to home page");
+      history.pushState({}, "", "/login");
+      loadLoginPage();
+      return;
+    }
+    window.currentUsername = window.currentUsername 
+    connectWebSocket();
+
+    
     const logoutButton = document.getElementById('logout-button');
     
     if (logoutButton) {
