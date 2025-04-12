@@ -25,6 +25,15 @@ function handleRoute() {
   const route = window.location.pathname;
   console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
+  const navbar = document.getElementById("navbar");
+  if (navbar) {
+    if (route === "/login" || route === "/signup") {
+      navbar.style.display = "none"; // Hide the navbar
+    }
+    else {
+      navbar.style.display = "block"; // Show the navbar
+    }
+  }
 
   container.innerHTML = "";
 
@@ -73,6 +82,7 @@ function handleRoute() {
 }
 
 function updateUsernameDisplay(username) {
+  console.log("Updating username display:", username); // Debug log
   const welcomeText = document.getElementById("username-placeholder");
   if (welcomeText) {
     welcomeText.textContent = username || "Guest";
@@ -107,6 +117,31 @@ function loadHomePage() {
     }
     window.currentUsername = window.currentUsername 
     connectWebSocket();
+
+    const navbar = document.getElementById("navbar");
+    if (navbar) {
+      navbar.innerHTML = `
+      <nav class="nav">
+        <div class="nav-left">
+            <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
+        </div>
+        <div class="nav-right">
+            <p class="welcome-text">Logged in as: <span id="username-placeholder">${window.currentUsername || "Guest"}</span></p>
+            <button type="submit" id="logout-button">Log Out</button>
+        </div>
+    </nav>
+    `;
+    }
+    const logoutButton = document.getElementById('logout-button');
+    
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+            console.log('Logging out...');
+            logout(); 
+        });
+    } else {
+        console.error('Logout button not found');
+    }
 
     const container = document.getElementById("content");
     container.innerHTML = `

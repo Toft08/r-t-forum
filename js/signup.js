@@ -2,6 +2,10 @@ function loadSignupPage() {
     history.pushState({}, '', '/signup');
 
     const container = document.getElementById('content');
+    const navbar = document.getElementById("navbar");
+  if (navbar) {
+    navbar.style.display = "none";
+  }
     container.innerHTML = `
         <h1>Sign Up</h1>
         <form id="signup-form">
