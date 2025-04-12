@@ -3,7 +3,10 @@ async function loadLoginPage() {
     const container = document.getElementById("content");
     const postsContainer = document.getElementById("posts-container");
     const sidebar = document.querySelector(".sidebar");
-
+    const navbar = document.getElementById("navbar");
+    if (navbar) {
+        navbar.style.display = "none"; // Hide the navbar
+    }
     if (!container || !postsContainer || !sidebar) {
         console.error("Error: Required elements not found.");
         return;

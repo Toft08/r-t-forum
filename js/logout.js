@@ -1,16 +1,3 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const logoutButton = document.getElementById('logout-button');
-    
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function() {
-            console.log('Logging out...');
-            logout(); 
-        });
-    } else {
-        console.error('Logout button not found');
-    }
-});
-
 function logout() {
     fetch('/api/logout', {
         method: 'POST',
