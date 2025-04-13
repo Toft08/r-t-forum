@@ -1,6 +1,6 @@
 async function loadLoginPage() {
     console.log("loading login page")
-    const container = document.getElementById("content");
+    const container = document.getElementById("loginview");
     const postsContainer = document.getElementById("posts-container");
     const sidebar = document.querySelector(".sidebar");
     const navbar = document.getElementById("navbar");
