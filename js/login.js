@@ -1,23 +1,29 @@
 async function loadLoginPage() {
     console.log("loading login page")
-    const container = document.getElementById("loginview");
+
+    const loginview = document.getElementById("loginview");
     const postsContainer = document.getElementById("posts-container");
     const sidebar = document.querySelector(".sidebar");
     const navbar = document.getElementById("navbar");
     if (navbar) {
         navbar.style.display = "none"; // Hide the navbar
     }
-    if (!container || !postsContainer || !sidebar) {
+    if (!loginview || !postsContainer || !sidebar) {
         console.error("Error: Required elements not found.");
         return;
     }
 
     // Clear other content
-    container.innerHTML = "";
+    loginview.innerHTML = ""
+    loginview.style.display = "flex";
     postsContainer.innerHTML = "";
     sidebar.innerHTML = "";
+
+    if (loginview) {
+        loginview.style.display = "flex";
+    }
     
-    container.innerHTML = `
+    loginview.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
             <label for="username">Username</label>

@@ -39,7 +39,7 @@ function handleRoute() {
   container.innerHTML = "";
 
   if (loginview) {
-    if (route !== "/login" && route !== "/signup") {
+    if (loginview && route !== "/login" && route !== "/signup") {
       loginview.innerHTML = ""; 
       loginview.style.display = "none";
     } else {
