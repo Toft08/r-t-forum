@@ -27,6 +27,8 @@ function handleRoute() {
   const container = document.getElementById("content");
   const navbar = document.getElementById("navbar");
   const loginview = document.getElementById("loginview");
+  const signupview = document.getElementById("signupview");
+  const postview = document.getElementById("postview");
   if (navbar) {
     if (route === "/login" || route === "/signup") {
       navbar.style.display = "none"; // Hide the navbar
@@ -36,16 +38,30 @@ function handleRoute() {
     }
   }
 
-  container.innerHTML = "";
-
   if (loginview) {
-    if (loginview && route !== "/login" && route !== "/signup") {
-      loginview.innerHTML = ""; 
-      loginview.style.display = "none";
-    } else {
+    if (route === "/login") {
       loginview.style.display = "flex";
+    } else {
+      loginview.style.display = "none";
+      loginview.innerHTML = ""; // optional: clear
     }
   }
+
+  // Hide or clear signupview unless on /signup
+  if (signupview) {
+    if (route === "/signup") {
+      signupview.style.display = "flex";
+    } else {
+      signupview.style.display = "none";
+      signupview.innerHTML = ""; // optional: clear
+    }
+  }
+
+  if (postview) {
+    postview.style.display = (route === "/home") ? "block" : "none";
+    if (route !== "/home") postview.innerHTML = "";
+  }
+  
 
   isLoggedIn().then((loggedIn) => {
     const publicRoutes = ["/login", "/signup"];
@@ -157,7 +173,7 @@ function loadHomePage() {
     const container = document.getElementById("postview");
     container.innerHTML = `
     <div> <button id="create-post-btn">Create Post</button></div>
-    <div id="create-post-popup" class="hidden"></div>
+    <div id="create-post-popup"></div>
     `;
 
     const sidebar = document.querySelector(".sidebar");
@@ -174,9 +190,7 @@ function loadHomePage() {
       console.error("Sidebar element not found");
     }
 
-    // Create post popup window.
-    const createPostBtn = document.getElementById("create-post-btn");
-    const createPostPopup = document.getElementById("create-post-popup");
+
 
     loadPosts();
     initializeCreatePostFeature();
