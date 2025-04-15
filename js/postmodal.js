@@ -4,11 +4,15 @@ function initializePostModal(post_id) {
   const existingPostModal = document.getElementById("post-modal");
   if (existingPostModal) existingPostModal.remove();
 
+    // Fetch post details and render
+    fetchPostDetails(post_id);
+
   // Create a new modal element
   const postModal = document.createElement("div");
   postModal.id = "post-modal";
   postModal.classList.add("modal");
 
+  
   // Create modal content container
   const modalContent = document.createElement("div");
   modalContent.classList.add("modal-content");
@@ -26,8 +30,7 @@ function initializePostModal(post_id) {
   // Append modal to the body
   document.body.appendChild(postModal);
 
-  // Fetch post details and render
-  fetchPostDetails(post_id);
+
 
   // Display the modal
   postModal.style.display = "block";
@@ -55,6 +58,7 @@ function fetchPostDetails(post_id) {
       return response.json();
     })
     .then((post) => {
+      console.log("Post details:", post);
       renderPost(post);
     })
     .catch((error) => {
@@ -64,13 +68,36 @@ function fetchPostDetails(post_id) {
 }
 
 // Function to render the post content inside the modal
-function renderPost(post) {
-  const postModal = document.getElementById("post-modal");
-  const modalContent = postModal.querySelector(".modal-content");
+function renderPost(postData) {
+  console.log("in renderPost:", postData);
 
+  const post = postData.post;
+  if (!post) {
+    console.error("Post data is missing");
+    return;
+  }
+
+  const postModal = document.getElementById("post-modal");
+  if (!postModal) {
+    console.error("Post modal not found");
+    return;
+  }
+
+  const modalContent = postModal.querySelector(".modal-content");
+  if (!modalContent) {
+    console.error("Modal content not found");
+    return;
+  }
   // Create post details container
   const postDetails = document.createElement("div");
   postDetails.id = "post-details";
+
+  console.log("Post ID:", post.post_id);
+  console.log ("Post title:", post.post_title);
+  console.log ("Post content:", post.post_content);
+  console.log ("Post categories:", post.categories);
+  console.log ("Post date:", post.created_at);
+  console.log ("Post username:", post.username);
 
   const categoriesHTML = post.categories ?
     (Array.isArray(post.categories)
@@ -104,7 +131,7 @@ function renderPost(post) {
         </div>
       </div>
       <div class="category-container">
-        ${categoriesHTML}
+        
       </div>
       <div class="post-info">
         <div class="left">
@@ -144,11 +171,6 @@ function renderPost(post) {
   // Display the modal
   postModal.style.display = 'block';
 
-  // Event listener to close the modal
-  // closeModal.onclick = function () {
-  //   postModal.style.display = 'none';
-  // };
-
   // Close the modal if the user clicks outside of the modal content
   window.onclick = function (event) {
     if (event.target == postModal) {
@@ -158,34 +180,35 @@ function renderPost(post) {
   modalContent.appendChild(postDetails);
 
   // Event listener for the comment form submission
-  // document.getElementById('comment-form').addEventListener('submit', function (event) {
-  //   event.preventDefault();
-  //   handleComment();
-  // });
+  document.getElementById('comment-form').addEventListener('submit', function (event) {
+    event.preventDefault();
+    handleComment();
+  });
 
   // Event listeners for like and dislike buttons
-  // document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function (event) {
-  //   event.preventDefault();
-  //   event.stopPropagation(); // Prevent the post click event
-  //   const voteData = {
-  //     vote: 'like',
-  //     post_id: post.post_id,
-  //     comment_id: 0
-  //   };
-  //   apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
-  // });
+  document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation(); // Prevent the post click event
+    const voteData = {
+      vote: 'like',
+      post_id: post.post_id,
+      comment_id: 0
+    };
+    apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
+  });
 
-  // document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function (event) {
-  //   event.preventDefault();
-  //   event.stopPropagation(); // Prevent the post click event
-  //   const voteData = {
-  //     vote: 'dislike',
-  //     post_id: post.post_id,
-  //     comment_id: 0
-  //   };
-  //   apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
-  // });
+  document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation(); // Prevent the post click event
+    const voteData = {
+      vote: 'dislike',
+      post_id: post.post_id,
+      comment_id: 0
+    };
+    apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
+  });
 }
+
 
 function handleComment() {
   const commentTextarea = document.getElementById('comment');
