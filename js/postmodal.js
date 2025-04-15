@@ -1,18 +1,76 @@
-function initializePostModal() {
-  const showPostModal = document.getElementById('post-modal');
-  const postDetails = document.getElementById('post-details');
-  const closeModal = document.getElementById('close-modal');
+// Function to initialize and display the post modal
+function initializePostModal(postId) {
+  // Remove any existing modal
+  const existingPostModal = document.getElementById("post-modal");
+  if (existingPostModal) existingPostModal.remove();
 
-  showPostModal.addEventListener('click', () => {
-    renderPost(post);
-    postModal.style.display = 'block';
-  });
+  // Create a new modal element
+  const postModal = document.createElement("div");
+  postModal.id = "post-modal";
+  postModal.classList.add("modal");
+
+  // Create modal content container
+  const modalContent = document.createElement("div");
+  modalContent.classList.add("modal-content");
+
+  // Create close button
+  const closeModal = document.createElement("span");
+  closeModal.id = "close-modal";
+  closeModal.classList.add("close");
+  closeModal.innerHTML = "&times;";
+
+  // Append close button and content container to modal
+  modalContent.appendChild(closeModal);
+  postModal.appendChild(modalContent);
+
+  // Append modal to the body
+  document.body.appendChild(postModal);
+
+  // Fetch post details and render
+  fetchPostDetails(postId);
+
+  // Display the modal
+  postModal.style.display = "block";
+
+  // Event listener to close the modal
+  closeModal.onclick = function () {
+    postModal.style.display = "none";
+  };
+
+  // Close the modal if the user clicks outside of the modal content
+  window.onclick = function (event) {
+    if (event.target == postModal) {
+      postModal.style.display = "none";
+    }
+  };
 }
 
-async function renderPost(post) {
-  const postDetails = document.getElementById('post-details');
-  const postModal = document.getElementById('post-modal');
-  const closeModal = document.getElementById('close-modal');
+// Function to fetch post details from the server
+function fetchPostDetails(postId) {
+  fetch(`/api/post/${postId}`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch post details");
+      }
+      return response.json();
+    })
+    .then((post) => {
+      renderPost(post);
+    })
+    .catch((error) => {
+      console.error("Error fetching post details:", error);
+      alert("Failed to load post details");
+    });
+}
+
+// Function to render the post content inside the modal
+function renderPost(post) {
+  const postModal = document.getElementById("post-modal");
+  const modalContent = postModal.querySelector(".modal-content");
+
+  // Create post details container
+  const postDetails = document.createElement("div");
+  postDetails.id = "post-details";
 
   const categoriesHMTL = post.categories ?
     (Array.isArray(post.categories)
@@ -31,18 +89,26 @@ async function renderPost(post) {
       <div class="post-header-like-dislike">
         <h3 class="post-title">${post.post_title}</h3>
         <div class="reaction-buttons">
-          <button id="like-button-${post.post_id}" class="like-button" style="color: ${post.liked_now ? '#54956d' : 'inherit'}">
+          <button id="like-button-${post.post_id}" class="like-button" style="color: ${
+    post.liked_now ? "#54956d" : "inherit"
+  }">
             <span class="material-symbols-outlined">thumb_up</span>
           </button>
-          <span id="like-count-${post.post_id}" class="reaction-count">${post.likes}</span>
-          <button id="dislike-button-${post.post_id}" class="dislike-button" style="color: ${post.disliked_now ? 'rgb(197, 54, 64)' : 'inherit'}">
+          <span id="like-count-${post.post_id}" class="reaction-count">${
+    post.likes
+  }</span>
+          <button id="dislike-button-${post.post_id}" class="dislike-button" style="color: ${
+    post.disliked_now ? "rgb(197, 54, 64)" : "inherit"
+  }">
             <span class="material-symbols-outlined">thumb_down</span>
           </button>
-          <span id="dislike-count-${post.post_id}" class="reaction-count">${post.dislikes}</span>
+          <span id="dislike-count-${post.post_id}" class="reaction-count">${
+    post.dislikes
+  }</span>
         </div>
       </div>
       <div class="category-container">
-        ${categoriesHMTL}
+        ${categoriesHTML}
       </div>
       <div class="post-info">
         <div class="left">
@@ -61,12 +127,22 @@ async function renderPost(post) {
         <textarea class="comment-textarea" id="comment" name="comment" placeholder="Enter comment here" required maxlength="200"></textarea>
         <button type="submit">Submit Comment</button>
       </form>
-      ${post.comments && post.comments.length > 0 ? post.comments.map(comment => `
+      ${
+        post.comments && post.comments.length > 0
+          ? post.comments
+              .map(
+                (comment) => `
         <div class="comment" id="comment-${comment.comment_id}">
-          <p><strong>${comment.username}</strong>: ${comment.created_at}</p>
+          <p><strong>${comment.username}</strong>: ${formatDate(
+                  comment.created_at
+                )}</p>
           <pre>${comment.comment_content}</pre>
         </div>
-      `).join('') : '<p>No comments yet.</p>'}
+      `
+              )
+              .join("")
+          : "<p>No comments yet.</p>"
+      }
     </div>
   `;
 

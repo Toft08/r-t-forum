@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 var db *sql.DB
@@ -19,28 +21,45 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		return
 	}
 
-	switch r.URL.Path {
-	case "/":
-		// HomePage(w, r, &data)
-	case "/api/login":
+	path := r.URL.Path
+
+	trimmedPath := strings.TrimPrefix(path, "/api/")
+
+	nextSlashIndex := strings.Index(trimmedPath, "/")
+
+	var page string
+	if nextSlashIndex != -1 {
+		page = trimmedPath[:nextSlashIndex]
+	} else {
+		page = trimmedPath
+	}
+
+	switch page {
+	case "login":
 		Login(w, r, db)
-	case "/api/signup":
+	case "signup":
 		SignUp(w, r, db)
-	case "/api/posts":
+	case "posts":
 		PostsHandler(w, r)
-	case "/api/create-post":
+	case "post":
+		postID, err := strconv.Atoi(r.URL.Query().Get("id"))
+		if err != nil {
+			log.Println("Error converting postID to int:", err)
+			http.Error(w, "Invalid post ID", http.StatusBadRequest)
+			return
+		}
+		PostHandler(w, r, &PageDetails{}, postID)
+	case "create-post":
 		CreatePost(w, r, &PageDetails{})
-	case "/api/post":
-		PostHandler(w, r, &PageDetails{})
-	case "/api/logout":
+	case "logout":
 		Logout(w, r)
-	case "/api/check-session":
+	case "check-session":
 		checkSessionHandler(w, r, db)
-	case "/api/all-users":
+	case "all-users":
 		allUsersHandler(w, r)
-	case "/api/ws":
+	case "ws":
 		handleChatWebSocket(w, r)
-	case "/api/getMessagesHandler":
+	case "getMessagesHandler":
 		getMessagesHandler(w, r)
 	default:
 		w.Header().Set("Content-Type", "application/json")

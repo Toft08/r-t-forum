@@ -6,18 +6,17 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 )
 
 // PostHandler handles requests to view a specific post
-func PostHandler(w http.ResponseWriter, r *http.Request, data *PageDetails) {
+func PostHandler(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
 
-	postID, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/api/post/"))
-	if err != nil {
-		log.Println("Error converting postID to int:", err)
-		return
-	}
+	// postID, err := strconv.Atoi(strings.TrimPrefix(r.URL.Path, "/post/"))
+	// if err != nil {
+	// 	log.Println("Error converting postID to int:", err)
+	// 	return
+	// }
 
 	valid := ValidatePostID(postID)
 	if !valid {

@@ -192,29 +192,14 @@ function insertPosts(posts) {
               </div>
           </div>
       `;
-    // Add event listener for post click
-    postElement.addEventListener("click", () => {
-      fetchPostDetails(post.post_id);
-    });
+
+      // const createPostModal = document.getElementById("create-post-modal");
+      // Add event listener for post click
+      postElement.addEventListener("click", () => {
+        initializePostModal(post.post_id);
+      });
     container.appendChild(postElement);
   });
-}
-
-function fetchPostDetails(postId) {
-  fetch(`api/post?id=${postId}`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to fetch post details");
-      }
-      return response.json();
-    })
-    .then((post) => {
-      renderPost(post);
-    })
-    .catch((error) => {
-      console.error("Error fetching post details:", error);
-      alert("Failed to load post details");
-    });
 }
 
 function formatDate(dateString) {
