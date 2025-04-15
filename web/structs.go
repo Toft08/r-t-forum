@@ -61,3 +61,13 @@ type StoredMessage struct {
 	Content   string `json:"content"`
 	CreatedAt string `json:"created_at"`
 }
+type SignUpData struct {
+	Username        string `json:"username"`
+	Age             string `json:"age"`
+	Gender          string `json:"gender"`
+	FirstName       string `json:"firstName"`
+	LastName        string `json:"lastName"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
+}
