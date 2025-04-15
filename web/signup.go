@@ -94,68 +94,25 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 func tellAllToUpdate() {
 	var msg RealTimeMessage
 	msg.Type = "update"
-	for _, conn := range clients {
-		conn.WriteJSON(msg)
+
+	onlineUsers := []string{}
+	clientsMu.Lock()
+	for username := range clients {
+		onlineUsers = append(onlineUsers, username)
 	}
+	clientsMu.Unlock()
+
+	msg.Usernames = onlineUsers
+
+	clientsMu.Lock()
+	for _, conn := range clients {
+		err := conn.WriteJSON(msg)
+		if err != nil {
+			log.Println("Error sending update:", err)
+		}
+	}
+	clientsMu.Unlock()
 }
-// func handleSignUpPost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-// 	username := r.FormValue("username")
-// 	email := r.FormValue("email")
-// 	password := r.FormValue("password")
-
-// 	// Validate username
-// 	if !IsValidUsername(username) {
-// 		data.ValidationError = "Invalid username: must be 3-20 characters, letters, numbers, or _"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-
-// 	if !isValidEmail(email) {
-// 		data.ValidationError = "Invalid email address"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-// 	if password == "" {
-// 		data.ValidationError = "Password cannot be empty"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-
-// 	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(username, email)
-// 	if err != nil {
-// 		log.Println("Error checking if username is unique:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	if !uniqueUsername {
-// 		data.ValidationError = "Username is already taken"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-// 	if !uniqueEmail {
-// 		data.ValidationError = "Email is already registered to existing user"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-
-// 	// Hash the password
-// 	hashedPassword, err := hashPassword(password)
-// 	if err != nil {
-// 		log.Println("Error hashing password:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Insert user into database
-// 	err = insertUserIntoDB(username, email, hashedPassword)
-// 	if err != nil {
-// 		log.Println("Error inserting user into database:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	http.Redirect(w, r, "/login", http.StatusFound)
-// }
 
 // hashPassword hashes the user's password using bcrypt
 func hashPassword(password string) (string, error) {

@@ -1,6 +1,6 @@
 // Global WebSocket connection
 let socket = null;
-
+let onlineUsers = [];
 // Add WebSocket connection function
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
@@ -32,22 +32,33 @@ function connectWebSocket() {
 function ShowUsers(users) {
     const userList = document.getElementById("users-list");
     const displayedUsers = new Set(); // Track displayed users
-        userList.innerHTML = ""; // Clear old users
+    userList.innerHTML = ""; // Clear old users
   
-        users.forEach((user) => {
-          const username = user.username || user; // Handle both object and string cases
-          if (!displayedUsers.has(username)) {
+    users.forEach((user) => {
+        const username = user.username || user; // Handle both object and string cases
+        if (!displayedUsers.has(username)) {
             displayedUsers.add(username); // Add username to the set
   
             const li = document.createElement("li");
-            li.textContent = username;
+            
+            // Check if user is online
+            const isOnline = onlineUsers.includes(username);
+            
+            // Create status indicator
+            const statusIndicator = document.createElement("span");
+            statusIndicator.className = `status-indicator ${isOnline ? 'online' : 'offline'}`;
+            
+            // Add username and status
+            li.appendChild(statusIndicator);
+            li.appendChild(document.createTextNode(username));
+            
             li.style.cursor = "pointer";
             li.onclick = () => openChat(username); // Pass the correct username
   
             userList.appendChild(li);
-          }
-        });
-  }
+        }
+    });
+}
 // Add message handling functions
 function handleWebSocketMessage(event) {
     try {
@@ -59,8 +70,8 @@ function handleWebSocketMessage(event) {
             displayMessageHistory(data.messages);
         } else if (data.type === "allUsers"){
             ShowUsers(data.usernames);
-
         }else if (data.type === "update"){
+            onlineUsers = data.usernames || [];
             fetchAllUsers();
 
         }else if (data.from && data.message) {
