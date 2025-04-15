@@ -26,6 +26,7 @@ function handleRoute() {
   console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
   const navbar = document.getElementById("navbar");
+  const loginview = document.getElementById("loginview");
   if (navbar) {
     if (route === "/login" || route === "/signup") {
       navbar.style.display = "none"; // Hide the navbar
@@ -36,6 +37,15 @@ function handleRoute() {
   }
 
   container.innerHTML = "";
+
+  if (loginview) {
+    if (loginview && route !== "/login" && route !== "/signup") {
+      loginview.innerHTML = ""; 
+      loginview.style.display = "none";
+    } else {
+      loginview.style.display = "flex";
+    }
+  }
 
   isLoggedIn().then((loggedIn) => {
     const publicRoutes = ["/login", "/signup"];
@@ -144,9 +154,8 @@ function loadHomePage() {
         console.error('Logout button not found');
     }
 
-    const container = document.getElementById("content");
+    const container = document.getElementById("postview");
     container.innerHTML = `
-      <h1>Home</h1>
     <div> <button id="create-post-btn">Create Post</button></div>
     <div id="create-post-popup" class="hidden"></div>
     `;

@@ -22,12 +22,13 @@ var (
 
 // Message structure
 type RealTimeMessage struct {
-	Type    string `json:"type"`
-	From    string `json:"from"`
-	To      string `json:"to"`
-	Message string `json:"message"`
-	Messages []StoredMessage `json:"messages"`
-	Usernames []string `json:"usernames"`
+	Type      string          `json:"type"`
+	From      string          `json:"from"`
+	To        string          `json:"to"`
+	Message   string          `json:"message"`
+	Messages  []StoredMessage `json:"messages"`
+	Usernames []string        `json:"usernames"`
+	Online    []string        `json:"online"`
 }
 
 // Session structure
@@ -77,13 +78,13 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println(username, "disconnected")
 			break
 		}
-		if(msg.Type == "fetchMessages"){
+		if msg.Type == "fetchMessages" {
 			var message RealTimeMessage
-			
+
 			messages, err := getMessages(msg.From, msg.To, 10)
 			if err != nil {
 				log.Println("Error fetching messages:", err)
-				continue				
+				continue
 			}
 			message.Type = "messages"
 			message.Messages = messages
@@ -93,8 +94,6 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			senderConn, exists := clients[msg.From]
 			clientsMu.Unlock()
 
-
-	
 			if exists {
 				// err := recipientConn.WriteJSON(msg)
 				err := senderConn.WriteJSON(message)
@@ -103,9 +102,8 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 				}
 			} else {
 				log.Println("Recipient", msg.From, "not found")
-			}		
-			
-	
+			}
+
 		} else {
 
 			err = saveMessage(msg.From, msg.To, 0, msg.Message)
@@ -117,17 +115,14 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			message.From = msg.From
 			message.To = msg.To
 			message.Message = msg.Message
-	
+
 			// Send message to recipient
 			clientsMu.Lock()
 			recipientConn, exists := clients[msg.To]
 			clientsMu.Unlock()
 
-
-	
 			if exists {
 				// err := recipientConn.WriteJSON(msg)
-
 
 				err := recipientConn.WriteJSON(message)
 				if err != nil {
@@ -141,8 +136,6 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			senderConn, exists := clients[msg.From]
 			clientsMu.Unlock()
 
-
-	
 			if exists {
 				// err := recipientConn.WriteJSON(msg)
 				err := senderConn.WriteJSON(message)
@@ -151,7 +144,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 				}
 			} else {
 				log.Println("Recipient", msg.From, "not found")
-			}		
+			}
 		}
 		// save the message to db
 	}
