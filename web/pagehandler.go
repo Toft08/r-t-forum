@@ -30,6 +30,8 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		PostsHandler(w, r)
 	case "/api/create-post":
 		CreatePost(w, r, &PageDetails{})
+	case "/api/post":
+		PostHandler(w, r, &PageDetails{})
 	case "/api/logout":
 		Logout(w, r)
 	case "/api/check-session":
@@ -92,7 +94,7 @@ func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	response := map[string]interface{}{
-		"loggedIn": loggedIn, 
+		"loggedIn": loggedIn,
 		"userID":   userID,
 		"username": username,
 	}

@@ -1,15 +1,26 @@
-function renderPost(post) {
+function initializePostModal() {
+  const showPostModal = document.getElementById('post-modal');
+  const postDetails = document.getElementById('post-details');
+  const closeModal = document.getElementById('close-modal');
+
+  showPostModal.addEventListener('click', () => {
+    renderPost(post);
+    postModal.style.display = 'block';
+  });
+}
+
+async function renderPost(post) {
   const postDetails = document.getElementById('post-details');
   const postModal = document.getElementById('post-modal');
   const closeModal = document.getElementById('close-modal');
 
   const categoriesHMTL = post.categories ?
-  (Array.isArray(post.categories) 
-    ? post.categories.map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('') 
-    : typeof post.categories === 'string'
-      ? post.categories.split(',').map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('')
-      : '') 
-  : '';
+    (Array.isArray(post.categories)
+      ? post.categories.map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('')
+      : typeof post.categories === 'string'
+        ? post.categories.split(',').map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('')
+        : '')
+    : '';
 
   // Clear previous content
   postDetails.innerHTML = '';
@@ -63,25 +74,25 @@ function renderPost(post) {
   postModal.style.display = 'block';
 
   // Event listener to close the modal
-  closeModal.onclick = function() {
+  closeModal.onclick = function () {
     postModal.style.display = 'none';
   };
 
   // Close the modal if the user clicks outside of the modal content
-  window.onclick = function(event) {
+  window.onclick = function (event) {
     if (event.target == postModal) {
       postModal.style.display = 'none';
     }
   };
 
   // Event listener for the comment form submission
-  document.getElementById('comment-form').addEventListener('submit', function(event) {
+  document.getElementById('comment-form').addEventListener('submit', function (event) {
     event.preventDefault();
     handleComment();
   });
 
   // Event listeners for like and dislike buttons
-  document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function(event) {
+  document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function (event) {
     event.preventDefault();
     event.stopPropagation(); // Prevent the post click event
     const voteData = {
@@ -92,7 +103,7 @@ function renderPost(post) {
     apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
   });
 
-  document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function(event) {
+  document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function (event) {
     event.preventDefault();
     event.stopPropagation(); // Prevent the post click event
     const voteData = {
@@ -157,7 +168,7 @@ function updateVoteUI(postId, likes, dislikes) {
   if (dislikeCount) dislikeCount.textContent = dislikes;
 }
 
-function appendComment(comment) {
+function appendComment() {
   const commentSection = document.getElementById('comment-section');
   if (commentSection) {
     // Find the "No comments yet" message and remove it if it exists
@@ -197,7 +208,7 @@ function displayError(message, action) {
     errorBox = document.createElement('div');
     errorBox.id = errorBoxId;
     errorBox.className = 'error-message';
-    
+
     // Append to appropriate container based on action
     if (action === 'comment') {
       document.getElementById('comment-form').appendChild(errorBox);
