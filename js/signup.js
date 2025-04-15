@@ -1,12 +1,17 @@
 function loadSignupPage() {
     history.pushState({}, '', '/signup');
-
-    const container = document.getElementById('content');
+    const loginview = document.getElementById('loginview');
+    const signupview = document.getElementById('signupview');
     const navbar = document.getElementById("navbar");
-  if (navbar) {
-    navbar.style.display = "none";
-  }
-    container.innerHTML = `
+    if (loginview) {
+        loginview.innerHTML = '';
+        loginview.style.display = 'none';
+    }
+    if (navbar) {
+        navbar.style.display = "none";
+    }
+
+    signupview.innerHTML = `
         <h1>Sign Up</h1>
         <form id="signup-form">
             <label for="username">Username
@@ -31,7 +36,7 @@ function loadSignupPage() {
     `;
 
     // Event listener for the form submission
-    document.getElementById("signup-form").addEventListener("submit", async function(event) {
+    document.getElementById("signup-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent traditional form submission
 
         const username = document.getElementById("username").value;
@@ -44,11 +49,11 @@ function loadSignupPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, email, password })
             });
-    
+
             const result = await response.json(); // Parse JSON response
-    
+
             const messageElement = document.getElementById("signupMessage");
-            
+
             if (response.ok) {
                 messageElement.style.color = "green";
                 messageElement.textContent = "Signup successful! Redirecting...";
