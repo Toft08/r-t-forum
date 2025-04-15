@@ -1,6 +1,7 @@
 // Global WebSocket connection
 let socket = null;
 let onlineUsers = [];
+let unreadMessages = {};
 // Add WebSocket connection function
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
@@ -47,13 +48,20 @@ function ShowUsers(users) {
             // Create status indicator
             const statusIndicator = document.createElement("span");
             statusIndicator.className = `status-indicator ${isOnline ? 'online' : 'offline'}`;
-            
-            // Add username and status
             li.appendChild(statusIndicator);
+            
+            // Add username text
             li.appendChild(document.createTextNode(username));
             
+            // Add notification indicator if there are unread messages
+            if (unreadMessages[username]) {
+                const notificationDot = document.createElement("span");
+                notificationDot.className = "notification-dot";
+                li.appendChild(notificationDot);
+            }
+            
             li.style.cursor = "pointer";
-            li.onclick = () => openChat(username); // Pass the correct username
+            li.onclick = () => openChat(username);
   
             userList.appendChild(li);
         }
@@ -77,6 +85,11 @@ function handleWebSocketMessage(event) {
         }else if (data.from && data.message) {
             // Handle direct message from another user
             displayMessage(data.from, data.message);
+            const curretChatUser = document.querySelector('.chat-header h3')?.textContent;
+            if (curretChatUser !== data.from) {
+                unreadMessages[data.from] = true;
+                fetchAllUsers();
+            }
         } else if (data.type === "error") {
             console.error("Error from WebSocket:", data.message);
         }
@@ -179,6 +192,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function openChat(username) {
+    unreadMessages[username] = false;
+    const userElements = document.querySelectorAll('#users-list li');
+    for (const li of userElements) {
+        if (li.textContent.includes(username)) {
+            // Find and remove notification dot if it exists
+            const dot = li.querySelector('.notification-dot');
+            if (dot) {
+                dot.remove();
+            }
+            break;
+        }
+    }
+
     // Create/update chat window UI
     const chatWindow = document.getElementById("chat-window") || createChatWindow();
 
@@ -201,6 +227,7 @@ function openChat(username) {
 
     // Connect to WebSocket if needed
     connectWebSocket();
+
 
     // Request message history
     requestMessageHistory(username);

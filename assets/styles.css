@@ -450,3 +450,11 @@ form#login-form a:hover {
   align-items: center;
   padding: 5px 0;
 }
+.notification-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #ff4c4c; /* Red color for notification */
+  border-radius: 50%;
+  margin-left: 8px;
+}
