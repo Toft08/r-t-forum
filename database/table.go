@@ -9,14 +9,18 @@ import (
 func MakeTables(db *sql.DB) {
 
 	createUserTableQuery := `
-		CREATE TABLE IF NOT EXISTS User (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		email TEXT UNIQUE NOT NULL,
-		username TEXT UNIQUE NOT NULL COLLATE NOCASE,
-		password TEXT NOT NULL,
-		created_at TEXT NOT NULL,
-		status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'deleted'))
-	);`
+CREATE TABLE IF NOT EXISTS User (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	email TEXT UNIQUE NOT NULL,
+	username TEXT UNIQUE NOT NULL COLLATE NOCASE,
+	password TEXT NOT NULL,
+	firstname TEXT NOT NULL,
+	lastname TEXT NOT NULL,
+	age INTEGER NOT NULL,
+	gender TEXT NOT NULL,
+	created_at TEXT NOT NULL,
+	status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'deleted'))
+);`
 	if _, err := db.Exec(createUserTableQuery); err != nil {
 		fmt.Println("Error creating User table:", err)
 		return
@@ -132,9 +136,9 @@ func MakeTables(db *sql.DB) {
 		return
 	}
 	insertUserQuery := `
-    INSERT INTO User (username, email, password, created_at)
-    SELECT 'admin', 'admin@example.com', 'hashedpassword', datetime('now')
-    WHERE NOT EXISTS (SELECT 1 FROM User WHERE username = 'admin');
+INSERT INTO User (username, email, password, firstname, lastname, age, gender, created_at)
+SELECT 'admin', 'admin@example.com', 'hashedpassword', 'Admin', 'User', 30, 'Other', datetime('now')
+WHERE NOT EXISTS (SELECT 1 FROM User WHERE username = 'admin');
 `
 
 	if _, err := db.Exec(insertUserQuery); err != nil {

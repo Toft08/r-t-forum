@@ -33,6 +33,10 @@ function connectWebSocket() {
 }
 function ShowUsers(users) {
     const userList = document.getElementById("users-list");
+    if (!userList) {
+        console.error("Error: 'users-list' element not found.");
+        return; // Exit the function if the element doesn't exist
+    }
     const displayedUsers = new Set(); // Track displayed users
     userList.innerHTML = ""; // Clear old users
 
@@ -177,7 +181,7 @@ function displayMessage(sender, message) {
     
     // Format the message with sender name and content
     messageElement.innerHTML = `
-        <strong>${sender}</strong>: ${message}
+        <strong>${sender}</strong>${message}
         <span class="timestamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
     `;
     
