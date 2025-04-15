@@ -1,15 +1,5 @@
 package web
 
-type PageDetails struct {
-	LoggedIn         bool
-	Username         string
-	Categories       []CategoryDetails
-	Posts            []PostDetails
-	SelectedCategory string
-	SelectedFilter   string
-	ValidationError  string
-}
-
 type CommentDetails struct {
 	CommentID   int    `json:"comment_id"`
 	PostID      int    `json:"post_id"`
@@ -44,9 +34,10 @@ type CategoryDetails struct {
 }
 
 type Post struct {
-	ID      int    `json:"id"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	ID         int      `json:"id"`
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	Categories []string `json:"categories"`
 }
 type LoginRequest struct {
 	Username string `json:"username"`

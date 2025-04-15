@@ -3,9 +3,9 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -42,15 +42,10 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 	case "posts":
 		PostsHandler(w, r)
 	case "post":
-		postID, err := strconv.Atoi(r.URL.Query().Get("id"))
-		if err != nil {
-			log.Println("Error converting postID to int:", err)
-			http.Error(w, "Invalid post ID", http.StatusBadRequest)
-			return
-		}
-		PostHandler(w, r, &PageDetails{}, postID)
+		fmt.Printf("Handling post request for %s\n", r.URL.Path)
+		PostHandler(w, r)
 	case "create-post":
-		CreatePost(w, r, &PageDetails{})
+		CreatePost(w, r)
 	case "logout":
 		Logout(w, r)
 	case "check-session":

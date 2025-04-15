@@ -6,9 +6,6 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchAllUsers() {
-
-
-
   fetch("/api/all-users")
     .then((response) => response.json())
     .then((res) => {
@@ -193,11 +190,12 @@ function insertPosts(posts) {
           </div>
       `;
 
-      // const createPostModal = document.getElementById("create-post-modal");
-      // Add event listener for post click
-      postElement.addEventListener("click", () => {
-        initializePostModal(post.post_id);
-      });
+    // const createPostModal = document.getElementById("create-post-modal");
+    // Add event listener for post click
+    postElement.addEventListener("click", () => {
+      initializePostModal(post.post_id);
+    });
+
     container.appendChild(postElement);
   });
 }

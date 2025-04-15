@@ -8,15 +8,8 @@ import (
 	"time"
 )
 
-// PostData represents the JSON structure received from the frontend
-type PostData struct {
-	Title      string   `json:"title"`
-	Content    string   `json:"content"`
-	Categories []string `json:"categories"`
-}
-
 // CreatePost handles post creation via JSON API
-func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
+func CreatePost(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		// Fetch categories for the frontend
 		FetchCategories(w, r)
@@ -29,16 +22,15 @@ func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 	}
 
 	// Check if the user is logged in
-	var userID int
-	data.LoggedIn, userID, data.Username = VerifySession(r, db)
-	if !data.LoggedIn {
+	loggedIn, userID, _ := VerifySession(r, db)
+	if !loggedIn {
 		http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
 		return
 	}
 
 	// Decode incoming JSON
-	var postData PostData
-	err := json.NewDecoder(r.Body).Decode(&postData)
+	var post Post
+	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		log.Println("Error decoding JSON:", err)
 		http.Error(w, `{"error": "Invalid JSON"}`, http.StatusBadRequest)
@@ -46,12 +38,12 @@ func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 	}
 
 	// Validate input
-	if postData.Title == "" || postData.Content == "" {
+	if post.Title == "" || post.Content == "" {
 		http.Error(w, `{"error": "Title or content cannot be empty"}`, http.StatusBadRequest)
 		return
 	}
 
-	categories := postData.Categories
+	categories := post.Categories
 
 	// Default category if none is selected
 	if len(categories) == 0 {
@@ -70,7 +62,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 		categoryIDs = append(categoryIDs, categoryID)
 	}
 
-	err = AddPostToDatabase(postData.Title, postData.Content, categoryIDs, userID)
+	err = AddPostToDatabase(post.Title, post.Content, categoryIDs, userID)
 	if err != nil {
 		http.Error(w, `{"error": "Server error"}`, http.StatusInternalServerError)
 		return

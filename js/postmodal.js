@@ -1,5 +1,5 @@
 // Function to initialize and display the post modal
-function initializePostModal(postId) {
+function initializePostModal(post_id) {
   // Remove any existing modal
   const existingPostModal = document.getElementById("post-modal");
   if (existingPostModal) existingPostModal.remove();
@@ -27,7 +27,7 @@ function initializePostModal(postId) {
   document.body.appendChild(postModal);
 
   // Fetch post details and render
-  fetchPostDetails(postId);
+  fetchPostDetails(post_id);
 
   // Display the modal
   postModal.style.display = "block";
@@ -46,8 +46,8 @@ function initializePostModal(postId) {
 }
 
 // Function to fetch post details from the server
-function fetchPostDetails(postId) {
-  fetch(`/api/post/${postId}`)
+function fetchPostDetails(post_id) {
+  fetch(`/api/post/${post_id}`)
     .then((response) => {
       if (!response.ok) {
         throw new Error("Failed to fetch post details");
@@ -72,7 +72,7 @@ function renderPost(post) {
   const postDetails = document.createElement("div");
   postDetails.id = "post-details";
 
-  const categoriesHMTL = post.categories ?
+  const categoriesHTML = post.categories ?
     (Array.isArray(post.categories)
       ? post.categories.map(cat => `<p class="category-selection">${cat.trim()}</p>`).join('')
       : typeof post.categories === 'string'
@@ -89,22 +89,18 @@ function renderPost(post) {
       <div class="post-header-like-dislike">
         <h3 class="post-title">${post.post_title}</h3>
         <div class="reaction-buttons">
-          <button id="like-button-${post.post_id}" class="like-button" style="color: ${
-    post.liked_now ? "#54956d" : "inherit"
-  }">
+          <button id="like-button-${post.post_id}" class="like-button" style="color: ${post.liked_now ? "#54956d" : "inherit"
+    }">
             <span class="material-symbols-outlined">thumb_up</span>
           </button>
-          <span id="like-count-${post.post_id}" class="reaction-count">${
-    post.likes
-  }</span>
-          <button id="dislike-button-${post.post_id}" class="dislike-button" style="color: ${
-    post.disliked_now ? "rgb(197, 54, 64)" : "inherit"
-  }">
+          <span id="like-count-${post.post_id}" class="reaction-count">${post.likes
+    }</span>
+          <button id="dislike-button-${post.post_id}" class="dislike-button" style="color: ${post.disliked_now ? "rgb(197, 54, 64)" : "inherit"
+    }">
             <span class="material-symbols-outlined">thumb_down</span>
           </button>
-          <span id="dislike-count-${post.post_id}" class="reaction-count">${
-    post.dislikes
-  }</span>
+          <span id="dislike-count-${post.post_id}" class="reaction-count">${post.dislikes
+    }</span>
         </div>
       </div>
       <div class="category-container">
@@ -127,22 +123,21 @@ function renderPost(post) {
         <textarea class="comment-textarea" id="comment" name="comment" placeholder="Enter comment here" required maxlength="200"></textarea>
         <button type="submit">Submit Comment</button>
       </form>
-      ${
-        post.comments && post.comments.length > 0
-          ? post.comments
-              .map(
-                (comment) => `
+      ${post.comments && post.comments.length > 0
+      ? post.comments
+        .map(
+          (comment) => `
         <div class="comment" id="comment-${comment.comment_id}">
           <p><strong>${comment.username}</strong>: ${formatDate(
-                  comment.created_at
-                )}</p>
+            comment.created_at
+          )}</p>
           <pre>${comment.comment_content}</pre>
         </div>
       `
-              )
-              .join("")
-          : "<p>No comments yet.</p>"
-      }
+        )
+        .join("")
+      : "<p>No comments yet.</p>"
+    }
     </div>
   `;
 
@@ -150,9 +145,9 @@ function renderPost(post) {
   postModal.style.display = 'block';
 
   // Event listener to close the modal
-  closeModal.onclick = function () {
-    postModal.style.display = 'none';
-  };
+  // closeModal.onclick = function () {
+  //   postModal.style.display = 'none';
+  // };
 
   // Close the modal if the user clicks outside of the modal content
   window.onclick = function (event) {
@@ -162,33 +157,33 @@ function renderPost(post) {
   };
 
   // Event listener for the comment form submission
-  document.getElementById('comment-form').addEventListener('submit', function (event) {
-    event.preventDefault();
-    handleComment();
-  });
+  // document.getElementById('comment-form').addEventListener('submit', function (event) {
+  //   event.preventDefault();
+  //   handleComment();
+  // });
 
   // Event listeners for like and dislike buttons
-  document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function (event) {
-    event.preventDefault();
-    event.stopPropagation(); // Prevent the post click event
-    const voteData = {
-      vote: 'like',
-      post_id: post.post_id,
-      comment_id: 0
-    };
-    apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
-  });
+  // document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function (event) {
+  //   event.preventDefault();
+  //   event.stopPropagation(); // Prevent the post click event
+  //   const voteData = {
+  //     vote: 'like',
+  //     post_id: post.post_id,
+  //     comment_id: 0
+  //   };
+  //   apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
+  // });
 
-  document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function (event) {
-    event.preventDefault();
-    event.stopPropagation(); // Prevent the post click event
-    const voteData = {
-      vote: 'dislike',
-      post_id: post.post_id,
-      comment_id: 0
-    };
-    apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
-  });
+  // document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function (event) {
+  //   event.preventDefault();
+  //   event.stopPropagation(); // Prevent the post click event
+  //   const voteData = {
+  //     vote: 'dislike',
+  //     post_id: post.post_id,
+  //     comment_id: 0
+  //   };
+  //   apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
+  // });
 }
 
 function handleComment() {
@@ -244,7 +239,7 @@ function updateVoteUI(postId, likes, dislikes) {
   if (dislikeCount) dislikeCount.textContent = dislikes;
 }
 
-function appendComment() {
+function appendComment(comment) {
   const commentSection = document.getElementById('comment-section');
   if (commentSection) {
     // Find the "No comments yet" message and remove it if it exists
