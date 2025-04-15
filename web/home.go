@@ -9,10 +9,7 @@ import (
 	"strconv"
 )
 
-func PostsHandler(w http.ResponseWriter, r *http.Request) {
-	// db := database.InitDB()
-	// defer db.Close()
-
+func FeedHandler(w http.ResponseWriter, r *http.Request) {
 	posts, err := FetchPosts(0)
 	if err != nil {
 		log.Println("❌ Error fetching posts:", err)
