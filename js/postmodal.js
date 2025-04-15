@@ -155,6 +155,7 @@ function renderPost(post) {
       postModal.style.display = 'none';
     }
   };
+  modalContent.appendChild(postDetails);
 
   // Event listener for the comment form submission
   // document.getElementById('comment-form').addEventListener('submit', function (event) {
