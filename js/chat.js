@@ -2,6 +2,7 @@
 let socket = null;
 let onlineUsers = [];
 let unreadMessages = {};
+let lastMessageTime = {};
 // Add WebSocket connection function
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
@@ -34,9 +35,19 @@ function ShowUsers(users) {
     const userList = document.getElementById("users-list");
     const displayedUsers = new Set(); // Track displayed users
     userList.innerHTML = ""; // Clear old users
+
+    const usersWithTime = users.map(user => {
+        const username = user.username || user;
+        return {
+            username,
+            lastTime: lastMessageTime[username] || 0  // Default to 0 if no messages yet
+        };
+    });
+
+    usersWithTime.sort((a, b) => b.lastTime - a.lastTime);
   
-    users.forEach((user) => {
-        const username = user.username || user; // Handle both object and string cases
+    usersWithTime.forEach(({username}) => {
+        // const username = user.username || user; // Handle both object and string cases
         if (!displayedUsers.has(username)) {
             displayedUsers.add(username); // Add username to the set
   
@@ -76,6 +87,13 @@ function handleWebSocketMessage(event) {
         if (data.type === "messages") {
             // Handle message history
             displayMessageHistory(data.messages);
+            if (data.messages && data.messages.length > 0) {
+                // Assuming messages are sorted with newest last
+                const lastMsg = data.messages[data.messages.length - 1];
+                if (lastMsg.sender === data.from || lastMsg.sender === data.to) {
+                    lastMessageTime[data.from] = new Date().getTime();
+                }
+            }
         } else if (data.type === "allUsers"){
             ShowUsers(data.usernames);
         }else if (data.type === "update"){
@@ -85,6 +103,9 @@ function handleWebSocketMessage(event) {
         }else if (data.from && data.message) {
             // Handle direct message from another user
             displayMessage(data.from, data.message);
+
+            lastMessageTime[data.from] = new Date().getTime();
+
             const curretChatUser = document.querySelector('.chat-header h3')?.textContent;
             if (curretChatUser !== data.from) {
                 unreadMessages[data.from] = true;
@@ -288,6 +309,10 @@ function sendMessage(recipient) {
         sendActualMessage(recipient, message);
     }
 
+    const recipientUsername = document.querySelector('.chat-header h3')?.textContent;
+    if (recipientUsername) {
+        lastMessageTime[recipientUsername] = new Date().getTime();
+    }
     // Clear the input field
     input.value = "";
 }
