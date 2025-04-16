@@ -134,8 +134,8 @@ async function isLoggedIn() {
 
 function loadHomePage() {
   const navbar = document.getElementById("navbar");
-    if (navbar) {
-      navbar.innerHTML = `
+  if (navbar) {
+    navbar.innerHTML = `
       <nav class="nav">
         <div class="nav-left">
             <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
@@ -146,7 +146,7 @@ function loadHomePage() {
         </div>
     </nav>
     `;
-    }
+  }
   isLoggedIn().then((loggedIn) => {
     if (!loggedIn) {
       console.error("Unauthorized access to home page");
@@ -157,16 +157,16 @@ function loadHomePage() {
     window.currentUsername = window.currentUsername
     connectWebSocket();
 
-    
+
     const logoutButton = document.getElementById('logout-button');
-    
+
     if (logoutButton) {
-        logoutButton.addEventListener('click', function() {
-            console.log('Logging out...');
-            logout(); 
-        });
+      logoutButton.addEventListener('click', function () {
+        console.log('Logging out...');
+        logout();
+      });
     } else {
-        console.error('Logout button not found');
+      console.error('Logout button not found');
     }
 
     const container = document.getElementById("postview");
@@ -239,10 +239,12 @@ function insertPosts(posts) {
               <span>${formatDate(post.created_at)}</span>
           </div>
           <h3 class="post-title">${post.post_title}</h3>
-          <div class="post-content">${post.post_content}</div>
+          <div class="post-content">${post.post_content.substring(0, 50)}</div>
           <div class="post-footer">
               <div class="categories">Categories: ${categoriesText}</div>
               <div class="post-stats">
+                  <div class="comments">
+                      <span class="material-symbols-outlined">comment</span> ${(post.comments ?? []).length}</div>
                   <div class="likes">
                       <span class="material-symbols-outlined">thumb_up</span> ${post.likes}</div>
                   <div class="dislikes">
