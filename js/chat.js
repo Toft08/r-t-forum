@@ -1,6 +1,8 @@
 // Global WebSocket connection
 let socket = null;
-
+let onlineUsers = [];
+let unreadMessages = {};
+let lastMessageTime = {};
 // Add WebSocket connection function
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
@@ -31,23 +33,55 @@ function connectWebSocket() {
 }
 function ShowUsers(users) {
     const userList = document.getElementById("users-list");
+    if (!userList) {
+        console.error("Error: 'users-list' element not found.");
+        return; // Exit the function if the element doesn't exist
+    }
     const displayedUsers = new Set(); // Track displayed users
-        userList.innerHTML = ""; // Clear old users
+    userList.innerHTML = ""; // Clear old users
+
+    const usersWithTime = users.map(user => {
+        const username = user.username || user;
+        return {
+            username,
+            lastTime: lastMessageTime[username] || 0  // Default to 0 if no messages yet
+        };
+    });
+
+    usersWithTime.sort((a, b) => b.lastTime - a.lastTime);
   
-        users.forEach((user) => {
-          const username = user.username || user; // Handle both object and string cases
-          if (!displayedUsers.has(username)) {
+    usersWithTime.forEach(({username}) => {
+        // const username = user.username || user; // Handle both object and string cases
+        if (!displayedUsers.has(username)) {
             displayedUsers.add(username); // Add username to the set
   
             const li = document.createElement("li");
-            li.textContent = username;
+            
+            // Check if user is online
+            const isOnline = onlineUsers.includes(username);
+            
+            // Create status indicator
+            const statusIndicator = document.createElement("span");
+            statusIndicator.className = `status-indicator ${isOnline ? 'online' : 'offline'}`;
+            li.appendChild(statusIndicator);
+            
+            // Add username text
+            li.appendChild(document.createTextNode(username));
+            
+            // Add notification indicator if there are unread messages
+            if (unreadMessages[username]) {
+                const notificationDot = document.createElement("span");
+                notificationDot.className = "notification-dot";
+                li.appendChild(notificationDot);
+            }
+            
             li.style.cursor = "pointer";
-            li.onclick = () => openChat(username); // Pass the correct username
+            li.onclick = () => openChat(username);
   
             userList.appendChild(li);
-          }
-        });
-  }
+        }
+    });
+}
 // Add message handling functions
 function handleWebSocketMessage(event) {
     try {
@@ -57,15 +91,30 @@ function handleWebSocketMessage(event) {
         if (data.type === "messages") {
             // Handle message history
             displayMessageHistory(data.messages);
+            if (data.messages && data.messages.length > 0) {
+                // Assuming messages are sorted with newest last
+                const lastMsg = data.messages[data.messages.length - 1];
+                if (lastMsg.sender === data.from || lastMsg.sender === data.to) {
+                    lastMessageTime[data.from] = new Date().getTime();
+                }
+            }
         } else if (data.type === "allUsers"){
             ShowUsers(data.usernames);
-
         }else if (data.type === "update"){
+            onlineUsers = data.usernames || [];
             fetchAllUsers();
 
         }else if (data.from && data.message) {
             // Handle direct message from another user
             displayMessage(data.from, data.message);
+
+            lastMessageTime[data.from] = new Date().getTime();
+
+            const curretChatUser = document.querySelector('.chat-header h3')?.textContent;
+            if (curretChatUser !== data.from) {
+                unreadMessages[data.from] = true;
+                fetchAllUsers();
+            }
         } else if (data.type === "error") {
             console.error("Error from WebSocket:", data.message);
         }
@@ -132,7 +181,7 @@ function displayMessage(sender, message) {
     
     // Format the message with sender name and content
     messageElement.innerHTML = `
-        <strong>${sender}</strong>: ${message}
+        <strong>${sender}</strong>${message}
         <span class="timestamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
     `;
     
@@ -168,6 +217,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function openChat(username) {
+    unreadMessages[username] = false;
+    const userElements = document.querySelectorAll('#users-list li');
+    for (const li of userElements) {
+        if (li.textContent.includes(username)) {
+            // Find and remove notification dot if it exists
+            const dot = li.querySelector('.notification-dot');
+            if (dot) {
+                dot.remove();
+            }
+            break;
+        }
+    }
+
     // Create/update chat window UI
     const chatWindow = document.getElementById("chat-window") || createChatWindow();
 
@@ -190,6 +252,7 @@ function openChat(username) {
 
     // Connect to WebSocket if needed
     connectWebSocket();
+
 
     // Request message history
     requestMessageHistory(username);
@@ -250,6 +313,10 @@ function sendMessage(recipient) {
         sendActualMessage(recipient, message);
     }
 
+    const recipientUsername = document.querySelector('.chat-header h3')?.textContent;
+    if (recipientUsername) {
+        lastMessageTime[recipientUsername] = new Date().getTime();
+    }
     // Clear the input field
     input.value = "";
 }

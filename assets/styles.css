@@ -1,10 +1,10 @@
 body {
     font-family: 'Arial', sans-serif;
     line-height: 1.6;
-    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #f5f5f5;
+    max-height: 100vh;
 }
 .nav {
     display: flex;
@@ -340,4 +340,228 @@ body {
 .close:focus {
     color: black;
     text-decoration: none;
+}
+/* login.css */
+
+#loginview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f7f7f7;
+  flex-direction: column;
+  padding: 1rem;
+}
+#login-form-container {
+  background: #fff;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+#login-form-container h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #333;
+}
+form#login-form {
+  background: #ffffff;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+form#login-form h1 {
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+form#login-form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+form#login-form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+form#login-form button {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+form#login-form button:hover {
+  background-color: #45a049;
+}
+
+form#login-form p {
+  text-align: center;
+  margin-top: 1rem;
+  color: #666;
+}
+
+form#login-form a {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+form#login-form a:hover {
+  text-decoration: underline;
+}
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-indicator.online {
+  background-color: #4CAF50; 
+}
+
+.status-indicator.offline {
+  background-color: #9E9E9E;
+}
+
+#users-list li {
+  display: flex;
+  align-items: center;
+  padding: 5px 0;
+}
+.notification-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #ff4c4c; /* Red color for notification */
+  border-radius: 50%;
+  margin-left: 8px;
+}
+#signupview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f7f7f7;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+#signup-form-container {
+  background: #fff;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+form#signup-form {
+  background: #ffffff;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+form#signup-form h1 {
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+form#signup-form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+form#signup-form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+form#signup-form button {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+form#signup-form button:hover {
+  background-color: #45a049;
+}
+
+form#signup-form p {
+  text-align: center;
+  margin-top: 1rem;
+  color: #666;
+}
+
+form#signup-form a {
+  color: #4CAF50;
+  text-decoration: none;
+}
+
+form#signup-form a:hover {
+  text-decoration: underline;
+}
+.hover-icon {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 12px;
+  z-index: 10;
+}
+
+.hover-icon:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
 }

@@ -54,13 +54,19 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Printf("Session cookie: %s", cookie.Value)
 
-	loggedIn, userID, username := VerifySession(r, db)
+	loggedIn, userID := VerifySession(r, db)
 	if loggedIn {
-		log.Printf("User %s (ID: %d) is logged in", username, userID)
+		// log.Printf("User %s (ID: %d) is logged in", userID)
 	} else {
 		log.Println("User is not logged in")
 	}
-
+	var username string
+	err = db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
+	if err != nil {
+		log.Println("Error fetching username from userID:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 	// Fetch all users from the database
 	rows, err := db.Query("SELECT username FROM User where id != ?", userID)
 	if err != nil {

@@ -40,7 +40,7 @@ type Post struct {
 	Categories []string `json:"categories"`
 }
 type LoginRequest struct {
-	Username string `json:"username"`
+	LoginID string `json:"loginid"` // can be either username or email
 	Password string `json:"password"`
 }
 
@@ -51,4 +51,14 @@ type StoredMessage struct {
 	UserID    int    `json:"user_id"`
 	Content   string `json:"content"`
 	CreatedAt string `json:"created_at"`
+}
+type SignUpData struct {
+	Username        string `json:"username"`
+	Age             string `json:"age"`
+	Gender          string `json:"gender"`
+	FirstName       string `json:"firstName"`
+	LastName        string `json:"lastName"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
 }

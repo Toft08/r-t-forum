@@ -22,8 +22,45 @@ function handleRoute() {
   const route = window.location.pathname;
   console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
+  const navbar = document.getElementById("navbar");
+  const loginview = document.getElementById("loginview");
+  const signupview = document.getElementById("signupview");
+  const postview = document.getElementById("postview");
+  if (navbar) {
+    if (route === "/login" || route === "/signup") {
+      navbar.style.display = "none"; // Hide the navbar
+    }
+    else {
+      navbar.style.display = "block"; // Show the navbar
+    }
+  }
 
-  container.innerHTML = "";
+  if (loginview) {
+    if (route === "/login") {
+      loginview.style.display = "flex";
+    } else {
+      loginview.style.display = "none";
+      loginview.innerHTML = ""; // optional: clear
+    }
+  }
+
+  // Hide or clear signupview unless on /signup
+  if (signupview) {
+    if (route === "/signup") {
+      signupview.style.display = "flex";
+    } else {
+      signupview.style.display = "none";
+      signupview.innerHTML = ""; // optional: clear
+    }
+  }
+  if (postview) {
+    if (route === "/home") {
+      postview.style.display = "flex";
+    } else {
+      postview.style.dispaly = "none";
+      postview.innerHTML = "";
+    }
+  }
 
   isLoggedIn().then((loggedIn) => {
     const publicRoutes = ["/login", "/signup"];
@@ -70,6 +107,7 @@ function handleRoute() {
 }
 
 function updateUsernameDisplay(username) {
+  console.log("Updating username display:", username); // Debug log
   const welcomeText = document.getElementById("username-placeholder");
   if (welcomeText) {
     welcomeText.textContent = username || "Guest";
@@ -95,6 +133,20 @@ async function isLoggedIn() {
 }
 
 function loadHomePage() {
+  const navbar = document.getElementById("navbar");
+    if (navbar) {
+      navbar.innerHTML = `
+      <nav class="nav">
+        <div class="nav-left">
+            <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
+        </div>
+        <div class="nav-right">
+            <p class="welcome-text">Logged in as: <span id="username-placeholder">${window.currentUsername || "Guest"}</span></p>
+            <button type="submit" id="logout-button">Log Out</button>
+        </div>
+    </nav>
+    `;
+    }
   isLoggedIn().then((loggedIn) => {
     if (!loggedIn) {
       console.error("Unauthorized access to home page");
@@ -105,11 +157,22 @@ function loadHomePage() {
     window.currentUsername = window.currentUsername
     connectWebSocket();
 
-    const container = document.getElementById("content");
+    
+    const logoutButton = document.getElementById('logout-button');
+    
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+            console.log('Logging out...');
+            logout(); 
+        });
+    } else {
+        console.error('Logout button not found');
+    }
+
+    const container = document.getElementById("postview");
     container.innerHTML = `
-      <h1>Home</h1>
     <div> <button id="create-post-btn">Create Post</button></div>
-    <div id="create-post-popup" class="hidden"></div>
+    <div id="create-post-popup"></div>
     `;
 
     const sidebar = document.querySelector(".sidebar");
@@ -126,9 +189,7 @@ function loadHomePage() {
       console.error("Sidebar element not found");
     }
 
-    // Create post popup window.
-    const createPostBtn = document.getElementById("create-post-btn");
-    const createPostPopup = document.getElementById("create-post-popup");
+
 
     loadPosts();
     initializeCreatePostFeature();

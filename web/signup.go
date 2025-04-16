@@ -8,7 +8,6 @@ import (
 	"net/mail"
 	"regexp"
 	"strings"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,17 +16,22 @@ import (
 func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	w.Header().Set("Content-Type", "application/json")
 	if r.Method != http.MethodPost {
-        w.WriteHeader(http.StatusMethodNotAllowed)
-        json.NewEncoder(w).Encode(map[string]string{
-            "error": "Method Not Allowed",
-        })
-        return
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error": "Method Not Allowed",
+		})
+		return
 	}
 
 	var user struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Username        string `json:"username"`
+		Age             int    `json:"age"`
+		Gender          string `json:"gender"`
+		FirstName       string `json:"firstname"`
+		LastName        string `json:"lastname"`
+		Email           string `json:"email"`
+		Password        string `json:"password"`
+		ConfirmPassword string `json:"confirmpassword"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
@@ -50,6 +54,25 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	// Validate password
 	if user.Password == "" {
 		http.Error(w, `{"error": "Password cannot be empty"}`, http.StatusBadRequest)
+		return
+	}
+	if user.FirstName == "" || user.LastName == "" {
+		http.Error(w, `{"error": "First name and last name are required"}`, http.StatusBadRequest)
+		return
+	}
+
+	if user.Age <= 0 || user.Age > 120 {
+		http.Error(w, `{"error": "Invalid age"}`, http.StatusBadRequest)
+		return
+	}
+
+	if user.Gender != "male" && user.Gender != "female" && user.Gender != "other" {
+		http.Error(w, `{"error": "Invalid gender"}`, http.StatusBadRequest)
+		return
+	}
+
+	if user.Password != user.ConfirmPassword {
+		http.Error(w, `{"error": "Passwords do not match"}`, http.StatusBadRequest)
 		return
 	}
 
@@ -78,7 +101,8 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	// Insert user into database
-	err = insertUserIntoDB(user.Username, user.Email, hashedPassword, db)
+	err = insertUserIntoDB(user.Username, user.Email, hashedPassword, user.Age, user.Gender, user.FirstName, user.LastName, db)
+
 	if err != nil {
 		log.Println("Error inserting user into database:", err)
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
@@ -91,71 +115,29 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful"})
 	tellAllToUpdate()
 }
+
 func tellAllToUpdate() {
 	var msg RealTimeMessage
 	msg.Type = "update"
-	for _, conn := range clients {
-		conn.WriteJSON(msg)
+
+	onlineUsers := []string{}
+	clientsMu.Lock()
+	for username := range clients {
+		onlineUsers = append(onlineUsers, username)
 	}
+	clientsMu.Unlock()
+
+	msg.Usernames = onlineUsers
+
+	clientsMu.Lock()
+	for _, conn := range clients {
+		err := conn.WriteJSON(msg)
+		if err != nil {
+			log.Println("Error sending update:", err)
+		}
+	}
+	clientsMu.Unlock()
 }
-// func handleSignUpPost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
-// 	username := r.FormValue("username")
-// 	email := r.FormValue("email")
-// 	password := r.FormValue("password")
-
-// 	// Validate username
-// 	if !IsValidUsername(username) {
-// 		data.ValidationError = "Invalid username: must be 3-20 characters, letters, numbers, or _"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-
-// 	if !isValidEmail(email) {
-// 		data.ValidationError = "Invalid email address"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-// 	if password == "" {
-// 		data.ValidationError = "Password cannot be empty"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-
-// 	uniqueUsername, uniqueEmail, err := isUsernameOrEmailUnique(username, email)
-// 	if err != nil {
-// 		log.Println("Error checking if username is unique:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	if !uniqueUsername {
-// 		data.ValidationError = "Username is already taken"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-// 	if !uniqueEmail {
-// 		data.ValidationError = "Email is already registered to existing user"
-// 		RenderTemplate(w, "signup", data)
-// 		return
-// 	}
-
-// 	// Hash the password
-// 	hashedPassword, err := hashPassword(password)
-// 	if err != nil {
-// 		log.Println("Error hashing password:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	// Insert user into database
-// 	err = insertUserIntoDB(username, email, hashedPassword)
-// 	if err != nil {
-// 		log.Println("Error inserting user into database:", err)
-// 		ErrorHandler(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-
-// 	http.Redirect(w, r, "/login", http.StatusFound)
-// }
 
 // hashPassword hashes the user's password using bcrypt
 func hashPassword(password string) (string, error) {
@@ -164,9 +146,10 @@ func hashPassword(password string) (string, error) {
 }
 
 // insertUserIntoDB inserts the user's details into the database
-func insertUserIntoDB(username, email, hashedPassword string, db *sql.DB) error {
-	_, err := db.Exec("INSERT INTO User (username, email, password, created_at) VALUES (?, ?, ?, ?)",
-		username, email, hashedPassword, time.Now().Format("2006-01-02 15:04:05"))
+func insertUserIntoDB(username, email, hashedPassword string, age int, gender, firstname, lastname string, db *sql.DB) error {
+	_, err := db.Exec(`INSERT INTO user (username, email, password, age, gender, firstname, lastname, created_at)
+					   VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+		username, email, hashedPassword, age, gender, firstname, lastname)
 	return err
 }
 

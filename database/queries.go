@@ -1,5 +1,10 @@
 package database
 
+import (
+	"database/sql"
+	"log"
+)
+
 // PostContent returns the query to fetch post details
 func PostContent() string {
 	query := `
@@ -99,4 +104,14 @@ func Votes() string {
       AND (post_id = COALESCE(?, post_id) AND comment_id = COALESCE(?, comment_id));
 	`
 	return query
+}
+func FindUsernameByUserID(userID int, db *sql.DB) (string, error) {
+	var username string
+	err := db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
+	if err != nil {
+		log.Printf("Error finding userID for session cookie : %v", err)
+		return  "", err 
+	}
+
+	return  username, nil
 }
