@@ -3,6 +3,7 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -32,11 +33,12 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
-	username := loginRequest.Username
-
+	loginID := loginRequest.LoginID
+	fmt.Println(loginID)
 	// Rest of your existing authentication logic remains the same
-	userID, hashedPassword, err := getUserCredentials(loginRequest.Username)
+	userID, username, hashedPassword, err := getUserCredentials(loginID)
 	if err != nil {
+		fmt.Println(err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Invalid username"})
@@ -71,15 +73,15 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 
 
 // getUserCredentials retrieves the user's ID and hashed password from the database
-func getUserCredentials(username string) (int, string, error) {
+func getUserCredentials(loginID string) (int, string, string, error) {
 	var userID int
-	var hashedPassword string
+	var username, hashedPassword string
 
-	err := db.QueryRow("SELECT id, password FROM User WHERE username = ?", username).Scan(&userID, &hashedPassword)
+	err := db.QueryRow("SELECT id, username ,password FROM User WHERE username = ? OR email = ?", loginID, loginID).Scan(&userID, &username, &hashedPassword)
 	if err != nil {
-		return 0, "", err
+		return 0, "", "", err
 	}
-	return userID, hashedPassword, nil
+	return userID, username, hashedPassword, nil
 }
 
 // verifyPassword compares the hashed password with the password provided by the user

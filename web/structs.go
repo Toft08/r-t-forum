@@ -49,7 +49,7 @@ type Post struct {
 	Content string `json:"content"`
 }
 type LoginRequest struct {
-	Username string `json:"username"`
+	LoginID string `json:"loginid"` // can be either username or email
 	Password string `json:"password"`
 }
 
