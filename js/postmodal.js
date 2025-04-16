@@ -1,5 +1,6 @@
 // Function to initialize and display the post modal
 function initializePostModal(post_id) {
+  console.log("Initializing post modal for post ID:", post_id);
   // Remove any existing modal
   const existingPostModal = document.getElementById("post-modal");
   if (existingPostModal) existingPostModal.remove();
@@ -56,7 +57,7 @@ function fetchPostDetails(post_id) {
       return response.json();
     })
     .then((post) => {
-      console.log("Post details:", post);
+      console.log("in fetchPostDetails: Post details:", post);
       renderPost(post);
     })
     .catch((error) => {

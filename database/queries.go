@@ -54,6 +54,7 @@ func CommentContent() string {
 		WHERE Comment.post_id = ?
 		GROUP BY Comment.id, User.id;
 `
+	//		OREDER BY Comment.created_at DESC;
 	return query
 }
 
@@ -110,8 +111,8 @@ func FindUsernameByUserID(userID int, db *sql.DB) (string, error) {
 	err := db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
 	if err != nil {
 		log.Printf("Error finding userID for session cookie : %v", err)
-		return  "", err 
+		return "", err
 	}
 
-	return  username, nil
+	return username, nil
 }

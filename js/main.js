@@ -256,6 +256,7 @@ function insertPosts(posts) {
     // const createPostModal = document.getElementById("create-post-modal");
     // Add event listener for post click
     postElement.addEventListener("click", () => {
+      console.log("in insertPosts: Post clicked:", post.post_id);
       initializePostModal(post.post_id);
     });
 
