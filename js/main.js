@@ -56,12 +56,14 @@ function handleRoute() {
       signupview.innerHTML = ""; // optional: clear
     }
   }
-
   if (postview) {
-    postview.style.display = (route === "/home") ? "block" : "none";
-    if (route !== "/home") postview.innerHTML = "";
+    if (route === "/home") {
+      postview.style.display = "flex";
+    } else {
+      postview.style.dispaly = "none";
+      postview.innerHTML = "";
+    }
   }
-  
 
   isLoggedIn().then((loggedIn) => {
     const publicRoutes = ["/login", "/signup"];
