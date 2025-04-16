@@ -5,6 +5,7 @@ let unreadMessages = {};
 let lastMessageTime = {};
 let numberOfMessages = 10;
 let previousScrollPosition = 0;
+let isLoadingMoreMessages = false;
 // Add WebSocket connection function
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
@@ -129,9 +130,17 @@ function displayMessageHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     if (!chatMessages) return;
 
-    chatMessages.innerHTML = ''; // Clear the current chat window
-    const currentScrollHeight = chatMessages.scrollHeight;
-    const currentScrollTop = chatMessages.scrollTop;
+    // Save the current scroll height and position before making changes
+    const oldScrollHeight = chatMessages.scrollHeight;
+    
+    // If we're loading more messages, save the current first message to use as an anchor
+    let firstVisibleMessage = null;
+    if (isLoadingMoreMessages && chatMessages.children.length > 0) {
+        firstVisibleMessage = chatMessages.children[0];
+    }
+    
+    // Clear the chat window
+    chatMessages.innerHTML = '';
 
     if (Array.isArray(messages) && messages.length > 0) {
         messages.sort((a, b) => {
@@ -140,6 +149,7 @@ function displayMessageHistory(messages) {
             }
             return new Date(a.created_at) - new Date(b.created_at);
         });
+        
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
 
@@ -166,10 +176,24 @@ function displayMessageHistory(messages) {
         chatMessages.appendChild(emptyMessage);
     }
 
-    // // Auto-scroll to the bottom
-    // const newScrollHeight = chatMessages.scrollHeight;
-    // chatMessages.scrollTop = newScrollHeight - currentScrollHeight + currentScrollTop;
-    chatMessages.scrollTop = previousScrollPosition;
+    // Handle scrolling after new messages are loaded
+    setTimeout(() => {
+        const newScrollHeight = chatMessages.scrollHeight;
+        
+        if (isLoadingMoreMessages) {
+            // Calculate how much new content was added at the top
+            const heightDifference = newScrollHeight - oldScrollHeight;
+            
+            // Set the scroll position to show the same messages as before
+            chatMessages.scrollTop = heightDifference + 10; // +10 to offset a bit
+            
+            // Reset the loading flag
+            isLoadingMoreMessages = false;
+        } else {
+            // For initial load or refresh, scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }, 0);
 }
 
 function displayMessage(sender, message) {
@@ -270,18 +294,26 @@ function openChat(username) {
             sendMessage(username);
         }
     });
-    const chatMessages = document.getElementById("chat-messages")
+    const chatMessages = document.getElementById("chat-messages");
     let isThrottled = false;
+    
     chatMessages.addEventListener('scroll', () => {
         if (chatMessages.scrollTop <= 5 && !isThrottled) {
             isThrottled = true;
+            
+            // Set the flag that we're loading more messages
+            isLoadingMoreMessages = true;
+            
+            // Increase the number of messages to fetch
             numberOfMessages += 10;
-            previousScrollPosition = chatMessages.scrollHeight;
+            
+            // Request more messages
             requestMessageHistory(username);
-    
+            
+            // Throttle to prevent multiple rapid requests
             setTimeout(() => {
                 isThrottled = false;
-            }, 1000); // throttle delay
+            }, 1000);
         }
     });
     
