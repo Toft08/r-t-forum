@@ -27,7 +27,7 @@ async function loadLoginPage() {
         <h1>Login</h1>
         <form id="login-form">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <input type="text" id="loginID" name="username" placeholder="Enter your username" required>
 
             <label for="password">Password</label>
             <input type="password" id="password" name="password" placeholder="Enter your password" required>
@@ -41,10 +41,10 @@ async function loadLoginPage() {
     document.getElementById("login-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent the form from submitting the traditional way
 
-        const username = document.getElementById("username").value;
+        const loginID = document.getElementById("loginID").value;
         const password = document.getElementById("password").value;
 
-        console.log("Attempting login with username:", username); // Debug log
+        console.log("Attempting login with username:", loginID); // Debug log
 
         try {
             console.log("Sending fetch request to /login"); // Debug log
@@ -53,7 +53,7 @@ async function loadLoginPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({ loginID, password }),
                 // include allows credentials to allow cookies to be sent and recieved
                 credentials: 'include'
             });

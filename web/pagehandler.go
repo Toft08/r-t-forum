@@ -3,8 +3,10 @@ package web
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"r-t-forum/database"
 )
 
 var db *sql.DB
@@ -48,27 +50,20 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 }
 
 // VerifySession checks if the session ID exists in the database
-func VerifySession(r *http.Request, db *sql.DB) (bool, int, string) {
+func VerifySession(r *http.Request, db *sql.DB) (bool, int) {
 	var userID int
-	var username string
 	cookie, err := r.Cookie("session_id")
 	if err != nil {
-		return false, 0, ""
+		return false, 0
 	}
 
 	err = db.QueryRow("SELECT user_id FROM Session WHERE id = ?", cookie.Value).Scan(&userID)
 	if err != nil {
 		log.Printf("Error finding userID for session cookie %s: %v", cookie.Value, err)
-		return false, 0, ""
+		return false, 0
 	}
 
-	err = db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
-	if err != nil {
-		log.Printf("Error finding username for userID %d: %v", userID, err)
-		return false, 0, ""
-	}
-
-	return true, userID, username
+	return true, userID
 }
 
 // API endpoint to check if the user is logged in
@@ -84,13 +79,16 @@ func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 	log.Printf("Session cookie: %s", cookie.Value)
 
-	loggedIn, userID, username := VerifySession(r, db)
+	loggedIn, userID := VerifySession(r, db)
 	if loggedIn {
-		log.Printf("User %s (ID: %d) is logged in", username, userID)
+		// log.Printf("User %s (ID: %d) is logged in", userID)
 	} else {
 		log.Println("User is not logged in")
 	}
-
+	username, err := database.FindUsernameByUserID(userID, db)
+	if err != nil {
+		fmt.Println(err)
+	}
 	response := map[string]interface{}{
 		"loggedIn": loggedIn, 
 		"userID":   userID,

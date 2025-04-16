@@ -39,7 +39,7 @@ func PostHandler(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 // HandlePostPageGet handles get requests to the post page
 func HandlePostPageGet(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
 	var userID int
-	data.LoggedIn, userID, data.Username = VerifySession(r, db)
+	data.LoggedIn, userID = VerifySession(r, db)
 	data.Posts = nil
 
 	post, err := GetPostDetails(postID, userID)
@@ -56,7 +56,7 @@ func HandlePostPageGet(w http.ResponseWriter, r *http.Request, data *PageDetails
 func HandlePostPagePost(w http.ResponseWriter, r *http.Request, data *PageDetails, postID int) {
 	var userID int
 	var err error
-	data.LoggedIn, userID, data.Username = VerifySession(r, db)
+	data.LoggedIn, userID = VerifySession(r, db)
 
 	if data.LoggedIn {
 		vote := r.FormValue("vote")

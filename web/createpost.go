@@ -30,7 +30,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request, data *PageDetails) {
 
 	// Check if the user is logged in
 	var userID int
-	data.LoggedIn, userID, data.Username = VerifySession(r, db)
+	data.LoggedIn, userID = VerifySession(r, db)
 	if !data.LoggedIn {
 		http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
 		return
