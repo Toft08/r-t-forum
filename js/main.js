@@ -6,13 +6,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function fetchAllUsers() {
-
-
-
   fetch("/api/all-users")
     .then((response) => response.json())
     .then((res) => {
-      if(res.ok){
+      if (res.ok) {
         console.log("All users fetched successfully");
       }
     })
@@ -125,7 +122,7 @@ async function isLoggedIn() {
       if (data.loggedIn) {
         updateUsernameDisplay(data.username);
 
-        
+
       }
       return data.loggedIn;
     })
@@ -157,7 +154,7 @@ function loadHomePage() {
       loadLoginPage();
       return;
     }
-    window.currentUsername = window.currentUsername 
+    window.currentUsername = window.currentUsername
     connectWebSocket();
 
     
@@ -253,28 +250,14 @@ function insertPosts(posts) {
               </div>
           </div>
       `;
-      // Add event listener for post click
-      postElement.addEventListener("click", () => {
-        fetchPostDetails(post.post_id);
-      });
-    container.appendChild(postElement);
-  });
-}
 
-function fetchPostDetails(postId) {
-  fetch(`/api/posts/${postId}`)
-  .then((response) => {
-    if (!response.ok) {
-      throw new Error("Failed to fetch post details");
-    }
-    return response.json();
-  })
-  .then((post) => {
-    renderPost(post);
-  })
-  .catch((error) => {
-    console.error("Error fetching post details:", error);
-    alert("Failed to load post details");
+    // const createPostModal = document.getElementById("create-post-modal");
+    // Add event listener for post click
+    postElement.addEventListener("click", () => {
+      initializePostModal(post.post_id);
+    });
+
+    container.appendChild(postElement);
   });
 }
 
