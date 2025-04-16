@@ -149,6 +149,7 @@ WHERE NOT EXISTS (SELECT 1 FROM User WHERE username = 'admin');
 		fmt.Println("Error inserting into User table:", err)
 		return
 	}
+	
 	//Insert initial data into Post
 	insertPostQuery := `
 	INSERT INTO post (title, content, user_id, created_at)
@@ -182,3 +183,4 @@ WHERE NOT EXISTS (SELECT 1 FROM User WHERE username = 'admin');
 
 	fmt.Println("Tables created and initial data inserted successfully.")
 }
+

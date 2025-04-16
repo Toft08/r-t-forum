@@ -3,6 +3,9 @@ let socket = null;
 let onlineUsers = [];
 let unreadMessages = {};
 let lastMessageTime = {};
+let numberOfMessages = 10;
+let previousScrollPosition = 0;
+let isLoadingMoreMessages = false;
 // Add WebSocket connection function
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
@@ -49,35 +52,35 @@ function ShowUsers(users) {
     });
 
     usersWithTime.sort((a, b) => b.lastTime - a.lastTime);
-  
-    usersWithTime.forEach(({username}) => {
+
+    usersWithTime.forEach(({ username }) => {
         // const username = user.username || user; // Handle both object and string cases
         if (!displayedUsers.has(username)) {
             displayedUsers.add(username); // Add username to the set
-  
+
             const li = document.createElement("li");
-            
+
             // Check if user is online
             const isOnline = onlineUsers.includes(username);
-            
+
             // Create status indicator
             const statusIndicator = document.createElement("span");
             statusIndicator.className = `status-indicator ${isOnline ? 'online' : 'offline'}`;
             li.appendChild(statusIndicator);
-            
+
             // Add username text
             li.appendChild(document.createTextNode(username));
-            
+
             // Add notification indicator if there are unread messages
             if (unreadMessages[username]) {
                 const notificationDot = document.createElement("span");
                 notificationDot.className = "notification-dot";
                 li.appendChild(notificationDot);
             }
-            
+
             li.style.cursor = "pointer";
             li.onclick = () => openChat(username);
-  
+
             userList.appendChild(li);
         }
     });
@@ -98,13 +101,13 @@ function handleWebSocketMessage(event) {
                     lastMessageTime[data.from] = new Date().getTime();
                 }
             }
-        } else if (data.type === "allUsers"){
+        } else if (data.type === "allUsers") {
             ShowUsers(data.usernames);
-        }else if (data.type === "update"){
+        } else if (data.type === "update") {
             onlineUsers = data.usernames || [];
             fetchAllUsers();
 
-        }else if (data.from && data.message) {
+        } else if (data.from && data.message) {
             // Handle direct message from another user
             displayMessage(data.from, data.message);
 
@@ -127,7 +130,17 @@ function displayMessageHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     if (!chatMessages) return;
 
-    chatMessages.innerHTML = ''; // Clear the current chat window
+    // Save the current scroll height and position before making changes
+    const oldScrollHeight = chatMessages.scrollHeight;
+    
+    // If we're loading more messages, save the current first message to use as an anchor
+    let firstVisibleMessage = null;
+    if (isLoadingMoreMessages && chatMessages.children.length > 0) {
+        firstVisibleMessage = chatMessages.children[0];
+    }
+    
+    // Clear the chat window
+    chatMessages.innerHTML = '';
 
     if (Array.isArray(messages) && messages.length > 0) {
         messages.sort((a, b) => {
@@ -136,23 +149,24 @@ function displayMessageHistory(messages) {
             }
             return new Date(a.created_at) - new Date(b.created_at);
         });
+        
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
-            
+
             // Add appropriate class based on sender
             if (msg.sender === window.currentUsername) {
                 messageElement.className = 'sent';
             } else {
                 messageElement.className = 'received';
             }
-            
+
             // Format the message with timestamp
-            const timestamp = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const timestamp = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             messageElement.innerHTML = `
                 <strong>${msg.sender}</strong> ${msg.content}
                 <span class="timestamp">${timestamp}</span>
             `;
-            
+
             chatMessages.appendChild(messageElement);
         });
     } else {
@@ -162,8 +176,24 @@ function displayMessageHistory(messages) {
         chatMessages.appendChild(emptyMessage);
     }
 
-    // Auto-scroll to the bottom
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // Handle scrolling after new messages are loaded
+    setTimeout(() => {
+        const newScrollHeight = chatMessages.scrollHeight;
+        
+        if (isLoadingMoreMessages) {
+            // Calculate how much new content was added at the top
+            const heightDifference = newScrollHeight - oldScrollHeight;
+            
+            // Set the scroll position to show the same messages as before
+            chatMessages.scrollTop = heightDifference + 10; // +10 to offset a bit
+            
+            // Reset the loading flag
+            isLoadingMoreMessages = false;
+        } else {
+            // For initial load or refresh, scroll to the bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }, 0);
 }
 
 function displayMessage(sender, message) {
@@ -171,25 +201,25 @@ function displayMessage(sender, message) {
     if (!chatMessages) return;
 
     const messageElement = document.createElement('div');
-    
+
     // Add appropriate class based on sender
     if (sender === window.currentUsername) {
         messageElement.className = 'sent new';
     } else {
         messageElement.className = 'received new';
     }
-    
+
     // Format the message with sender name and content
     messageElement.innerHTML = `
         <strong>${sender}</strong>${message}
-        <span class="timestamp">${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        <span class="timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
     `;
-    
+
     chatMessages.appendChild(messageElement);
 
     // Auto-scroll to the bottom
     chatMessages.scrollTop = chatMessages.scrollHeight;
-    
+
     // Remove the 'new' class after animation completes
     setTimeout(() => {
         messageElement.classList.remove('new');
@@ -217,6 +247,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function openChat(username) {
+    numberOfMessages = 10;
     unreadMessages[username] = false;
     const userElements = document.querySelectorAll('#users-list li');
     for (const li of userElements) {
@@ -263,7 +294,32 @@ function openChat(username) {
             sendMessage(username);
         }
     });
+    const chatMessages = document.getElementById("chat-messages");
+    let isThrottled = false;
+    
+    chatMessages.addEventListener('scroll', () => {
+        if (chatMessages.scrollTop <= 5 && !isThrottled) {
+            isThrottled = true;
+            
+            // Set the flag that we're loading more messages
+            isLoadingMoreMessages = true;
+            
+            // Increase the number of messages to fetch
+            numberOfMessages += 10;
+            
+            // Request more messages
+            requestMessageHistory(username);
+            
+            // Throttle to prevent multiple rapid requests
+            setTimeout(() => {
+                isThrottled = false;
+            }, 1000);
+        }
+    });
+    
+    //chatMessages.scrollTop = previousScrollPosition;
 }
+
 
 function createChatWindow() {
     const chatWindow = document.createElement("div");
@@ -338,6 +394,7 @@ function sendActualMessage(recipient, message) {
 
 function requestMessageHistory(otherUser) {
     // Make sure we're connected
+    console.log("toft is not god")
     if (!socket || socket.readyState !== WebSocket.OPEN) {
         socket = connectWebSocket();
         // Wait for connection to establish
@@ -356,7 +413,8 @@ function sendHistoryRequest(otherUser) {
     const requestObj = {
         type: "fetchMessages",
         from: window.currentUsername, // Add sender info
-        to: otherUser
+        to: otherUser,
+        numberOfMessages: numberOfMessages
     };
 
     // Send the request
@@ -369,7 +427,7 @@ async function fetchCurrentUsername() {
             method: 'GET',
             credentials: 'include', // Include cookies
         });
-        
+
         if (response.ok) {
             const data = await response.json();
             return data.username; // Return the logged-in username

@@ -29,6 +29,7 @@ type RealTimeMessage struct {
 	Messages  []StoredMessage `json:"messages"`
 	Usernames []string        `json:"usernames"`
 	Online    []string        `json:"online"`
+	NumberOfMessages int       `json:"numberOfMessages"`
 }
 
 // Session structure
@@ -81,7 +82,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 		if msg.Type == "fetchMessages" {
 			var message RealTimeMessage
 
-			messages, err := getMessages(msg.From, msg.To, 10)
+			messages, err := getMessages(msg.From, msg.To, msg.NumberOfMessages)
 			if err != nil {
 				log.Println("Error fetching messages:", err)
 				continue
