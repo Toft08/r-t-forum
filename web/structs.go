@@ -3,7 +3,7 @@ package web
 type CommentDetails struct {
 	CommentID   int    `json:"comment_id"`
 	PostID      int    `json:"post_id"`
-	Content     string `json:"content"`
+	Content     string `json:"comment_content"`
 	UserID      int    `json:"user_id"`
 	Username    string `json:"username"`
 	CreatedAt   string `json:"created_at"`
@@ -33,14 +33,14 @@ type CategoryDetails struct {
 	CategoryName string
 }
 
-type Post struct {
-	ID         int      `json:"id"`
-	Title      string   `json:"title"`
-	Content    string   `json:"content"`
-	Categories []string `json:"categories"`
-}
+//	type Post struct {
+//		ID         int      `json:"id"`
+//		Title      string   `json:"title"`
+//		Content    string   `json:"content"`
+//		Categories []string `json:"categories"`
+//	}
 type LoginRequest struct {
-	LoginID string `json:"loginid"` // can be either username or email
+	LoginID  string `json:"loginid"` // can be either username or email
 	Password string `json:"password"`
 }
 

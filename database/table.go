@@ -146,7 +146,7 @@ WHERE NOT EXISTS (SELECT 1 FROM User WHERE username = 'admin');
 `
 
 	if _, err := db.Exec(insertUserQuery); err != nil {
-		fmt.Println("Error inserting into Post table:", err)
+		fmt.Println("Error inserting into User table:", err)
 		return
 	}
 	//Insert initial data into Post
