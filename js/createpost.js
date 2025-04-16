@@ -72,7 +72,10 @@ async function handlePostSubmit(event) {
     const response = await fetch("/api/create-post", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, content, categories: selectedCategories }),
+        body: JSON.stringify({
+            post_title: title,
+            post_content: content,
+            categories: selectedCategories }),
     });
     const result = await response.json();
         if (response.ok) {
