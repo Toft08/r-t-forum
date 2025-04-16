@@ -13,6 +13,12 @@ type CommentDetails struct {
 	DislikedNow bool   `json:"disliked_now"`
 }
 
+type VoteDetails struct {
+	Vote      string `json:"vote"`
+	CommentID int    `json:"comment_id"`
+	PostID    int    `json:"post_id"`
+}
+
 type PostDetails struct {
 	PostID      int              `json:"post_id"`
 	UserID      int              `json:"user_id"`
