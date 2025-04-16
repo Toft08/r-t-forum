@@ -26,7 +26,7 @@ func PostContent() string {
 				SUM(CASE WHEN type = 1 THEN 1 ELSE 0 END) AS post_likes,
 				SUM(CASE WHEN type = 2 THEN 1 ELSE 0 END) AS post_dislikes
 			FROM Like
-			GROUP BY post_id	
+			GROUP BY post_id
 		) AS likes ON Post.id = likes.post_id
 		LEFT JOIN Post_Category ON Post.id = Post_Category.post_id
 		LEFT JOIN Category ON Post_Category.category_id = Category.id
@@ -52,7 +52,8 @@ func CommentContent() string {
 		LEFT JOIN user ON Comment.user_id = User.id
 		LEFT JOIN like ON Comment.id = Like.comment_id
 		WHERE Comment.post_id = ?
-		GROUP BY Comment.id, User.id;
+		GROUP BY Comment.id, User.id
+		ORDER BY Comment.created_at DESC;
 `
 	return query
 }
@@ -110,8 +111,8 @@ func FindUsernameByUserID(userID int, db *sql.DB) (string, error) {
 	err := db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
 	if err != nil {
 		log.Printf("Error finding userID for session cookie : %v", err)
-		return  "", err 
+		return "", err
 	}
 
-	return  username, nil
+	return username, nil
 }

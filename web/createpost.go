@@ -22,7 +22,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request, userID int) {
 	}
 
 	// Decode incoming JSON
-	var post Post
+	var post PostDetails
 	err := json.NewDecoder(r.Body).Decode(&post)
 	if err != nil {
 		log.Println("Error decoding JSON:", err)
@@ -31,7 +31,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request, userID int) {
 	}
 
 	// Validate input
-	if post.Title == "" || post.Content == "" {
+	if post.PostTitle == "" || post.PostContent == "" {
 		http.Error(w, `{"error": "Title or content cannot be empty"}`, http.StatusBadRequest)
 		return
 	}
@@ -55,7 +55,7 @@ func CreatePost(w http.ResponseWriter, r *http.Request, userID int) {
 		categoryIDs = append(categoryIDs, categoryID)
 	}
 
-	err = AddPostToDatabase(post.Title, post.Content, categoryIDs, userID)
+	err = AddPostToDatabase(post.PostTitle, post.PostContent, categoryIDs, userID)
 	if err != nil {
 		http.Error(w, `{"error": "Server error"}`, http.StatusInternalServerError)
 		return
