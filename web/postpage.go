@@ -11,7 +11,7 @@ import (
 )
 
 // PostHandler handles requests to view a specific post
-func PostHandler(w http.ResponseWriter, r *http.Request) {
+func PostHandler(w http.ResponseWriter, r *http.Request, userID int) {
 	pathParts := strings.Split(r.URL.Path, "/")
 	var addedPart string
 	fmt.Printf("Post Handler1 %s\n", r.URL.Path)
@@ -38,10 +38,10 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		HandlePostPageGet(w, r, postID)
+		HandlePostPageGet(w, r, postID, userID)
 	case http.MethodPost:
 		if addedPart == "comment" {
-			HandleComment(w, r, postID)
+			HandleComment(w, r, postID, userID)
 			// } else if added == "vote" {
 			// 	HandleVote(w, r, postID)
 		} else {
@@ -55,31 +55,19 @@ func PostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // HandlePostPageGet handles get requests to the post page
-func HandlePostPageGet(w http.ResponseWriter, r *http.Request, postID int) {
-	loggedIn, userID, username := VerifySession(r, db)
-
+func HandlePostPageGet(w http.ResponseWriter, r *http.Request, postID, userID int) {
 	post, err := GetPostDetails(postID, userID)
 	if err != nil {
 		http.Error(w, "Post not found", http.StatusNotFound)
 		return
 	}
 
-	response := struct {
-		Post     *PostDetails `json:"post"`
-		Username string       `json:"username"`
-		LoggedIn bool         `json:"logged_in"`
-	}{
-		Post:     post,
-		Username: username,
-		LoggedIn: loggedIn,
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(post)
 }
 
 // HandlePostPagePost handles post requests to the post page
-func HandleComment(w http.ResponseWriter, r *http.Request, postID int) {
+func HandleComment(w http.ResponseWriter, r *http.Request, postID, userID int) {
 
 	var newComment CommentDetails
 	decoder := json.NewDecoder(r.Body)
@@ -91,19 +79,19 @@ func HandleComment(w http.ResponseWriter, r *http.Request, postID int) {
 
 	if newComment.Content != "" {
 		// Insert comment into the database
-		err := AddComment(postID, newComment.Content)
+		err := AddComment(postID, newComment.Content, userID)
 		if err != nil {
 			log.Println("error adding comment to the database")
 			return
 		}
 	}
 
-	HandlePostPageGet(w, r, postID)
+	HandlePostPageGet(w, r, postID, userID)
 }
 
-func AddComment(postID int, content string) error {
+func AddComment(postID int, content string, userID int) error {
 	_, err := db.Exec("INSERT INTO Comment (post_id, content, user_id, created_at) VALUES (?, ?, ?, ?)",
-		postID, content, time.Now().Format("2006-01-02 15:04:05"))
+		postID, content, userID, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		log.Println("Error creating post:", err)
 		return err

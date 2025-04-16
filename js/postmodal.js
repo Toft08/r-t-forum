@@ -9,7 +9,7 @@ function initializePostModal(post_id) {
   postModal.id = "post-modal";
   postModal.classList.add("modal");
 
-  
+
   // Create modal content container
   const modalContent = document.createElement("div");
   modalContent.classList.add("modal-content");
@@ -69,12 +69,6 @@ function fetchPostDetails(post_id) {
 function renderPost(postData) {
   console.log("in renderPost:", postData);
 
-  const post = postData.post;
-  if (!post) {
-    console.error("Post data is missing");
-    return;
-  }
-
   const postModal = document.getElementById("post-modal");
   if (!postModal) {
     console.error("Post modal not found");
@@ -90,13 +84,13 @@ function renderPost(postData) {
   const postDetails = document.createElement("div");
   postDetails.id = "post-details";
 
-  console.log("Post ID:", post.post_id);
-  console.log ("Post title:", post.post_title);
-  console.log ("Post content:", post.post_content);
-  console.log ("Post categories:", post.categories);
-  console.log ("Post date:", post.created_at);
-  console.log ("Post username:", post.username);
-  console.log ("Post comments:", post.comments);
+  console.log("Post ID:", postData.post_id);
+  console.log("Post title:", postData.post_title);
+  console.log("Post content:", postData.post_content);
+  console.log("Post categories:", postData.categories);
+  console.log("Post date:", postData.created_at);
+  console.log("Post username:", postData.username);
+  console.log("Post comments:", postData.comments);
 
   // Clear previous content
   postDetails.innerHTML = '';
@@ -105,38 +99,38 @@ function renderPost(postData) {
   postDetails.innerHTML = `
     <div id="post-container">
       <div class="post-header-like-dislike">
-        <h3 class="post-title">${post.post_title}</h3>
+        <h3 class="post-title">${postData.post_title}</h3>
         <div class="reaction-buttons">
-          <button id="like-button-${post.post_id}" class="like-button" style="color: ${post.liked_now ? "#54956d" : "inherit"}">
+          <button id="like-button-${postData.post_id}" class="like-button" style="color: ${postData.liked_now ? "#54956d" : "inherit"}">
             <span class="material-symbols-outlined">thumb_up</span>
           </button>
-          <span id="like-count-${post.post_id}" class="reaction-count">${post.likes}</span>
-          <button id="dislike-button-${post.post_id}" class="dislike-button" style="color: ${post.disliked_now ? "rgb(197, 54, 64)" : "inherit"}">
+          <span id="like-count-${postData.post_id}" class="reaction-count">${postData.likes}</span>
+          <button id="dislike-button-${postData.post_id}" class="dislike-button" style="color: ${postData.disliked_now ? "rgb(197, 54, 64)" : "inherit"}">
             <span class="material-symbols-outlined">thumb_down</span>
           </button>
-          <span id="dislike-count-${post.post_id}" class="reaction-count">${post.dislikes}</span>
+          <span id="dislike-count-${postData.post_id}" class="reaction-count">${postData.dislikes}</span>
         </div>
       </div>
       <div class="category-container">
-      ${post.categories.map(cat => `<p class="category-selection">${cat}</p>`).join('')}
+      ${postData.categories.map(cat => `<p class="category-selection">${cat}</p>`).join('')}
       </div>
       <div class="post-info">
         <div class="left">
-          <span class="username">${post.username}</span>
+          <span class="username">${postData.username}</span>
         </div>
-        <p class="right">${formatDate(post.created_at)}</p>
+        <p class="right">${formatDate(postData.created_at)}</p>
       </div>
       <div class="post-card">
-        <p class="post-body">${post.post_content}</p>
+        <p class="post-body">${postData.post_content}</p>
       </div>
     </div>
     <div id="comment-section">
       <h3 class="comment-header">Comments:</h3>
-      <form id="comment-form" data-post-id="${post.post_id}">
+      <form id="comment-form" data-post-id="${postData.post_id}">
         <textarea class="comment-textarea" id="comment" name="comment" placeholder="Enter comment here" required maxlength="200"></textarea>
         <button type="submit">Submit Comment</button>
       </form>
-      ${post.comments && post.comments.length > 0 ? post.comments.map((comment) => `
+      ${postData.comments && postData.comments.length > 0 ? postData.comments.map((comment) => `
         <div class="comment" id="comment-${comment.comment_id}">
           <p><strong>${comment.username}</strong>: ${comment.created_at}</p>
           <pre>${comment.comment_content}</pre>
@@ -164,26 +158,26 @@ function renderPost(postData) {
   });
 
   // Event listeners for like and dislike buttons
-  document.getElementById(`like-button-${post.post_id}`).addEventListener('click', function (event) {
+  document.getElementById(`like-button-${postData.post_id}`).addEventListener('click', function (event) {
     event.preventDefault();
     event.stopPropagation(); // Prevent the post click event
     const voteData = {
       vote: 'like',
-      post_id: post.post_id,
+      post_id: postData.post_id,
       comment_id: 0
     };
-    apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
+    apiPOST(`/api/post/${postData.post_id}/vote`, 'vote', voteData);
   });
 
-  document.getElementById(`dislike-button-${post.post_id}`).addEventListener('click', function (event) {
+  document.getElementById(`dislike-button-${postData.post_id}`).addEventListener('click', function (event) {
     event.preventDefault();
     event.stopPropagation(); // Prevent the post click event
     const voteData = {
       vote: 'dislike',
-      post_id: post.post_id,
+      post_id: postData.post_id,
       comment_id: 0
     };
-    apiPOST(`/api/post/${post.post_id}/vote`, 'vote', voteData);
+    apiPOST(`/api/post/${postData.post_id}/vote`, 'vote', voteData);
   });
 }
 
@@ -229,7 +223,7 @@ async function apiPOST(url, action, postData) {
 
     // Log the raw response for debugging
     const responseText = await response.text();
-    console.log(`Raw response from ${url}:`, responseText);
+    console.log(`in apiPOST: Raw response from ${url}:`, responseText);
 
     // Try to parse as JSON
     let data;
@@ -244,7 +238,7 @@ async function apiPOST(url, action, postData) {
       throw new Error(data.message || "Unknown error");
     }
 
-    console.log(`Successful ${action} response:`, data);
+    console.log(`in apiPOST: Successful ${action} response:`, data);
 
     switch (action) {
       // case 'vote':
@@ -291,21 +285,21 @@ function appendComment(comment) {
     console.error("Comment section not found");
     return;
   }
-  
+
   // Check if all required properties exist
   if (!comment.comment_id) {
     console.warn("Comment missing comment_id, generating temporary one");
     comment.comment_id = "temp-" + Date.now();
   }
-  
+
   if (!comment.username) {
     comment.username = "Anonymous";
   }
-  
+
   if (!comment.created_at) {
     comment.created_at = new Date().toISOString();
   }
-  
+
   // Find the "No comments yet" message and remove it if it exists
   const noCommentsMsg = commentSection.querySelector('p:last-child');
   if (noCommentsMsg && noCommentsMsg.textContent === 'No comments yet.') {
@@ -315,16 +309,16 @@ function appendComment(comment) {
   const newComment = document.createElement('div');
   newComment.className = 'comment';
   newComment.id = `comment-${comment.comment_id}`;
-  
+
   newComment.innerHTML = `
     <p><strong>${comment.username}</strong>: ${formatDate(comment.created_at)}</p>
     <pre>${comment.comment_content}</pre>
   `;
-  
+
   const commentForm = commentSection.querySelector('#comment-form');
   if (commentForm) {
     commentForm.insertAdjacentElement('afterend', newComment);
-    
+
     // Clear the comment textarea
     const commentTextarea = document.getElementById('comment');
     if (commentTextarea) {

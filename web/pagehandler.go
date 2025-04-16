@@ -34,32 +34,46 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		page = trimmedPath
 	}
 
-	switch page {
-	case "login":
-		Login(w, r, db)
-	case "signup":
-		SignUp(w, r, db)
-	case "posts":
-		FeedHandler(w, r)
-	case "post":
-		fmt.Printf("Handling post request for %s\n", r.URL.Path)
-		PostHandler(w, r)
-	case "create-post":
-		CreatePost(w, r)
-	case "logout":
-		Logout(w, r)
-	case "check-session":
-		checkSessionHandler(w, r, db)
-	case "all-users":
-		allUsersHandler(w, r)
-	case "ws":
-		handleChatWebSocket(w, r)
-	case "getMessagesHandler":
-		getMessagesHandler(w, r)
-	default:
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(map[string]string{"error": "Page Not Found"})
+	loggedIn, userID, username := VerifySession(r, db)
+
+	// remove this after testing...
+	fmt.Printf(username)
+
+	if !loggedIn {
+		switch page {
+		case "login":
+			Login(w, r, db)
+		case "signup":
+			SignUp(w, r, db)
+		default:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Page Not Found"})
+		}
+	} else {
+		switch page {
+		case "check-session":
+			checkSessionHandler(w, r, db)
+		case "posts":
+			FeedHandler(w, r)
+		case "post":
+			fmt.Printf("Handling post request for %s\n", r.URL.Path)
+			PostHandler(w, r, userID)
+		case "create-post":
+			CreatePost(w, r, userID)
+		case "logout":
+			Logout(w, r)
+		case "all-users":
+			allUsersHandler(w, r)
+		case "ws":
+			handleChatWebSocket(w, r)
+		case "getMessagesHandler":
+			getMessagesHandler(w, r)
+		default:
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Page Not Found"})
+		}
 	}
 }
 
@@ -85,6 +99,23 @@ func VerifySession(r *http.Request, db *sql.DB) (bool, int, string) {
 	}
 
 	return true, userID, username
+}
+
+// This function is just till the other is fixed
+func VerifySession2(r *http.Request, db *sql.DB) (bool, int) {
+	var userID int
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		return false, 0
+	}
+
+	err = db.QueryRow("SELECT user_id FROM Session WHERE id = ?", cookie.Value).Scan(&userID)
+	if err != nil {
+		log.Printf("Error finding userID for session cookie %s: %v", cookie.Value, err)
+		return false, 0
+	}
+
+	return true, userID
 }
 
 // API endpoint to check if the user is logged in

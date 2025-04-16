@@ -9,7 +9,7 @@ import (
 )
 
 // CreatePost handles post creation via JSON API
-func CreatePost(w http.ResponseWriter, r *http.Request) {
+func CreatePost(w http.ResponseWriter, r *http.Request, userID int) {
 	if r.Method == http.MethodGet {
 		// Fetch categories for the frontend
 		FetchCategories(w, r)
@@ -18,13 +18,6 @@ func CreatePost(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != http.MethodPost {
 		http.Error(w, `{"Error": "Method not allowed"}`, http.StatusMethodNotAllowed)
-		return
-	}
-
-	// Check if the user is logged in
-	loggedIn, userID, _ := VerifySession(r, db)
-	if !loggedIn {
-		http.Error(w, `{"error": "Unauthorized"}`, http.StatusUnauthorized)
 		return
 	}
 
