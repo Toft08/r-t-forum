@@ -33,12 +33,6 @@ type CategoryDetails struct {
 	CategoryName string
 }
 
-//	type Post struct {
-//		ID         int      `json:"id"`
-//		Title      string   `json:"title"`
-//		Content    string   `json:"content"`
-//		Categories []string `json:"categories"`
-//	}
 type LoginRequest struct {
 	LoginID  string `json:"loginid"` // can be either username or email
 	Password string `json:"password"`
