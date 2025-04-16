@@ -130,6 +130,8 @@ function displayMessageHistory(messages) {
     if (!chatMessages) return;
 
     chatMessages.innerHTML = ''; // Clear the current chat window
+    const currentScrollHeight = chatMessages.scrollHeight;
+    const currentScrollTop = chatMessages.scrollTop;
 
     if (Array.isArray(messages) && messages.length > 0) {
         messages.sort((a, b) => {
@@ -164,8 +166,10 @@ function displayMessageHistory(messages) {
         chatMessages.appendChild(emptyMessage);
     }
 
-    // Auto-scroll to the bottom
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    // // Auto-scroll to the bottom
+    // const newScrollHeight = chatMessages.scrollHeight;
+    // chatMessages.scrollTop = newScrollHeight - currentScrollHeight + currentScrollTop;
+    chatMessages.scrollTop = previousScrollPosition;
 }
 
 function displayMessage(sender, message) {
@@ -268,24 +272,19 @@ function openChat(username) {
     });
     const chatMessages = document.getElementById("chat-messages")
     let isThrottled = false;
-    chatMessages.addEventListener('scroll', event => {
-        if (isThrottled) return;
-
-        isThrottled = true;
-        console.log(chatMessages.scrollTop ,chatMessages.scrollHeight - chatMessages.clientHeight - 1, chatMessages.scrollHeight, chatMessages.clientHeight )
-        setTimeout(() => {
-            if (chatMessages.scrollTop - chatMessages.scrollHeight - chatMessages.clientHeight <= 1) {
-                console.log("roope is god")
-                if (username != '') {
-                    numberOfMessages += 10;
-                    previousScrollPosition = chatMessages.scrollTop;
-
-                    requestMessageHistory(username);
-                }
-            }
-            isThrottled = false;
-        }, 1000); // Throttle delay
+    chatMessages.addEventListener('scroll', () => {
+        if (chatMessages.scrollTop <= 5 && !isThrottled) {
+            isThrottled = true;
+            numberOfMessages += 10;
+            previousScrollPosition = chatMessages.scrollHeight;
+            requestMessageHistory(username);
+    
+            setTimeout(() => {
+                isThrottled = false;
+            }, 1000); // throttle delay
+        }
     });
+    
     //chatMessages.scrollTop = previousScrollPosition;
 }
 
