@@ -19,9 +19,7 @@ body {
     align-items: center;
     gap: 10px;
 }
-.welcome-text {
-    margin: 0;
-}
+
 #logout-button {
   background-color: #4a90e2;
   color: white;
@@ -37,12 +35,6 @@ body {
 #logout-button:hover {
   background-color: #357ae8;
 }
-
-.welcome-text {
-  margin-right: 15px;
-  font-size: 14px;
-}
-
 
 .logout-button {
     background-color: #f44336;
@@ -66,11 +58,11 @@ body {
     flex: 1;
     padding: 20px;
 }
-.feed-table {
+/* .feed-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
-}
+} */
 .post-card {
     background-color: white;
     border-radius: 8px;
@@ -79,7 +71,7 @@ body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-left: auto;
     margin-right: auto;
-    cursor: pointer; /* Add pointer cursor for clickable posts */
+    cursor: pointer;
 }
 .post-header {
     display: flex;
@@ -118,7 +110,7 @@ body {
 .likes { color: #4CAF50; }
 .dislikes { color: #f44336; }
 
-.popup {
+/* .popup {
     position: fixed;
     top: 15%;
     left: 30%;
@@ -129,7 +121,7 @@ body {
     border: #1d1c1c 1px solid;
     justify-content: center;
     align-items: center;
-}
+} */
 
 .hidden {
     display: none;
