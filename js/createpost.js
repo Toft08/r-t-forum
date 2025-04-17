@@ -2,6 +2,8 @@ function initializeCreatePostFeature() {
     const createPostBtn = document.getElementById("create-post-btn");
     const createPostPopup = document.getElementById("create-post-popup");
 
+    createPostPopup.classList.add("hidden");
+
     // Show popup when clicking Create Post
     createPostBtn.addEventListener("click", () => {
         createPopupContent();
