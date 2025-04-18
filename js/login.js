@@ -26,7 +26,7 @@ async function loadLoginPage() {
     loginview.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
-            <label for="username">Username</label>
+            <label for="username">Username or Email</label>
             <input type="text" id="loginID" name="username" placeholder="Enter your username" required>
 
             <label for="password">Password</label>

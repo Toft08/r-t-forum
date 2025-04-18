@@ -18,7 +18,7 @@ function loadSignupPage() {
                 <span class="material-symbols-outlined" style="font-size: 20px; vertical-align: middle;">info</span>
                 <span class="tooltip">Username must be 3-20 characters, letters, numbers, or _</span>
             </div>
-        <label for="username">Username</label>
+        <label for="username">Username or Email</label>
         <input type="text" id="username" name="username" placeholder="Enter your username" required>
 
         <label for="firstname">First Name</label>
