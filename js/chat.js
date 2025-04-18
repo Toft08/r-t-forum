@@ -101,6 +101,9 @@ function handleWebSocketMessage(event) {
                     lastMessageTime[data.from] = new Date().getTime();
                 }
             }
+            
+        } else if (data.type === "typing" && data.from) {
+                showTypingIndicator(data.from);
         } else if (data.type === "allUsers") {
             ShowUsers(data.usernames);
         } else if (data.type === "update") {
@@ -245,6 +248,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Connect to WebSocket when page loads
     connectWebSocket();
 });
+function sendTypingEvent(toUser) {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            type: "typing",
+            from: window.currentUsername,
+            to: toUser
+        }));
+    }
+}
+function showTypingIndicator(fromUser) {
+    const indicatorContainer = document.getElementById("typing-indicator");
+
+    if (!indicatorContainer || !window.currentChatPartner) return;
+
+    // Show only if chatting with the typing user
+    if (fromUser === window.currentChatPartner) {
+        indicatorContainer.innerHTML = `${fromUser} is typing<span class="dots"><span>.</span><span>.</span><span>.</span></span>`;
+        indicatorContainer.style.display = "block";
+
+        // Clear old timeout and set new one
+        clearTimeout(window.typingTimeout);
+        window.typingTimeout = setTimeout(() => {
+            indicatorContainer.style.display = "none";
+        }, 2000);
+    }
+}
 
 function openChat(username) {
     numberOfMessages = 10;
@@ -272,6 +301,7 @@ function openChat(username) {
         <button onclick="closeChat()">×</button>
       </div>
       <div id="chat-messages" class="chat-messages"></div>
+      <div id="typing-indicator" class="typing-indicator" style="display: none;"></div> 
       <div class="chat-input-area">
         <input type="text" id="chat-input" placeholder="Type a message...">
         <button onclick="sendMessage('${username}')">Send</button>
@@ -290,6 +320,7 @@ function openChat(username) {
 
     // Set up Enter key for sending
     document.getElementById("chat-input").addEventListener("keypress", (e) => {
+        sendTypingEvent(username);
         if (e.key === "Enter") {
             sendMessage(username);
         }

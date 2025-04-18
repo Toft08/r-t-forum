@@ -79,6 +79,30 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println(username, "disconnected")
 			break
 		}
+		if msg.Type == "typing" || msg.Type == "stop_typing" {
+			// Build response
+			response := RealTimeMessage{
+				Type: "typing",
+				From: msg.From,
+				To:   msg.To,
+			}
+			if msg.Type == "stop_typing" {
+				response.Type = "stop_typing"
+			}
+		
+			// Send to recipient if online
+			clientsMu.Lock()
+			recipientConn, exists := clients[msg.To]
+			clientsMu.Unlock()
+		
+			if exists {
+				err := recipientConn.WriteJSON(response)
+				if err != nil {
+					log.Println("Error sending typing indicator:", err)
+				}
+			}
+			continue
+		}
 		if msg.Type == "fetchMessages" {
 			var message RealTimeMessage
 
