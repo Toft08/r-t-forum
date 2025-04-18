@@ -53,6 +53,7 @@ func CommentContent() string {
 		LEFT JOIN like ON Comment.id = Like.comment_id
 		WHERE Comment.post_id = ?
 		GROUP BY Comment.id, User.id
+		ORDER BY Comment.created_at DESC
 `
 	return query
 }

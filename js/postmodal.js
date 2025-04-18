@@ -254,7 +254,8 @@ async function apiPOST(url, action, postData) {
           appendComment(data.comment);
         } else if (data.comments && data.comments.length > 0) {
           // Sometimes API returns an array of comments with the newest first
-          appendComment(data.comments[0]);
+          const sortedComments = data.comments.sort((a, b) => b.comment_id - a.comment_id);
+          appendComment(sortedComments[0]);
         } else {
           console.error("Comment data missing in response:", data);
           throw new Error("Comment data missing in response");
