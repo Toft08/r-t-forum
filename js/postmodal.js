@@ -37,12 +37,14 @@ function initializePostModal(post_id) {
   // Event listener to close the modal
   closeModal.onclick = function () {
     postModal.style.display = "none";
+    window.location.reload();
   };
 
   // Close the modal if the user clicks outside of the modal content
   window.onclick = function (event) {
     if (event.target == postModal) {
       postModal.style.display = "none";
+      window.location.reload();
     }
   };
 }
@@ -145,11 +147,11 @@ function renderPost(postData) {
   postModal.style.display = 'block';
 
   // Close the modal if the user clicks outside of the modal content
-  window.onclick = function (event) {
-    if (event.target == postModal) {
-      postModal.style.display = 'none';
-    }
-  };
+  // window.onclick = function (event) {
+  //   if (event.target == postModal) {
+  //     postModal.style.display = 'none';
+  //   }
+  // };
   modalContent.appendChild(postDetails);
 
   // Event listener for the comment form submission
@@ -242,10 +244,10 @@ async function apiPOST(url, action, postData) {
     console.log(`in apiPOST: Successful ${action} response:`, data);
 
     switch (action) {
-      // case 'vote':
-      //   // Update the UI to reflect the new vote counts
-      //   updateVoteUI(postData.post_id, data.likes, data.dislikes);
-      //   break;
+      case 'vote':
+        // Update the UI to reflect the new vote counts
+        updateVoteUI(postData.post_id, data.likes, data.dislikes);
+        break;
 
       case 'comment':
         if (data.comment) {
