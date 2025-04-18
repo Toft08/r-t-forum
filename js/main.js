@@ -57,7 +57,7 @@ function handleRoute() {
     if (route === "/home") {
       postview.style.display = "flex";
     } else {
-      postview.style.dispaly = "none";
+      postview.style.display = "none";
       postview.innerHTML = "";
     }
   }
