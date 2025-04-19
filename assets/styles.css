@@ -765,3 +765,42 @@ button {
   transition: all 0.2s;
 }
 
+
+.typing-indicator {
+  font-size: 0.85em;
+  color: #555;
+  padding: 6px 12px;
+  background: #f0f0f0;
+  border-top: 1px solid #e0e0e0;
+  font-style: italic;
+}
+
+/* Dots container */
+.typing-indicator .dots {
+  display: inline-block;
+  margin-left: 4px;
+}
+
+/* Each dot blinks independently */
+.typing-indicator .dots span {
+  display: inline-block;
+  animation: blink 1.2s infinite;
+  opacity: 0;
+}
+
+/* Stagger the blinking */
+.typing-indicator .dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.typing-indicator .dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.typing-indicator .dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+  0%   { opacity: 0; }
+  50%  { opacity: 1; }
+  100% { opacity: 0; }
+}
