@@ -9,6 +9,8 @@ import (
 	"strconv"
 )
 
+// FeedHandler handles the main page of the forum
+// It fetches posts from the database and returns them as JSON
 func FeedHandler(w http.ResponseWriter, r *http.Request) {
 	posts, err := FetchPosts(0)
 	if err != nil {
@@ -29,6 +31,8 @@ func FeedHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// FetchPosts retrieves posts from the database
+// It returns a slice of PostDetails or an error if any
 func FetchPosts(userID int) ([]PostDetails, error) {
 	var posts []PostDetails
 

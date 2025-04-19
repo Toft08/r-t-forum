@@ -98,6 +98,8 @@ func AddPostToDatabase(title, content string, categories []int, userID int) erro
 	return nil
 }
 
+// FetchCategories handles GET request for categories
+// It fetches all categories from the database and returns them as JSON
 func FetchCategories(w http.ResponseWriter, r *http.Request) {
 	var data []CategoryDetails
 	var err error
