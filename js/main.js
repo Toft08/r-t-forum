@@ -236,7 +236,7 @@ function insertPosts(posts) {
     postElement.innerHTML = `
           <div class="post-header">
               <span>Posted by: ${post.username}</span>
-              <span>${formatDate(post.created_at)}</span>
+              <span>${post.created_at}</span>
           </div>
           <h3 class="post-title">${post.post_title}</h3>
           <div class="post-content">${post.post_content.substring(0, 50)}</div>
@@ -263,27 +263,3 @@ function insertPosts(posts) {
     container.appendChild(postElement);
   });
 }
-
-function formatDate(dateString) {
-  if (!dateString) return "Unknown date";
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    const parts = dateString.match(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/);
-    if (parts) {
-      const year = parseInt(parts[1]);
-      const month = parseInt(parts[2]) - 1;
-      const day = parseInt(parts[3]);
-      const hour = parseInt(parts[4]);
-      const minute = parseInt(parts[5]);
-      const second = parseInt(parts[6]);
-
-      const formattedDate = new Date(year, month, day, hour, minute, second);
-      return formattedDate.toLocaleString();
-    }
-    return dateString;
-  }
-
-  return date.toLocaleString();
-}
-

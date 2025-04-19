@@ -121,7 +121,7 @@ function renderPost(postData) {
         <div class="left">
           <span class="username">${postData.username}</span>
         </div>
-        <p class="right">${formatDate(postData.created_at)}</p>
+        <p class="right">${postData.created_at}</p>
       </div>
       <div class="post-card">
         <p class="post-body">${postData.post_content}</p>
@@ -315,7 +315,7 @@ function appendComment(comment) {
   newComment.id = `comment-${comment.comment_id}`;
 
   newComment.innerHTML = `
-    <p><strong>${comment.username}</strong>: ${formatDate(comment.created_at)}</p>
+    <p><strong>${comment.username}</strong>: ${comment.created_at}</p>
     <pre>${comment.comment_content}</pre>
   `;
 
@@ -367,28 +367,4 @@ function displayError(message, action) {
   setTimeout(() => {
     errorBox.style.display = 'none';
   }, 3000);
-}
-
-// This is needed in both files, so we duplicate it to avoid dependencies
-function formatDate(dateString) {
-  if (!dateString) return "Unknown date";
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    const parts = dateString.match(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/);
-    if (parts) {
-      const year = parseInt(parts[1]);
-      const month = parseInt(parts[2]) - 1;
-      const day = parseInt(parts[3]);
-      const hour = parseInt(parts[4]);
-      const minute = parseInt(parts[5]);
-      const second = parseInt(parts[6]);
-
-      const formattedDate = new Date(year, month, day, hour, minute, second);
-      return formattedDate.toLocaleString();
-    }
-    return dateString;
-  }
-
-  return date.toLocaleString();
 }
