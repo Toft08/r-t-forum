@@ -161,7 +161,10 @@ function displayMessageHistory(messages) {
             }
 
             // Format the message with timestamp
-            const timestamp = new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timestamp = new Date(msg.created_at).toLocaleString([], {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            });
             messageElement.innerHTML = `
                 <strong>${msg.sender}</strong> ${msg.content}
                 <span class="timestamp">${timestamp}</span>
