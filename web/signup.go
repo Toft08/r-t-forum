@@ -23,16 +23,7 @@ func SignUp(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 		return
 	}
 
-	var user struct {
-		Username        string `json:"username"`
-		Age             int    `json:"age"`
-		Gender          string `json:"gender"`
-		FirstName       string `json:"firstname"`
-		LastName        string `json:"lastname"`
-		Email           string `json:"email"`
-		Password        string `json:"password"`
-		ConfirmPassword string `json:"confirmpassword"`
-	}
+	var user SignUpData
 
 	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		http.Error(w, `{"error": "Invalid JSON data"}`, http.StatusBadRequest)

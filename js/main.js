@@ -136,7 +136,7 @@ function loadHomePage() {
     navbar.innerHTML = `
       <nav class="nav">
         <div class="nav-left">
-            <a href="/"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
+            <a href="/home"><span class="material-symbols-outlined" style="font-size: 40px">home</span></a>
         </div>
         <div class="nav-right">
             <p class="welcome-text">Logged in as: <span id="username-placeholder">${window.currentUsername || "Guest"}</span></p>

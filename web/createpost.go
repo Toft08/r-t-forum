@@ -94,7 +94,6 @@ func AddPostToDatabase(title, content string, categories []int, userID int) erro
 			return err
 		}
 	}
-
 	return nil
 }
 

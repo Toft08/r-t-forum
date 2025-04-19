@@ -15,10 +15,6 @@ import (
 func PostHandler(w http.ResponseWriter, r *http.Request, userID int) {
 	pathParts := strings.Split(r.URL.Path, "/")
 	var addedPart string
-	fmt.Printf("Post Handler1 %s\n", r.URL.Path)
-
-	fmt.Printf("Post Handler2 %s\n", pathParts)
-	fmt.Printf("Post Handler3 %s\n", pathParts[3])
 
 	postID, err := strconv.Atoi(pathParts[3])
 	if err != nil {
@@ -29,7 +25,6 @@ func PostHandler(w http.ResponseWriter, r *http.Request, userID int) {
 	//Check if comment or vote is added to post
 	if len(pathParts) > 4 {
 		addedPart = pathParts[4]
-		fmt.Printf("Post Handler4 %s\n", addedPart)
 	}
 
 	if !ValidatePostID(postID) {
@@ -86,7 +81,6 @@ func HandleComment(w http.ResponseWriter, r *http.Request, postID, userID int) {
 			return
 		}
 	}
-
 	HandlePostPageGet(w, r, postID, userID)
 }
 
@@ -130,7 +124,6 @@ func HandleVote(w http.ResponseWriter, r *http.Request, postID, userID int) {
 
 		return
 	}
-
 	HandlePostPageGet(w, r, postID, userID)
 }
 

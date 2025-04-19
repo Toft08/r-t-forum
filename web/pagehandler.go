@@ -92,23 +92,6 @@ func VerifySession(r *http.Request, db *sql.DB) (bool, int) {
 	return true, userID
 }
 
-// This function is just till the other is fixed
-func VerifySession2(r *http.Request, db *sql.DB) (bool, int) {
-	var userID int
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		return false, 0
-	}
-
-	err = db.QueryRow("SELECT user_id FROM Session WHERE id = ?", cookie.Value).Scan(&userID)
-	if err != nil {
-		log.Printf("Error finding userID for session cookie %s: %v", cookie.Value, err)
-		return false, 0
-	}
-
-	return true, userID
-}
-
 // API endpoint to check if the user is logged in
 func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	_, err := r.Cookie("session_id")

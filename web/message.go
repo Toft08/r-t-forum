@@ -67,7 +67,6 @@ log.Printf("Sender: %s, Receiver: %s", sender, receiver)
 		return
 	}
 	log.Printf("Fetched messages: %v", messages)
-	//json.NewEncoder(w).Encode(messages)
 	if _, ok := clients[sender]; ok {
 		clients[sender].WriteJSON(map[string]any{
 			"messages":messages,

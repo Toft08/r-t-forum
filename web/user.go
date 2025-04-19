@@ -7,27 +7,30 @@ import (
 	"sync"
 )
 
-var (
-	AllUsers = NewUserStore()
-)
+// Global user store
+var AllUsers = NewUserStore()
 
+// UserStore manages the collection of users
 type UserStore struct {
 	users map[string]bool
 	mu    sync.Mutex
 }
 
+// NewUserStore creates a new user store
 func NewUserStore() *UserStore {
 	return &UserStore{
 		users: make(map[string]bool),
 	}
 }
 
+// AddUser adds a username to the store
 func (u *UserStore) AddUser(username string) {
 	u.mu.Lock()
 	defer u.mu.Unlock()
 	u.users[username] = true
 }
 
+// GetAllUsers returns a slice of all usernames in the store
 func (u *UserStore) GetAllUsers() []string {
 	u.mu.Lock()
 	defer u.mu.Unlock()
@@ -39,12 +42,16 @@ func (u *UserStore) GetAllUsers() []string {
 	return users
 }
 
+// allUsersHandler responds to requests for all users
 func allUsersHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if method is allowed
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(map[string]string{"error": "Method Not Allowed"})
 		return
 	}
+
+	// Check if user is logged in
 	_, err := r.Cookie("session_id")
 	if err != nil {
 		log.Println("No session cookie found:", err)
@@ -53,12 +60,10 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	loggedIn, userID := VerifySession(r, db)
-	if loggedIn {
-		// log.Printf("User %s (ID: %d) is logged in", userID)
-	} else {
-		log.Println("User is not logged in")
-	}
+	// Verify session and get user ID
+	_, userID := VerifySession(r, db)
+	
+	// Get requesting user's username
 	var username string
 	err = db.QueryRow("SELECT username FROM User WHERE id = ?", userID).Scan(&username)
 	if err != nil {
@@ -66,8 +71,9 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	// Fetch all users from the database
-	rows, err := db.Query("SELECT username FROM User where id != ?", userID)
+	
+	// Fetch all other users from the database
+	rows, err := db.Query("SELECT username FROM User WHERE id != ?", userID)
 	if err != nil {
 		log.Println("Error fetching users from database:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -75,74 +81,39 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
+	// Build user list
 	var users []string
 	for rows.Next() {
-		var username string
-		if err := rows.Scan(&username); err != nil {
+		var user string
+		if err := rows.Scan(&user); err != nil {
 			log.Println("Error scanning user:", err)
 			continue
 		}
-		users = append(users, username)
+		users = append(users, user)
 	}
 
+	// Send HTTP response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode("ok")
-	var msg RealTimeMessage
-	msg.Type = "allUsers"
-	msg.Usernames = users
+	
+	// Send WebSocket message with user list
+	msg := RealTimeMessage{
+		Type:      "allUsers",
+		Usernames: users,
+	}
+	
+	// Find the user's WebSocket connection
 	clientsMu.Lock()
 	conn, exists := clients[username]
 	clientsMu.Unlock()
 
-
-	
-			if exists {
-				// err := recipientConn.WriteJSON(msg)
-				err := conn.WriteJSON(msg)
-				if err != nil {
-					log.Println("Error sending message:", err)
-				}
-			} else {
-				log.Println( msg, "not found")
-			}		
+	// Send the user list over WebSocket if connection exists
+	if exists {
+		if err := conn.WriteJSON(msg); err != nil {
+			log.Println("Error sending user list to client:", err)
+		}
+	} else {
+		log.Println("WebSocket connection for user", username, "not found")
+	}
 }
-
-// // ActiveUserStore is a thread-safe struct to store active users
-// type ActiveUserStore struct {
-// 	sync.RWMutex
-// 	users map[string]bool
-// }
-
-// // New creates a new ActiveUserStore instance
-// func New() *ActiveUserStore {
-// 	return &ActiveUserStore{
-// 		users: make(map[string]bool),
-// 	}
-// }
-
-// // AddUser marks a user as active
-// func (store *ActiveUserStore) AddUser(username string) {
-// 	store.Lock()
-// 	defer store.Unlock()
-// 	store.users[username] = true
-// }
-
-// // RemoveUser marks a user as inactive
-// func (store *ActiveUserStore) RemoveUser(username string) {
-// 	store.Lock()
-// 	defer store.Unlock()
-// 	delete(store.users, username)
-// }
-
-// // GetActiveUsers returns a list of active users
-// func (store *ActiveUserStore) GetActiveUsers() []string {
-// 	store.RLock()
-// 	defer store.RUnlock()
-
-// 	users := []string{}
-// 	for user := range store.users {
-// 		users = append(users, user)
-// 	}
-// 	return users
-// }
