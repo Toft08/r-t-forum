@@ -1,3 +1,7 @@
+/**
+ * Initializes the create post feature by setting up event listeners for the create post button.
+ * Hides the popup by default and configures it to appear when the create post button is clicked.
+ */
 function initializeCreatePostFeature() {
     const createPostBtn = document.getElementById("create-post-btn");
     const createPostPopup = document.getElementById("create-post-popup");
@@ -11,6 +15,11 @@ function initializeCreatePostFeature() {
     });
 }
 
+/**
+ * Generates and populates the content of the create post popup.
+ * Fetches available categories from the database and creates a form for the user to fill out.
+ * Sets up event listeners for form submission and closing the popup.
+ */
 async function createPopupContent() {
     const createPostPopup = document.getElementById("create-post-popup");
 
@@ -52,17 +61,18 @@ async function createPopupContent() {
         });
 }
 
+/** 
+* Handles the post submission process when the user submits the form.
+* Validates the input data, sanitizes content, and sends a POST request to the server.
+* and manages the UI state based on the submission result.
+* @param {Event} event - The form submission event.
+*/
 async function handlePostSubmit(event) {
     event.preventDefault();
     const title = document.getElementById("title").value.replace(/[<>]/g, '').trim();
     const content = document.getElementById("post-content").value.replace(/[<>]/g, '').trim();
     const selectedCategories = [...document.querySelectorAll("input[name='categories']:checked")]
         .map(cb => cb.value);
-
-    // debugging check
-    console.log("Title:", title);
-    console.log("Content:", content);
-    console.log("Selected categories:", selectedCategories);
 
     // Check if title and content are not empty
     if (!title || !content) {
@@ -83,7 +93,7 @@ async function handlePostSubmit(event) {
         if (response.ok) {
             console.log("Post created successfully!");
             document.getElementById("create-post-popup").classList.add("hidden");
-            loadPosts(); // Reload posts dynamically
+            loadPosts();
         } else {
             console.error("Error creating post:", result.error);
         }

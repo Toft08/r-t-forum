@@ -1,17 +1,17 @@
-// Function to initialize and display the post modal
+/**
+ * Initializes a modal dialog for displaying a specific post.
+ * Creates the modal structure, fetches post details, and sets up event handlers for closing.
+ * @param {number|string} post_id - The ID of the post to display in the modal
+ */
 function initializePostModal(post_id) {
-  console.log("Initializing post modal for post ID:", post_id);
   // Remove any existing modal
   const existingPostModal = document.getElementById("post-modal");
   if (existingPostModal) existingPostModal.remove();
 
-  // Create a new modal element
   const postModal = document.createElement("div");
   postModal.id = "post-modal";
   postModal.classList.add("modal");
 
-
-  // Create modal content container
   const modalContent = document.createElement("div");
   modalContent.classList.add("modal-content");
 
@@ -21,17 +21,15 @@ function initializePostModal(post_id) {
   closeModal.classList.add("close");
   closeModal.innerHTML = "&times;";
 
-  // Append close button and content container to modal
   modalContent.appendChild(closeModal);
   postModal.appendChild(modalContent);
 
-  // Append modal to the body
+
   document.body.appendChild(postModal);
 
-  // Fetch post details and render
   fetchPostDetails(post_id);
 
-  // Display the modal
+
   postModal.style.display = "block";
 
   // Event listener to close the modal
@@ -49,7 +47,11 @@ function initializePostModal(post_id) {
   };
 }
 
-// Function to fetch post details from the server
+/**
+ * Fetches detailed information for a specific post from the server API.
+ * Handles the API response and passes post data to the rendering function.
+ * @param {number|string} post_id - The ID of the post to fetch
+ */
 function fetchPostDetails(post_id) {
   fetch(`/api/post/${post_id}`)
     .then((response) => {
@@ -59,7 +61,6 @@ function fetchPostDetails(post_id) {
       return response.json();
     })
     .then((post) => {
-      console.log("in fetchPostDetails: Post details:", post);
       renderPost(post);
     })
     .catch((error) => {
@@ -68,10 +69,12 @@ function fetchPostDetails(post_id) {
     });
 }
 
-// Function to render the post content inside the modal
+/**
+ * Renders the post data inside the modal with all its components.
+ * Creates post content, like/dislike buttons, comments section, and sets up event listeners.
+ * @param {Object} postData - The post data object containing all post information
+ */
 function renderPost(postData) {
-  console.log("in renderPost:", postData);
-
   const postModal = document.getElementById("post-modal");
   if (!postModal) {
     console.error("Post modal not found");
@@ -83,22 +86,13 @@ function renderPost(postData) {
     console.error("Modal content not found");
     return;
   }
-  // Create post details container
+
   const postDetails = document.createElement("div");
   postDetails.id = "post-details";
-
-  console.log("Post ID:", postData.post_id);
-  console.log("Post title:", postData.post_title);
-  console.log("Post content:", postData.post_content);
-  console.log("Post categories:", postData.categories);
-  console.log("Post date:", postData.created_at);
-  console.log("Post username:", postData.username);
-  console.log("Post comments:", postData.comments);
 
   // Clear previous content
   postDetails.innerHTML = '';
 
-  // Populate with new post content
   postDetails.innerHTML = `
     <div id="post-container">
       <div class="post-header-like-dislike">
@@ -121,7 +115,7 @@ function renderPost(postData) {
         <div class="left">
           <span class="username">${postData.username}</span>
         </div>
-        <p class="right">${formatDate(postData.created_at)}</p>
+        <p class="right">${postData.created_at}</p>
       </div>
       <div class="post-card">
         <p class="post-body">${postData.post_content}</p>
@@ -143,15 +137,8 @@ function renderPost(postData) {
     </div>
   `;
 
-  // Display the modal
   postModal.style.display = 'block';
 
-  // Close the modal if the user clicks outside of the modal content
-  // window.onclick = function (event) {
-  //   if (event.target == postModal) {
-  //     postModal.style.display = 'none';
-  //   }
-  // };
   modalContent.appendChild(postDetails);
 
   // Event listener for the comment form submission
@@ -184,7 +171,10 @@ function renderPost(postData) {
   });
 }
 
-
+/**
+ * Handles the submission of a new comment on a post.
+ * Validates comment content and sends it to the server API.
+ */
 function handleComment() {
   const commentTextarea = document.getElementById('comment');
   if (!commentTextarea) {
@@ -208,14 +198,19 @@ function handleComment() {
     return;
   }
 
-  console.log(`Submitting comment for post ${postID}:`, commentContent);
   apiPOST(`/api/post/${postID}/comment`, 'comment', { comment_content: commentContent });
 }
 
+/**
+ * Makes POST requests to the API for various actions like commenting or voting.
+ * Updates UI based on the response type and handles any errors.
+ * @param {string} url - The API endpoint URL
+ * @param {string} action - The type of action ('vote' or 'comment')
+ * @param {Object} postData - The data to send in the request body
+ * @returns {Promise<void>}
+ */
 async function apiPOST(url, action, postData) {
   try {
-    console.log(`Sending ${action} request to ${url}:`, postData);
-
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -224,11 +219,8 @@ async function apiPOST(url, action, postData) {
       body: JSON.stringify(postData),
     });
 
-    // Log the raw response for debugging
     const responseText = await response.text();
-    console.log(`in apiPOST: Raw response from ${url}:`, responseText);
 
-    // Try to parse as JSON
     let data;
     try {
       data = JSON.parse(responseText);
@@ -240,8 +232,6 @@ async function apiPOST(url, action, postData) {
     if (!response.ok) {
       throw new Error(data.message || "Unknown error");
     }
-
-    console.log(`in apiPOST: Successful ${action} response:`, data);
 
     switch (action) {
       case 'vote':
@@ -271,6 +261,13 @@ async function apiPOST(url, action, postData) {
   }
 }
 
+
+/**
+ * Updates the like and dislike count UI elements after a vote action.
+ * @param {number|string} postId - The ID of the post to update
+ * @param {number} likes - The updated like count
+ * @param {number} dislikes - The updated dislike count
+ */
 function updateVoteUI(postId, likes, dislikes) {
   const likeCount = document.getElementById(`like-count-${postId}`);
   const dislikeCount = document.getElementById(`dislike-count-${postId}`);
@@ -278,8 +275,12 @@ function updateVoteUI(postId, likes, dislikes) {
   if (dislikeCount) dislikeCount.textContent = dislikes;
 }
 
+/**
+ * Adds a new comment to the comment section in the UI.
+ * Handles missing data and replaces "No comments" message if present.
+ * @param {Object} comment - The comment data to append
+ */
 function appendComment(comment) {
-  console.log("Appending comment:", comment);
   if (!comment) {
     console.error("Comment data is missing");
     return;
@@ -315,7 +316,7 @@ function appendComment(comment) {
   newComment.id = `comment-${comment.comment_id}`;
 
   newComment.innerHTML = `
-    <p><strong>${comment.username}</strong>: ${formatDate(comment.created_at)}</p>
+    <p><strong>${comment.username}</strong>: ${comment.created_at}</p>
     <pre>${comment.comment_content}</pre>
   `;
 
@@ -333,7 +334,12 @@ function appendComment(comment) {
     commentSection.appendChild(newComment);
   }
 }
-
+/**
+ * Displays an error message for a specific action.
+ * Creates or updates an error box and removes it after a timeout.
+ * @param {string} message - The error message to display
+ * @param {string} action - The action that caused the error ('vote' or 'comment')
+ */
 function displayError(message, action) {
   let errorBoxId;
   switch (action) {
@@ -367,28 +373,4 @@ function displayError(message, action) {
   setTimeout(() => {
     errorBox.style.display = 'none';
   }, 3000);
-}
-
-// This is needed in both files, so we duplicate it to avoid dependencies
-function formatDate(dateString) {
-  if (!dateString) return "Unknown date";
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    const parts = dateString.match(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/);
-    if (parts) {
-      const year = parseInt(parts[1]);
-      const month = parseInt(parts[2]) - 1;
-      const day = parseInt(parts[3]);
-      const hour = parseInt(parts[4]);
-      const minute = parseInt(parts[5]);
-      const second = parseInt(parts[6]);
-
-      const formattedDate = new Date(year, month, day, hour, minute, second);
-      return formattedDate.toLocaleString();
-    }
-    return dateString;
-  }
-
-  return date.toLocaleString();
 }

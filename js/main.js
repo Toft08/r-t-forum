@@ -20,7 +20,6 @@ function fetchAllUsers() {
 
 function handleRoute() {
   const route = window.location.pathname;
-  console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
   const navbar = document.getElementById("navbar");
   const loginview = document.getElementById("loginview");
@@ -107,7 +106,6 @@ function handleRoute() {
 }
 
 function updateUsernameDisplay(username) {
-  console.log("Updating username display:", username); // Debug log
   const welcomeText = document.getElementById("username-placeholder");
   if (welcomeText) {
     welcomeText.textContent = username || "Guest";
@@ -236,7 +234,7 @@ function insertPosts(posts) {
     postElement.innerHTML = `
           <div class="post-header">
               <span>Posted by: ${post.username}</span>
-              <span>${formatDate(post.created_at)}</span>
+              <span>${post.created_at}</span>
           </div>
           <h3 class="post-title">${post.post_title}</h3>
           <div class="post-content">${post.post_content.substring(0, 50)}</div>
@@ -253,37 +251,12 @@ function insertPosts(posts) {
           </div>
       `;
 
-    // const createPostModal = document.getElementById("create-post-modal");
     // Add event listener for post click
     postElement.addEventListener("click", () => {
-      console.log("in insertPosts: Post clicked:", post.post_id);
       initializePostModal(post.post_id);
     });
 
     container.appendChild(postElement);
   });
-}
-
-function formatDate(dateString) {
-  if (!dateString) return "Unknown date";
-
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    const parts = dateString.match(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/);
-    if (parts) {
-      const year = parseInt(parts[1]);
-      const month = parseInt(parts[2]) - 1;
-      const day = parseInt(parts[3]);
-      const hour = parseInt(parts[4]);
-      const minute = parseInt(parts[5]);
-      const second = parseInt(parts[6]);
-
-      const formattedDate = new Date(year, month, day, hour, minute, second);
-      return formattedDate.toLocaleString();
-    }
-    return dateString;
-  }
-
-  return date.toLocaleString();
 }
 
