@@ -215,7 +215,7 @@ function displayMessage(sender, message) {
     // Format the message with sender name and content
     messageElement.innerHTML = `
         <strong>${sender}</strong>${message}
-        <span class="timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        <span class="timestamp">${new Date().toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
     `;
 
     chatMessages.appendChild(messageElement);
