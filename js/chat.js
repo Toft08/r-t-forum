@@ -1,4 +1,3 @@
-// Global WebSocket connection
 let socket = null;
 let onlineUsers = [];
 let unreadMessages = {};
@@ -6,15 +5,16 @@ let lastMessageTime = {};
 let numberOfMessages = 10;
 let previousScrollPosition = 0;
 let isLoadingMoreMessages = false;
-// Add WebSocket connection function
+/**
+ *  Creates or reuses a Websocket connection to the server
+ * @returns {WebSocket} The active Websocket connection
+ */
 function connectWebSocket() {
     // Only create a new connection if one doesn't exist
     if (socket && socket.readyState === WebSocket.OPEN) {
-        console.log("WebSocket already connected");
         return socket;
     }
 
-    console.log("Creating new WebSocket connection");
     socket = new WebSocket("ws://" + window.location.host + "/api/ws");
 
     socket.onopen = () => {
@@ -24,7 +24,6 @@ function connectWebSocket() {
     socket.onmessage = handleWebSocketMessage;
 
     socket.onclose = () => {
-        console.log("WebSocket connection closed");
         socket = null; // Reset socket variable when connection closes
     };
 
@@ -34,15 +33,21 @@ function connectWebSocket() {
 
     return socket;
 }
+
+/**
+ * Updates and displays the list of users in the sidebar
+ * @param {Array} users - Array of user objects or usernames
+ */
 function ShowUsers(users) {
     const userList = document.getElementById("users-list");
     if (!userList) {
         console.error("Error: 'users-list' element not found.");
-        return; // Exit the function if the element doesn't exist
+        return;
     }
     const displayedUsers = new Set(); // Track displayed users
-    userList.innerHTML = ""; // Clear old users
+    userList.innerHTML = "";
 
+    // sort users by last msg time
     const usersWithTime = users.map(user => {
         const username = user.username || user;
         return {
@@ -54,7 +59,6 @@ function ShowUsers(users) {
     usersWithTime.sort((a, b) => b.lastTime - a.lastTime);
 
     usersWithTime.forEach(({ username }) => {
-        // const username = user.username || user; // Handle both object and string cases
         if (!displayedUsers.has(username)) {
             displayedUsers.add(username); // Add username to the set
 
@@ -85,62 +89,74 @@ function ShowUsers(users) {
         }
     });
 }
-// Add message handling functions
+/**
+ * Processes incoming WebSocket messages
+ * @param {MessageEvent} event - The WebSocket message event
+ */
 function handleWebSocketMessage(event) {
     try {
         const data = JSON.parse(event.data);
-        console.log("Received WebSocket message:", data);
 
-        if (data.type === "messages") {
-            // Handle message history
-            displayMessageHistory(data.messages);
-            if (data.messages && data.messages.length > 0) {
-                // Assuming messages are sorted with newest last
-                const lastMsg = data.messages[data.messages.length - 1];
-                if (lastMsg.sender === data.from || lastMsg.sender === data.to) {
-                    lastMessageTime[data.from] = new Date().getTime();
+        switch (data.type) {
+            case "messages":
+                // Handle message history
+                displayMessageHistory(data.messages);
+                if (data.messages && data.messages.length > 0) {
+                    // Update last message timestamp
+                    const lastMsg = data.messages[data.messages.length - 1];
+                    if (lastMsg.sender === data.from || lastMsg.sender === data.to) {
+                        lastMessageTime[data.from] = new Date().getTime();
+                    }
                 }
-            }
-            
-        } else if (data.type === "typing" && data.from) {
-                showTypingIndicator(data.from);
-        } else if (data.type === "allUsers") {
-            ShowUsers(data.usernames);
-        } else if (data.type === "update") {
-            onlineUsers = data.usernames || [];
-            fetchAllUsers();
-
-        } else if (data.from && data.message) {
-            // Handle direct message from another user
-            displayMessage(data.from, data.message);
-
-            lastMessageTime[data.from] = new Date().getTime();
-
-            const curretChatUser = document.querySelector('.chat-header h3')?.textContent;
-            if (curretChatUser !== data.from) {
-                unreadMessages[data.from] = true;
+                break;
+                
+            case "typing":
+                if (data.from) {
+                    showTypingIndicator(data.from);
+                }
+                break;
+                
+            case "allUsers":
+                ShowUsers(data.usernames);
+                break;
+                
+            case "update":
+                onlineUsers = data.usernames || [];
                 fetchAllUsers();
-            }
-        } else if (data.type === "error") {
-            console.error("Error from WebSocket:", data.message);
+                break;
+                
+            case "error":
+                console.error("Error from WebSocket:", data.message);
+                break;
+                
+            default:
+                // Handle direct message from another user
+                if (data.from && data.message) {
+                    displayMessage(data.from, data.message);
+                    lastMessageTime[data.from] = new Date().getTime();
+
+                    // Add unread notification if not currently chatting with sender
+                    const currentChatUser = document.querySelector('.chat-header h3')?.textContent;
+                    if (currentChatUser !== data.from) {
+                        unreadMessages[data.from] = true;
+                        fetchAllUsers();
+                    }
+                }
         }
     } catch (error) {
         console.error("Error parsing WebSocket message:", error);
     }
 }
-
+/**
+ * Displays message history in the chat window
+ * @param {Array} messages - Array of message objects
+ */
 function displayMessageHistory(messages) {
     const chatMessages = document.getElementById("chat-messages");
     if (!chatMessages) return;
 
-    // Save the current scroll height and position before making changes
+    // Save the current scroll height before making changes
     const oldScrollHeight = chatMessages.scrollHeight;
-    
-    // If we're loading more messages, save the current first message to use as an anchor
-    let firstVisibleMessage = null;
-    if (isLoadingMoreMessages && chatMessages.children.length > 0) {
-        firstVisibleMessage = chatMessages.children[0];
-    }
     
     // Clear the chat window
     chatMessages.innerHTML = '';
@@ -187,13 +203,9 @@ function displayMessageHistory(messages) {
         const newScrollHeight = chatMessages.scrollHeight;
         
         if (isLoadingMoreMessages) {
-            // Calculate how much new content was added at the top
+            // When loading more history, maintain relative scroll position
             const heightDifference = newScrollHeight - oldScrollHeight;
-            
-            // Set the scroll position to show the same messages as before
             chatMessages.scrollTop = heightDifference + 10; // +10 to offset a bit
-            
-            // Reset the loading flag
             isLoadingMoreMessages = false;
         } else {
             // For initial load or refresh, scroll to the bottom
@@ -201,7 +213,11 @@ function displayMessageHistory(messages) {
         }
     }, 0);
 }
-
+/**
+ * Displays a new message in the chat window
+ * @param {string} sender - Username of the message sender
+ * @param {string} message - Content of the message
+ */
 function displayMessage(sender, message) {
     const chatMessages = document.getElementById("chat-messages");
     if (!chatMessages) return;
@@ -239,7 +255,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (usernamePlaceholder) {
         usernamePlaceholder.textContent = username; // Update the placeholder
     }
-    console.log("Current username is:", username);
     window.currentUsername = username; // Set globally for use in other functions
 
     // Make functions globally accessible
@@ -251,6 +266,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Connect to WebSocket when page loads
     connectWebSocket();
 });
+/**
+ * Sends a typing indicator to another user
+ * @param {string} toUser - Username of the recipient
+ */
 function sendTypingEvent(toUser) {
     if (socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
@@ -260,6 +279,10 @@ function sendTypingEvent(toUser) {
         }));
     }
 }
+/**
+ * Shows typing indicator in the chat window
+ * @param {string} fromUser - Username of the user who is typing
+ */
 function showTypingIndicator(fromUser) {
     const indicatorContainer = document.getElementById("typing-indicator");
 
@@ -277,10 +300,14 @@ function showTypingIndicator(fromUser) {
         }, 2000);
     }
 }
-
+/**
+ * Opens a chat window with the selected user
+ * @param {string} username - Username to chat with
+ */
 function openChat(username) {
     numberOfMessages = 10;
     unreadMessages[username] = false;
+
     const userElements = document.querySelectorAll('#users-list li');
     for (const li of userElements) {
         if (li.textContent.includes(username)) {
@@ -313,12 +340,7 @@ function openChat(username) {
 
     // Store who we're chatting with
     window.currentChatPartner = username;
-
-    // Connect to WebSocket if needed
     connectWebSocket();
-
-
-    // Request message history
     requestMessageHistory(username);
 
     // Set up Enter key for sending
@@ -331,17 +353,14 @@ function openChat(username) {
     const chatMessages = document.getElementById("chat-messages");
     let isThrottled = false;
     
+    // scroll event for loading more messages
     chatMessages.addEventListener('scroll', () => {
         if (chatMessages.scrollTop <= 5 && !isThrottled) {
             isThrottled = true;
             
             // Set the flag that we're loading more messages
             isLoadingMoreMessages = true;
-            
-            // Increase the number of messages to fetch
             numberOfMessages += 10;
-            
-            // Request more messages
             requestMessageHistory(username);
             
             // Throttle to prevent multiple rapid requests
@@ -350,11 +369,12 @@ function openChat(username) {
             }, 1000);
         }
     });
-    
-    //chatMessages.scrollTop = previousScrollPosition;
 }
 
-
+/**
+ * Creates the chat window DOM element
+ * @returns {HTMLElement} The created chat window element
+ */
 function createChatWindow() {
     const chatWindow = document.createElement("div");
     chatWindow.id = "chat-window";
@@ -384,7 +404,10 @@ function closeChat() {
     }
     window.currentChatPartner = null;
 }
-
+/**
+ * Initiates sending a message to another user
+ * @param {string} recipient - Username of the message recipient
+ */
 function sendMessage(recipient) {
     const input = document.getElementById("chat-input");
     const message = input.value.trim();
@@ -410,25 +433,27 @@ function sendMessage(recipient) {
     // Clear the input field
     input.value = "";
 }
-
+/**
+ * Sends the actual message through the WebSocket
+ * @param {string} recipient - Username of the message recipient
+ * @param {string} message - Message content to send
+ */
 function sendActualMessage(recipient, message) {
-
-    console.log(`Sending message to ${recipient}: ${message}`);
     // Create the message object
     const messageObj = {
         from: window.currentUsername, // Add sender information
         to: recipient,
         message: message
     };
-
     // Send the message
     socket.send(JSON.stringify(messageObj));
-
 }
-
+/**
+ * Requests message history between current user and another user
+ * @param {string} otherUser - Username of the other chat participant
+ */
 function requestMessageHistory(otherUser) {
     // Make sure we're connected
-    console.log("toft is not god")
     if (!socket || socket.readyState !== WebSocket.OPEN) {
         socket = connectWebSocket();
         // Wait for connection to establish
@@ -440,21 +465,25 @@ function requestMessageHistory(otherUser) {
         sendHistoryRequest(otherUser);
     }
 }
-
+/**
+ * Sends the actual history request through the WebSocket
+ * @param {string} otherUser - Username of the other chat participant
+ */
 function sendHistoryRequest(otherUser) {
     // Create history request object
-    console.log("current user name", window.currentUsername)
     const requestObj = {
         type: "fetchMessages",
-        from: window.currentUsername, // Add sender info
+        from: window.currentUsername,
         to: otherUser,
         numberOfMessages: numberOfMessages
     };
-
     // Send the request
     socket.send(JSON.stringify(requestObj));
 }
-
+/**
+ * Fetches the current user's username from the server
+ * @returns {Promise<string>} Promise that resolves to the current username
+ */
 async function fetchCurrentUsername() {
     try {
         const response = await fetch('/api/check-session', {
@@ -467,10 +496,10 @@ async function fetchCurrentUsername() {
             return data.username; // Return the logged-in username
         } else {
             console.error("User is not logged in.");
-            return "Guest"; // Default to "Guest" if not logged in
+            return "Guest";
         }
     } catch (error) {
         console.error("Error fetching current username:", error);
-        return "Guest"; // Default to "Guest" on error
+        return "Guest";
     }
 }

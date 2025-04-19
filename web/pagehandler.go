@@ -111,16 +111,13 @@ func VerifySession2(r *http.Request, db *sql.DB) (bool, int) {
 
 // API endpoint to check if the user is logged in
 func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	log.Printf("Handling /api/check-session for %s", r.RemoteAddr)
-
-	cookie, err := r.Cookie("session_id")
+	_, err := r.Cookie("session_id")
 	if err != nil {
 		log.Println("No session cookie found:", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]string{"error": "User not logged in"})
 		return
 	}
-	log.Printf("Session cookie: %s", cookie.Value)
 
 	loggedIn, userID := VerifySession(r, db)
 	if loggedIn {

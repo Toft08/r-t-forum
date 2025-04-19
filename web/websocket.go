@@ -50,7 +50,6 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 
 	// Validate session ID and get associated user
 	username, err := validateSession(sessionID.Value)
-	fmt.Println("hello here we are: ", username)
 	if err != nil {
 		http.Error(w, "Invalid session or session expired", http.StatusUnauthorized)
 		return

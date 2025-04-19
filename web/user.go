@@ -45,14 +45,13 @@ func allUsersHandler(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Method Not Allowed"})
 		return
 	}
-	cookie, err := r.Cookie("session_id")
+	_, err := r.Cookie("session_id")
 	if err != nil {
 		log.Println("No session cookie found:", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]string{"error": "User not logged in"})
 		return
 	}
-	log.Printf("Session cookie: %s", cookie.Value)
 
 	loggedIn, userID := VerifySession(r, db)
 	if loggedIn {

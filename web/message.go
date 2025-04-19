@@ -16,7 +16,6 @@ func saveMessage(sender, receiver string, userID int, content string) error {
 	return err
 }
 func getMessages(sender, receiver string, limit int) ([]StoredMessage, error) {
-	log.Printf("Fetching messages for %s and %s", sender, receiver)
 	rows, err := db.Query(`
         SELECT sender, receiver, content, created_at 
         FROM Message
@@ -38,7 +37,6 @@ func getMessages(sender, receiver string, limit int) ([]StoredMessage, error) {
 		}
 		messages = append(messages, msg)
 	}
-	fmt.Println("messages are: ",messages)
 	return messages, nil
 }
 
