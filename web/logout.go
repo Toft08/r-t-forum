@@ -16,7 +16,6 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "Internal Server Error"}`, http.StatusInternalServerError)
 		return
 	}
-	log.Printf("Session ID to delete: %s", cookie.Value)
 
 	var sessionID string
 	err = db.QueryRow("SELECT id FROM Session WHERE id = ? AND status = 'active'", cookie.Value).Scan(&sessionID)

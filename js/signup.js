@@ -53,7 +53,6 @@ function loadSignupPage() {
     <p id="signupMessage"></p>
 `;
 
-
     // Event listener for the form submission
     document.getElementById("signup-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent traditional form submission

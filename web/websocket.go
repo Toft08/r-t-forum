@@ -22,14 +22,14 @@ var (
 
 // Message structure
 type RealTimeMessage struct {
-	Type            string          `json:"type"`
-	From            string          `json:"from"`
-	To              string          `json:"to"`
-	Message         string          `json:"message"`
-	Messages        []StoredMessage `json:"messages"`
-	Usernames       []string        `json:"usernames"`
-	Online          []string        `json:"online"`
-	NumberOfMessages int            `json:"numberOfMessages"`
+	Type             string          `json:"type"`
+	From             string          `json:"from"`
+	To               string          `json:"to"`
+	Message          string          `json:"message"`
+	Messages         []StoredMessage `json:"messages"`
+	Usernames        []string        `json:"usernames"`
+	Online           []string        `json:"online"`
+	NumberOfMessages int             `json:"numberOfMessages"`
 }
 
 // Session structure
@@ -40,7 +40,7 @@ type Session struct {
 }
 
 // Handle WebSocket connections for chat
-func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
+func HandleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 	// Get session_id from the cookie
 	sessionID, err := r.Cookie("session_id")
 	if err != nil || sessionID == nil {
@@ -68,7 +68,6 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 	clients[username] = conn
 	clientsMu.Unlock()
 	tellAllToUpdate()
-	log.Println(username, "connected")
 
 	// Listen for incoming messages
 	for {
@@ -78,7 +77,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			log.Println(username, "disconnected")
 			break
 		}
-		
+
 		if msg.Type == "typing" || msg.Type == "stop_typing" {
 			// Handle typing indicators
 			response := RealTimeMessage{
@@ -86,12 +85,12 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 				From: msg.From,
 				To:   msg.To,
 			}
-			
+
 			// Send to recipient if online
 			clientsMu.Lock()
 			recipientConn, exists := clients[msg.To]
 			clientsMu.Unlock()
-			
+
 			if exists {
 				err := recipientConn.WriteJSON(response)
 				if err != nil {
@@ -100,7 +99,7 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			}
 			continue
 		}
-		
+
 		if msg.Type == "fetchMessages" {
 			// Handle fetching message history
 			messages, err := getMessages(msg.From, msg.To, msg.NumberOfMessages)
@@ -108,18 +107,18 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 				log.Println("Error fetching messages:", err)
 				continue
 			}
-			
+
 			response := RealTimeMessage{
 				Type:     "messages",
 				Messages: messages,
 				From:     msg.From,
 				To:       msg.To,
 			}
-			
+
 			clientsMu.Lock()
 			senderConn, exists := clients[msg.From]
 			clientsMu.Unlock()
-			
+
 			if exists {
 				err := senderConn.WriteJSON(response)
 				if err != nil {
@@ -135,18 +134,18 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 				log.Println("Error saving message:", err)
 				continue
 			}
-			
+
 			response := RealTimeMessage{
 				From:    msg.From,
 				To:      msg.To,
 				Message: msg.Message,
 			}
-			
+
 			// Send to recipient
 			clientsMu.Lock()
 			recipientConn, exists := clients[msg.To]
 			clientsMu.Unlock()
-			
+
 			if exists {
 				err := recipientConn.WriteJSON(response)
 				if err != nil {
@@ -155,12 +154,12 @@ func handleChatWebSocket(w http.ResponseWriter, r *http.Request) {
 			} else {
 				log.Println("Recipient", msg.To, "not found")
 			}
-			
+
 			// Send to sender
 			clientsMu.Lock()
 			senderConn, exists := clients[msg.From]
 			clientsMu.Unlock()
-			
+
 			if exists {
 				err := senderConn.WriteJSON(response)
 				if err != nil {

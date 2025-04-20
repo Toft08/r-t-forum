@@ -58,16 +58,10 @@ async function loadLoginPage() {
                 credentials: 'include'
             });
 
-            console.log("Response status:", response.status); // Debug log
-
             // Parse the response JSON
             const data = await response.json();
 
-            console.log("Response data:", data); // Debug log
-
             if (response.ok) {
-                // fetchPreviousMessages(username, 'other');
-                console.log("Login succesful, fetching users...")
                 // Handle successful login, redirect or load homepage content dynamically
                 history.pushState({}, '', '/home');
                 handleRoute();

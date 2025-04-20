@@ -62,11 +62,11 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		case "logout":
 			Logout(w, r)
 		case "all-users":
-			allUsersHandler(w, r)
+			AllUsersHandler(w, r)
 		case "ws":
-			handleChatWebSocket(w, r)
+			HandleChatWebSocket(w, r)
 		case "getMessagesHandler":
-			getMessagesHandler(w, r)
+			GetMessagesHandler(w, r)
 		default:
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
@@ -103,11 +103,7 @@ func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
 	}
 
 	loggedIn, userID := VerifySession(r, db)
-	if loggedIn {
-		// log.Printf("User %s (ID: %d) is logged in", userID)
-	} else {
-		log.Println("User is not logged in")
-	}
+	
 	username, err := database.FindUsernameByUserID(userID, db)
 	if err != nil {
 		fmt.Println(err)

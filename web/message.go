@@ -3,7 +3,6 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -41,12 +40,9 @@ func getMessages(sender, receiver string, limit int) ([]StoredMessage, error) {
 }
 
 // Handler to fetch messages between two users
-func getMessagesHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("getMessagesHandler called")
+func GetMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	sender := r.URL.Query().Get("sender")
 	receiver := r.URL.Query().Get("receiver")
-
-log.Printf("Sender: %s, Receiver: %s", sender, receiver)
 
 	if sender == "" || receiver == "" {
 		http.Error(w, "Missing sender or receiver", http.StatusBadRequest)
@@ -66,15 +62,14 @@ log.Printf("Sender: %s, Receiver: %s", sender, receiver)
 		json.NewEncoder(w).Encode([]StoredMessage{})
 		return
 	}
-	log.Printf("Fetched messages: %v", messages)
 	if _, ok := clients[sender]; ok {
 		clients[sender].WriteJSON(map[string]any{
-			"messages":messages,
+			"messages": messages,
 		})
 	}
 	if _, ok := clients[receiver]; ok {
 		clients[receiver].WriteJSON(map[string]any{
-			"messages":messages,
+			"messages": messages,
 		})
 	}
 }

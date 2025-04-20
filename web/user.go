@@ -43,7 +43,7 @@ func (u *UserStore) GetAllUsers() []string {
 }
 
 // allUsersHandler responds to requests for all users
-func allUsersHandler(w http.ResponseWriter, r *http.Request) {
+func AllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if method is allowed
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
