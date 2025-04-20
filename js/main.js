@@ -4,7 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
   isLoggedIn();
   window.addEventListener("hashchange", handleRoute);
 });
-
+/**
+ * Fetches all users from the API
+ * Used to populate the users list in the sidebar
+ */
 function fetchAllUsers() {
   fetch("/api/all-users")
     .then((response) => response.json())
@@ -15,23 +18,24 @@ function fetchAllUsers() {
     })
     .catch((error) => console.error("Error fetching all users:", error));
 }
-
-
-
+/**
+ * Main routing function - handles navigation between different views
+ * Controls which components are visible based on the current route
+ */
 function handleRoute() {
   const route = window.location.pathname;
-  console.log("Current route:", route); // Debug log
   const container = document.getElementById("content");
   const navbar = document.getElementById("navbar");
   const loginview = document.getElementById("loginview");
   const signupview = document.getElementById("signupview");
   const postview = document.getElementById("postview");
+// hide or clear views
   if (navbar) {
     if (route === "/login" || route === "/signup") {
-      navbar.style.display = "none"; // Hide the navbar
+      navbar.style.display = "none";
     }
     else {
-      navbar.style.display = "block"; // Show the navbar
+      navbar.style.display = "block";
     }
   }
 
@@ -40,17 +44,16 @@ function handleRoute() {
       loginview.style.display = "flex";
     } else {
       loginview.style.display = "none";
-      loginview.innerHTML = ""; // optional: clear
+      loginview.innerHTML = "";
     }
   }
 
-  // Hide or clear signupview unless on /signup
   if (signupview) {
     if (route === "/signup") {
       signupview.style.display = "flex";
     } else {
       signupview.style.display = "none";
-      signupview.innerHTML = ""; // optional: clear
+      signupview.innerHTML = "";
     }
   }
   if (postview) {
@@ -105,15 +108,21 @@ function handleRoute() {
     }
   });
 }
-
+/**
+ * Updates the username display in the UI
+ * @param {string} username - The username to display
+ */
 function updateUsernameDisplay(username) {
-  console.log("Updating username display:", username); // Debug log
   const welcomeText = document.getElementById("username-placeholder");
   if (welcomeText) {
     welcomeText.textContent = username || "Guest";
     window.currentUsername = username || "Guest"; // Store the current username globally
   }
 }
+/**
+ * Checks if the user is currently logged in by validating session with the API
+ * @returns {Promise<boolean>} Promise resolving to login status
+ */
 async function isLoggedIn() {
   // Send an API request to check if the session is valid
   return fetch("/api/check-session")
@@ -131,7 +140,10 @@ async function isLoggedIn() {
       return false;
     });
 }
-
+/**
+ * Loads the home page with all its components
+ * Initializes the navbar, post container, and sidebar
+ */
 function loadHomePage() {
   const navbar = document.getElementById("navbar");
   if (navbar) {
@@ -189,13 +201,13 @@ function loadHomePage() {
       console.error("Sidebar element not found");
     }
 
-
-
     loadPosts();
     initializeCreatePostFeature();
   });
 }
-
+/**
+ * Fetches posts from the API and displays them
+ */
 function loadPosts() {
   fetch("/api/posts")
     .then((response) => response.json())
@@ -206,11 +218,13 @@ function loadPosts() {
         `<p>Error loading posts: ${error.message}</p>`;
     });
 }
-
-
+/**
+ * Renders posts in the UI
+ * @param {Array} posts - Array of post objects to display
+ */
 function insertPosts(posts) {
   const container = document.getElementById("posts-container");
-  container.innerHTML = ""; // Clear container first
+  container.innerHTML = "";
 
   if (!posts || posts.length === 0) {
     container.innerHTML = "<p>No posts found.</p>";
@@ -253,10 +267,8 @@ function insertPosts(posts) {
           </div>
       `;
 
-    // const createPostModal = document.getElementById("create-post-modal");
     // Add event listener for post click
     postElement.addEventListener("click", () => {
-      console.log("in insertPosts: Post clicked:", post.post_id);
       initializePostModal(post.post_id);
     });
 

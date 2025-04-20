@@ -34,8 +34,7 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	loginID := loginRequest.LoginID
-	fmt.Println(loginID)
-	// Rest of your existing authentication logic remains the same
+
 	userID, username, hashedPassword, err := getUserCredentials(loginID)
 	if err != nil {
 		fmt.Println(err)
@@ -70,7 +69,6 @@ func HandleLoginPost(w http.ResponseWriter, r *http.Request) {
 	})
 	
 }
-
 
 // getUserCredentials retrieves the user's ID and hashed password from the database
 func getUserCredentials(loginID string) (int, string, string, error) {

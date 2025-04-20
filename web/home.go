@@ -14,19 +14,17 @@ import (
 func FeedHandler(w http.ResponseWriter, r *http.Request) {
 	posts, err := FetchPosts(0)
 	if err != nil {
-		log.Println("❌ Error fetching posts:", err)
+		log.Println("Error fetching posts:", err)
 		http.Error(w, "Error fetching posts", http.StatusInternalServerError)
 		return
 	}
-
-	log.Printf("Number of posts fetched: %d", len(posts))
 
 	// Directly encode the posts array
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
-		log.Println("❌ Error encoding JSON:", err)
+		log.Println("Error encoding JSON:", err)
 		http.Error(w, "Error processing data", http.StatusInternalServerError)
 	}
 }
@@ -43,7 +41,7 @@ func FetchPosts(userID int) ([]PostDetails, error) {
 	`
 	rows, err := db.Query(query)
 	if err != nil {
-		log.Println("❌ Error executing query:", err)
+		log.Println("Error executing query:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -51,14 +49,14 @@ func FetchPosts(userID int) ([]PostDetails, error) {
 	for rows.Next() {
 		var postID int
 		if err := rows.Scan(&postID); err != nil {
-			log.Println("❌ Error scanning post ID:", err)
+			log.Println("Error scanning post ID:", err)
 			return nil, err
 		}
 
 		// Get the details for each post
 		p, err := GetPostDetails(postID, userID)
 		if err != nil {
-			log.Println("❌ Error getting post details:", err)
+			log.Println("Error getting post details:", err)
 			return nil, err
 		}
 		posts = append(posts, *p)

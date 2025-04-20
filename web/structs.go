@@ -54,7 +54,7 @@ type StoredMessage struct {
 }
 type SignUpData struct {
 	Username        string `json:"username"`
-	Age             string `json:"age"`
+	Age             int `json:"age"`
 	Gender          string `json:"gender"`
 	FirstName       string `json:"firstName"`
 	LastName        string `json:"lastName"`

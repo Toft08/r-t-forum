@@ -55,18 +55,17 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		case "posts":
 			FeedHandler(w, r)
 		case "post":
-			fmt.Printf("Handling post request for %s\n", r.URL.Path)
 			PostHandler(w, r, userID)
 		case "create-post":
 			CreatePost(w, r, userID)
 		case "logout":
 			Logout(w, r)
 		case "all-users":
-			allUsersHandler(w, r)
+			AllUsersHandler(w, r)
 		case "ws":
-			handleChatWebSocket(w, r)
+			HandleChatWebSocket(w, r)
 		case "getMessagesHandler":
-			getMessagesHandler(w, r)
+			GetMessagesHandler(w, r)
 		default:
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
@@ -92,42 +91,18 @@ func VerifySession(r *http.Request, db *sql.DB) (bool, int) {
 	return true, userID
 }
 
-// This function is just till the other is fixed
-func VerifySession2(r *http.Request, db *sql.DB) (bool, int) {
-	var userID int
-	cookie, err := r.Cookie("session_id")
-	if err != nil {
-		return false, 0
-	}
-
-	err = db.QueryRow("SELECT user_id FROM Session WHERE id = ?", cookie.Value).Scan(&userID)
-	if err != nil {
-		log.Printf("Error finding userID for session cookie %s: %v", cookie.Value, err)
-		return false, 0
-	}
-
-	return true, userID
-}
-
 // API endpoint to check if the user is logged in
 func checkSessionHandler(w http.ResponseWriter, r *http.Request, db *sql.DB) {
-	log.Printf("Handling /api/check-session for %s", r.RemoteAddr)
-
-	cookie, err := r.Cookie("session_id")
+	_, err := r.Cookie("session_id")
 	if err != nil {
 		log.Println("No session cookie found:", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		json.NewEncoder(w).Encode(map[string]string{"error": "User not logged in"})
 		return
 	}
-	log.Printf("Session cookie: %s", cookie.Value)
 
 	loggedIn, userID := VerifySession(r, db)
-	if loggedIn {
-		// log.Printf("User %s (ID: %d) is logged in", userID)
-	} else {
-		log.Println("User is not logged in")
-	}
+	
 	username, err := database.FindUsernameByUserID(userID, db)
 	if err != nil {
 		fmt.Println(err)
