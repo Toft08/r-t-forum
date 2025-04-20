@@ -29,14 +29,12 @@ func main() {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
-
 		err = tmpl.Execute(w, nil)
 		if err != nil {
 			log.Println("Error executing template:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		}
 	})
-
 	http.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		web.Handler(w, r, db)
 	})
