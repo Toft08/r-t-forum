@@ -1,6 +1,4 @@
 async function loadLoginPage() {
-    console.log("loading login page")
-
     const loginview = document.getElementById("loginview");
     const postsContainer = document.getElementById("posts-container");
     const sidebar = document.querySelector(".sidebar");
@@ -36,7 +34,6 @@ async function loadLoginPage() {
         </form>
         <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
-    console.log("Login page loaded");
     
     document.getElementById("login-form").addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent the form from submitting the traditional way
@@ -44,10 +41,7 @@ async function loadLoginPage() {
         const loginID = document.getElementById("loginID").value;
         const password = document.getElementById("password").value;
 
-        console.log("Attempting login with username:", loginID); // Debug log
-
         try {
-            console.log("Sending fetch request to /login"); // Debug log
             const response = await fetch('/api/login', {
                 method: 'POST',
                 headers: {
