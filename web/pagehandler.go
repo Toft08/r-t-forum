@@ -55,7 +55,6 @@ func Handler(w http.ResponseWriter, r *http.Request, database *sql.DB) {
 		case "posts":
 			FeedHandler(w, r)
 		case "post":
-			fmt.Printf("Handling post request for %s\n", r.URL.Path)
 			PostHandler(w, r, userID)
 		case "create-post":
 			CreatePost(w, r, userID)

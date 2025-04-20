@@ -17,8 +17,6 @@ func FeedHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Number of posts fetched: %d", len(posts))
-
 	// Directly encode the posts array
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

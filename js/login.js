@@ -1,26 +1,19 @@
+/**
+ * Loads and initializes the login page
+ * Handles form submission and authentication
+ */
 async function loadLoginPage() {
     const loginview = document.getElementById("loginview");
     const postsContainer = document.getElementById("posts-container");
     const sidebar = document.querySelector(".sidebar");
-    const navbar = document.getElementById("navbar");
-    if (navbar) {
-        navbar.style.display = "none"; // Hide the navbar
-    }
-    if (!loginview || !postsContainer || !sidebar) {
-        console.error("Error: Required elements not found.");
+    
+    if (!loginview) {
+        console.error("Error: Login view element not found.");
         return;
     }
 
-    // Clear other content
-    loginview.innerHTML = ""
+    // Clear and prepare containers
     loginview.style.display = "flex";
-    postsContainer.innerHTML = "";
-    sidebar.innerHTML = "";
-
-    if (loginview) {
-        loginview.style.display = "flex";
-    }
-    
     loginview.innerHTML = `
         <h1>Login</h1>
         <form id="login-form">
@@ -35,8 +28,13 @@ async function loadLoginPage() {
         <p>Don't have an account? <a href="/signup" id="signup-link">Sign Up</a></p>
     `;
     
+    // Clear other content if those elements exist
+    if (postsContainer) postsContainer.innerHTML = "";
+    if (sidebar) sidebar.innerHTML = "";
+    
+    // Set up form submission handler
     document.getElementById("login-form").addEventListener("submit", async function (event) {
-        event.preventDefault(); // Prevent the form from submitting the traditional way
+        event.preventDefault();
 
         const loginID = document.getElementById("loginID").value;
         const password = document.getElementById("password").value;
@@ -48,23 +46,22 @@ async function loadLoginPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ loginID, password }),
-                // include allows credentials to allow cookies to be sent and recieved
-                credentials: 'include'
+                credentials: 'include' // Allow cookies to be sent and received
             });
 
-            // Parse the response JSON
             const data = await response.json();
 
             if (response.ok) {
-                // Handle successful login, redirect or load homepage content dynamically
+                // Navigate to home page on successful login
                 history.pushState({}, '', '/home');
                 handleRoute();
-                connectWebSocket()
+                connectWebSocket();
             } else {
                 alert(data.error);
             }
         } catch (error) {
             console.error("Error during login:", error);
+            alert("Login failed. Please try again.");
         }
     });
 }
