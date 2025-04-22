@@ -1,4 +1,7 @@
 function logout() {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close();
+    }
     fetch('/api/logout', {
         method: 'POST',
         credentials: 'same-origin', // Ensure the session cookie is sent
