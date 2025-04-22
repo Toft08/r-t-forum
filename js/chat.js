@@ -1,10 +1,12 @@
 let socket = null;
 let onlineUsers = [];
 let unreadMessages = {};
-let lastMessageTime = {};
+let lastMessageTime = JSON.parse(localStorage.getItem('lastMessageTime') || '{}');
 let numberOfMessages = 10;
 let previousScrollPosition = 0;
 let isLoadingMoreMessages = false;
+let lastTypingSent = 0;
+const TYPING_THROTTLE_MS = 1000;
 /**
  *  Creates or reuses a Websocket connection to the server
  * @returns {WebSocket} The active Websocket connection
@@ -56,7 +58,14 @@ function ShowUsers(users) {
         };
     });
 
-    usersWithTime.sort((a, b) => b.lastTime - a.lastTime);
+    usersWithTime.sort((a, b) => {
+        // First compare by time
+        if (b.lastTime !== a.lastTime) {
+            return b.lastTime - a.lastTime; // Sort by most recent message first
+        }
+        // If times are equal, sort alphabetically
+        return a.username.localeCompare(b.username);
+    });
 
     usersWithTime.forEach(({ username }) => {
         if (!displayedUsers.has(username)) {
@@ -105,35 +114,39 @@ function handleWebSocketMessage(event) {
                     // Update last message timestamp
                     const lastMsg = data.messages[data.messages.length - 1];
                     if (lastMsg.sender === data.from || lastMsg.sender === data.to) {
-                        lastMessageTime[data.from] = new Date().getTime();
+                        updateLastMessageTime(data.from);
                     }
                 }
                 break;
-                
+
             case "typing":
                 if (data.from) {
                     showTypingIndicator(data.from);
                 }
                 break;
-                
+            case "stop_typing":
+                if (data.from) {
+                    hideTypingIndicator(data.from);
+                }
+                break;
             case "allUsers":
                 ShowUsers(data.usernames);
                 break;
-                
+
             case "update":
                 onlineUsers = data.usernames || [];
                 fetchAllUsers();
                 break;
-                
+
             case "error":
                 console.error("Error from WebSocket:", data.message);
                 break;
-                
+
             default:
                 // Handle direct message from another user
                 if (data.from && data.message) {
                     displayMessage(data.from, data.message);
-                    lastMessageTime[data.from] = new Date().getTime();
+                    updateLastMessageTime(data.from);
 
                     // Add unread notification if not currently chatting with sender
                     const currentChatUser = document.querySelector('.chat-header h3')?.textContent;
@@ -157,7 +170,7 @@ function displayMessageHistory(messages) {
 
     // Save the current scroll height before making changes
     const oldScrollHeight = chatMessages.scrollHeight;
-    
+
     // Clear the chat window
     chatMessages.innerHTML = '';
 
@@ -168,7 +181,7 @@ function displayMessageHistory(messages) {
             }
             return new Date(a.created_at) - new Date(b.created_at);
         });
-        
+
         messages.forEach(msg => {
             const messageElement = document.createElement('div');
 
@@ -201,7 +214,7 @@ function displayMessageHistory(messages) {
     // Handle scrolling after new messages are loaded
     setTimeout(() => {
         const newScrollHeight = chatMessages.scrollHeight;
-        
+
         if (isLoadingMoreMessages) {
             // When loading more history, maintain relative scroll position
             const heightDifference = newScrollHeight - oldScrollHeight;
@@ -266,19 +279,28 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Connect to WebSocket when page loads
     connectWebSocket();
 });
+function updateLastMessageTime(username, timestamp = new Date().getTime()) {
+    lastMessageTime[username] = timestamp;
+    localStorage.setItem('lastMessageTime', JSON.stringify(lastMessageTime));
+}
 /**
  * Sends a typing indicator to another user
  * @param {string} toUser - Username of the recipient
  */
 function sendTypingEvent(toUser) {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-            type: "typing",
-            from: window.currentUsername,
-            to: toUser
-        }));
+    const now = Date.now();
+    if (now - lastTypingSent > TYPING_THROTTLE_MS) {
+        lastTypingSent = now;
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({
+                type: "typing",
+                from: window.currentUsername,
+                to: toUser
+            }));
+        }
     }
 }
+
 /**
  * Shows typing indicator in the chat window
  * @param {string} fromUser - Username of the user who is typing
@@ -296,9 +318,27 @@ function showTypingIndicator(fromUser) {
         // Clear old timeout and set new one
         clearTimeout(window.typingTimeout);
         window.typingTimeout = setTimeout(() => {
-            indicatorContainer.style.display = "none";
+            hideTypingIndicator(fromUser)
         }, 2000);
     }
+}
+/**
+ * Hides the typing indicator if it's currently displaying for the specified user.
+ *
+ * @param {string} fromUser - Username of the user who stopped typing
+ */
+function hideTypingIndicator(fromUser) {
+    const indicatorContainer = document.getElementById("typing-indicator");
+
+    // Only hide if it's currently for that user
+    if (indicatorContainer && indicatorContainer.style.display === "block") {
+        const isCurrent = indicatorContainer.innerHTML.includes(fromUser);
+        if (isCurrent) {
+            indicatorContainer.style.display = "none";
+        }
+    }
+
+    clearTimeout(window.typingTimeout);
 }
 /**
  * Opens a chat window with the selected user
@@ -352,17 +392,17 @@ function openChat(username) {
     });
     const chatMessages = document.getElementById("chat-messages");
     let isThrottled = false;
-    
+
     // scroll event for loading more messages
     chatMessages.addEventListener('scroll', () => {
         if (chatMessages.scrollTop <= 5 && !isThrottled) {
             isThrottled = true;
-            
+
             // Set the flag that we're loading more messages
             isLoadingMoreMessages = true;
             numberOfMessages += 10;
             requestMessageHistory(username);
-            
+
             // Throttle to prevent multiple rapid requests
             setTimeout(() => {
                 isThrottled = false;
@@ -427,9 +467,9 @@ function sendMessage(recipient) {
     }
 
     const recipientUsername = document.querySelector('.chat-header h3')?.textContent;
-    if (recipientUsername) {
-        lastMessageTime[recipientUsername] = new Date().getTime();
-    }
+if (recipientUsername) {
+    updateLastMessageTime(recipient);
+}
     // Clear the input field
     input.value = "";
 }
@@ -447,6 +487,13 @@ function sendActualMessage(recipient, message) {
     };
     // Send the message
     socket.send(JSON.stringify(messageObj));
+
+    // send stoptyping event right after
+    socket.send(JSON.stringify({
+        type: "stop_typing",
+        from: window.currentUsername,
+        to: recipient
+    }));
 }
 /**
  * Requests message history between current user and another user
