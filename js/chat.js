@@ -50,20 +50,32 @@ function ShowUsers(users) {
     userList.innerHTML = "";
 
     // sort users by last msg time
+    const currentUser = window.currentUsername
     const usersWithTime = users.map(user => {
         const username = user.username || user;
+        // Only consider messages TO the current user FROM others
+        const lastTime = lastMessageTime[`${username}_to_${currentUser}`] || 0;
+        
         return {
             username,
-            lastTime: lastMessageTime[username] || 0  // Default to 0 if no messages yet
+            lastTime
         };
     });
 
     usersWithTime.sort((a, b) => {
-        // First compare by time
-        if (b.lastTime !== a.lastTime) {
-            return b.lastTime - a.lastTime; // Sort by most recent message first
+        // If user A has messages and user B doesn't, A comes first
+        if (a.lastTime > 0 && b.lastTime === 0) {
+            return -1;
         }
-        // If times are equal, sort alphabetically
+        // If user B has messages and user A doesn't, B comes first
+        if (a.lastTime === 0 && b.lastTime > 0) {
+            return 1;
+        }
+        // If both have messages, sort by most recent first
+        if (a.lastTime > 0 && b.lastTime > 0) {
+            return b.lastTime - a.lastTime;
+        }
+        // If neither has messages, sort alphabetically
         return a.username.localeCompare(b.username);
     });
 
@@ -146,8 +158,9 @@ function handleWebSocketMessage(event) {
                 // Handle direct message from another user
                 if (data.from && data.message) {
                     displayMessage(data.from, data.message);
+                    // Update with correct format for incoming messages
                     updateLastMessageTime(data.from);
-
+                    
                     // Add unread notification if not currently chatting with sender
                     const currentChatUser = document.querySelector('.chat-header h3')?.textContent;
                     if (currentChatUser !== data.from) {
@@ -280,7 +293,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     connectWebSocket();
 });
 function updateLastMessageTime(username, timestamp = new Date().getTime()) {
-    lastMessageTime[username] = timestamp;
+    const currentUser = window.currentUsername;
+    const key = `${username}_to_${currentUser}`;
+    
+    console.log(`Updating lastMessageTime: ${key} = ${timestamp}`);
+    
+    // Update the timestamp
+    lastMessageTime[key] = timestamp;
+    
+    // Save to localStorage
     localStorage.setItem('lastMessageTime', JSON.stringify(lastMessageTime));
 }
 /**
