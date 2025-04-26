@@ -1,6 +1,6 @@
 let socket = null;
 let onlineUsers = [];
-let unreadMessages = {};
+let unreadMessages = JSON.parse(localStorage.getItem('unreadMessages') || '{}');
 let lastMessageTime = JSON.parse(localStorage.getItem('lastMessageTime') || '{}');
 let numberOfMessages = 10;
 let previousScrollPosition = 0;
@@ -162,9 +162,10 @@ function handleWebSocketMessage(event) {
                     updateLastMessageTime(data.from);
                     
                     // Add unread notification if not currently chatting with sender
-                    const currentChatUser = document.querySelector('.chat-header h3')?.textContent;
+                    const currentChatUser = window.currentChatPartner;
                     if (currentChatUser !== data.from) {
                         unreadMessages[data.from] = true;
+                        saveUnreadMessages();
                         fetchAllUsers();
                     }
                 }
@@ -304,6 +305,10 @@ function updateLastMessageTime(username, timestamp = new Date().getTime()) {
     // Save to localStorage
     localStorage.setItem('lastMessageTime', JSON.stringify(lastMessageTime));
 }
+
+function saveUnreadMessages() {
+    localStorage.setItem('unreadMessages', JSON.stringify(unreadMessages));
+}
 /**
  * Sends a typing indicator to another user
  * @param {string} toUser - Username of the recipient
@@ -368,6 +373,7 @@ function hideTypingIndicator(fromUser) {
 function openChat(username) {
     numberOfMessages = 10;
     unreadMessages[username] = false;
+    saveUnreadMessages();
 
     const userElements = document.querySelectorAll('#users-list li');
     for (const li of userElements) {
