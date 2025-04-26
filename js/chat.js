@@ -97,7 +97,8 @@ function ShowUsers(users) {
             li.appendChild(document.createTextNode(username));
 
             // Add notification indicator if there are unread messages
-            if (unreadMessages[username]) {
+            const messageKey = `${username}_to_${currentUser}`;
+            if (unreadMessages[messageKey]) {
                 const notificationDot = document.createElement("span");
                 notificationDot.className = "notification-dot";
                 li.appendChild(notificationDot);
@@ -164,7 +165,8 @@ function handleWebSocketMessage(event) {
                     // Add unread notification if not currently chatting with sender
                     const currentChatUser = window.currentChatPartner;
                     if (currentChatUser !== data.from) {
-                        unreadMessages[data.from] = true;
+                        const messageKey = `${data.from}_to_${window.currentUsername}`;
+                        unreadMessages[messageKey] = true;
                         saveUnreadMessages();
                         fetchAllUsers();
                     }
@@ -345,7 +347,7 @@ function showTypingIndicator(fromUser) {
         clearTimeout(window.typingTimeout);
         window.typingTimeout = setTimeout(() => {
             hideTypingIndicator(fromUser)
-        }, 2000);
+        }, 1500);
     }
 }
 /**
@@ -371,8 +373,8 @@ function hideTypingIndicator(fromUser) {
  * @param {string} username - Username to chat with
  */
 function openChat(username) {
-    numberOfMessages = 10;
-    unreadMessages[username] = false;
+    const messageKey = `${username}_to_${window.currentUsername}`;
+    unreadMessages[messageKey] = false;
     saveUnreadMessages();
 
     const userElements = document.querySelectorAll('#users-list li');
